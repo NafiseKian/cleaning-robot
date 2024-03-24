@@ -1,44 +1,44 @@
 import 'package:flutter/material.dart';
+
 import 'battery_indicator.dart';
 import 'trash_indicator.dart';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
+class RobotMainPage extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Robot Controller',
-      theme: ThemeData(
-        primarySwatch: Colors.orange,
-      ),
-      home: RobotControlScreen(),
-    );
-  }
+  State<StatefulWidget> createState() => _RobotMainPageState();
 }
 
-class RobotControlScreen extends StatelessWidget {
-  // Example map bounds and robot location
-  final double mapTopLatitude = 40.0;
-  final double mapBottomLatitude = 40.1;
-  final double mapLeftLongitude = -74.0;
-  final double mapRightLongitude = -73.9;
-  final double robotLatitude = 40.05;
-  final double robotLongitude = -73.95;
+class _RobotMainPageState extends State<RobotMainPage> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  double mapTopLatitude = 40.0;
+  double mapBottomLatitude = 40.1;
+  double mapLeftLongitude = -74.0;
+  double mapRightLongitude = -73.9;
+  double robotLatitude = 40.05;
+  double robotLongitude = -73.95;
 
   // These dimensions should match the displayed size of your map image in the app
   final double mapWidth = 600; // Adjust to your displayed map image's width
   final double mapHeight = 300; // Adjust to your displayed map image's height
 
-  @override
-  Widget build(BuildContext context) {
-    // Calculate the robot's position on the map in pixels
-    double xPosition = (robotLongitude - mapLeftLongitude) /
+  double findxPosition(double x, double y) {
+    return (robotLongitude - mapLeftLongitude) /
         (mapRightLongitude - mapLeftLongitude) *
         mapWidth;
-    double yPosition = (mapTopLatitude - robotLatitude) /
+  }
+
+  double findyPosition(double x, double y) {
+    return (mapTopLatitude - robotLatitude) /
         (mapTopLatitude - mapBottomLatitude) *
         mapHeight;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Robot Controller'),
@@ -68,8 +68,8 @@ class RobotControlScreen extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    left: xPosition,
-                    top: yPosition,
+                    left: findxPosition(40, 40),
+                    top: findyPosition(40, 40),
                     child: Icon(Icons.location_on,
                         color: Colors.red, size: 24), // Robot marker
                   ),
@@ -90,7 +90,7 @@ class RobotControlScreen extends StatelessWidget {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TrashIndicator(trashLevel: 40.0),
+                      TrashIndicator(trashLevel: 90.0),
                     ],
                   ),
                 ],
@@ -108,7 +108,7 @@ class RobotControlScreen extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Handle Return Home action
+                    setState(() {});
                   },
                   child: Text('Return Home'),
                 ),
@@ -119,4 +119,9 @@ class RobotControlScreen extends StatelessWidget {
       ),
     );
   }
+
+//TODO : add some functions to get the x y coordinates from robot and update the location
+//TODO : add a functin to get charger data from robot and update the widget
+//TODO : add a function to get the trash bin status from robot and update the widget
+//hint : in all functions you need to call set state to update the state of the application in real time
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-// ignore: unused_import
-import 'robot_control_screen.dart';
+import 'package:my_robot_app/MainPage.dart';
 
 void main() {
   runApp(MyApp());
@@ -58,19 +57,16 @@ class MyApp extends StatelessWidget {
                   },
                 ),
               ),
-
               ListTile(
                 title: Text('Locate Robot'),
                 onTap: () {
-                  // Implement locate robot functionality
-                  Navigator.pop(context); // Close the drawer
+                  Navigator.pop(context);
                 },
               ),
-              // Add more items here as needed
             ],
           ),
         ),
-        body: RobotControlScreen(),
+        body: RobotMainPage(),
       ),
     );
   }
