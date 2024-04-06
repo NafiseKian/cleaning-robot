@@ -3,6 +3,7 @@
 */
 
 #include <iostream>
+#include <Python.h>
 #include "camera_module.h"
 
 int main() 
@@ -11,6 +12,6 @@ int main()
 
     CameraModule::capturePhoto(photoCounter);
 
-    
+
     return 0;
 }
