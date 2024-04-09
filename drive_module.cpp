@@ -27,11 +27,14 @@ void setup() {
     gpioSetMode(enB, PI_OUTPUT);
     printf("enB setupped \n");
 
-    gpioPWM(enA, 180);
-    gpioPWM(enB, 180);
+   
 }
 
 void forward() {
+
+     gpioPWM(enA, 180);
+    gpioPWM(enB, 180);
+    
     gpioWrite(in1, PI_LOW);  
     gpioWrite(in2, PI_HIGH); 
     gpioWrite(in3, PI_HIGH); 
