@@ -18,7 +18,7 @@ int main()
     // Move forward for 2 seconds
     MotorControl::forward();
     printf("called forward\n\n\n");
-    sleep(2); // Sleep for 2 seconds
+    sleep(7); // Sleep for 2 seconds
     MotorControl::stop(); // Stop moving
 
     // Capture a photo
