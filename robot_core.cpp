@@ -4,14 +4,24 @@
 
 #include <iostream>
 #include <Python.h>
+#include <unistd.h> // For sleep()
 #include "camera_module.h"
+#include "motor_control.h"
 
 int main() 
 {
     int photoCounter = 0;
 
-    CameraModule::capturePhoto(photoCounter);
+    // Initialize motor control
+    MotorControl::setup();
+    
+    // Move forward for 2 seconds
+    MotorControl::forward();
+    sleep(2); // Sleep for 2 seconds
+    MotorControl::stop(); // Stop moving
 
+    // Capture a photo
+    CameraModule::capturePhoto(photoCounter);
 
     return 0;
 }
