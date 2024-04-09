@@ -13,16 +13,18 @@ namespace MotorControl {
 
 void setup() {
     if (gpioInitialise() < 0) {
-        // Initialization failed
+          printf("set up failed \n");
         return;
     }
 
     gpioSetMode(enA, PI_OUTPUT);
+    printf("enA setupped \n");
     gpioSetMode(in1, PI_OUTPUT);
     gpioSetMode(in2, PI_OUTPUT);
     gpioSetMode(in3, PI_OUTPUT);
     gpioSetMode(in4, PI_OUTPUT);
     gpioSetMode(enB, PI_OUTPUT);
+    printf("enB setupped \n");
 
     gpioPWM(enA, 180);
     gpioPWM(enB, 180);
