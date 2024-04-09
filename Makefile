@@ -18,7 +18,7 @@ INCLUDES =
 LIBS = -lpigpio -lrt -pthread
 
 # Define the C++ source files
-SRCS = robot_core.cpp camera_module.cpp motor_control.cpp
+SRCS = robot_core.cpp camera_module.cpp drive_module.cpp
 
 # Define the C++ object files 
 OBJS = $(SRCS:.cpp=.o)
