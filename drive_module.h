@@ -4,6 +4,7 @@
 namespace MotorControl {
     void setup();
     void forward();
+    void turn();
     void stop();
 }
 

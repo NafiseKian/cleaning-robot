@@ -47,6 +47,10 @@ void forward() {
     printf("Motors should be moving forward now." );
 }
 
+void turn()
+{
+    
+}
 
 void stop() {
     gpioWrite(in1, PI_LOW);
