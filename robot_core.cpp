@@ -14,9 +14,10 @@ int main()
 
     // Initialize motor control
     MotorControl::setup();
-    
+    printf("set up done\n\n\n");
     // Move forward for 2 seconds
     MotorControl::forward();
+    printf("called forward\n\n\n");
     sleep(2); // Sleep for 2 seconds
     MotorControl::stop(); // Stop moving
 
