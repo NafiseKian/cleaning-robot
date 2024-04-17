@@ -22,7 +22,5 @@ int main(int argc,char*argv[])
     std::cout <<fun2_out<<std::endl;
 
 
-    g++ main.cpp -o output -L C:\Users\mosim\AppData\Local\Programs\Python\Python37-32\libs -lpython37 -I C:\Users\mosim\AppData\Local\Programs\Python\Python37-32\include
-
-
+  
 }
