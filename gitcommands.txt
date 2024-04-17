@@ -1,0 +1,13 @@
+git pull
+git stash 
+git stash pop
+
+
+make clean 
+make 
+
+./runapp.sh 
+sudo ./runapp.sh 
+
+cd ..
+cd cleaning-robot
