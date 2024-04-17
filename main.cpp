@@ -12,7 +12,7 @@ int main(int argc,char*argv[])
     callfunc=PyObject_CallObject(func,NULL);
     double fun1_out=PyFloat_AsDouble(callfunc);
 
-    func = PyObject_GetAttrString(load_module,(char*)"fun2");
+    func = PyObject_GetAttrString(load_module,(char*)"func2");
     args = PyTuple_Pack(1,PyFloat_FromDouble(4.0))
     callfunc=PyObject_CallObject(func,NULL);
     double fun2_out=PyFloat_AsDouble(callfunc);

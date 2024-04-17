@@ -1,28 +1,121 @@
-/**
-**this code is the main core of the project and it should call all modules through headers 
-*/
+#include <gpiod.h>
+#include <stdio.h>
+#include <unistd.h>
 
-#include <iostream>
-#include <Python.h>
-#include <unistd.h> // For sleep()
-#include "camera_module.h"
-#include "drive_module.h"
+#define enA 5  
+#define in1 7  
+#define in2 8  
+#define in3 9  
+#define in4 10 
+#define enB 6  
 
-int main() 
-{
-    int photoCounter = 0;
+void setup() {
+    struct gpiod_chip *chip;
+    struct gpiod_line *line;
+    int ret;
 
-    // Initialize motor control
-    MotorControl::setup();
-    printf("set up done\n\n\n");
-    // Move forward for 2 seconds
-    MotorControl::forward();
-    printf("called forward\n\n\n");
-    sleep(7); // Sleep for 2 seconds
-    MotorControl::stop(); // Stop moving
+    chip = gpiod_chip_open("/dev/gpiochip0");
+    if (!chip) {
+        printf("Failed to open GPIO chip\n");
+        return;
+    }
 
-    // Capture a photo
-    CameraModule::capturePhoto(photoCounter);
+    line = gpiod_chip_get_line(chip, enA);
+    if (!line) {
+        printf("Failed to get line %d\n", enA);
+        gpiod_chip_close(chip);
+        return;
+    }
+
+    ret = gpiod_line_request_output(line, "enA", 0);
+    if (ret < 0) {
+        printf("Failed to request line %d\n", enA);
+        gpiod_line_release(line);
+        gpiod_chip_close(chip);
+        return;
+    }
+
+    // Similar setup for other GPIO pins
+
+    printf("GPIO setup done\n");
+
+    gpiod_chip_close(chip);
+}
+
+void forward() {
+    struct gpiod_chip *chip;
+    struct gpiod_line *line;
+    int ret;
+
+    chip = gpiod_chip_open("/dev/gpiochip0");
+    if (!chip) {
+        printf("Failed to open GPIO chip\n");
+        return;
+    }
+
+    line = gpiod_chip_get_line(chip, enA);
+    if (!line) {
+        printf("Failed to get line %d\n", enA);
+        gpiod_chip_close(chip);
+        return;
+    }
+
+    ret = gpiod_line_set_value(line, 1);
+    if (ret < 0) {
+        printf("Failed to set line %d\n", enA);
+        gpiod_line_release(line);
+        gpiod_chip_close(chip);
+        return;
+    }
+
+    // Similar setup for other GPIO pins
+
+    printf("Motors moving forward\n");
+
+    gpiod_chip_close(chip);
+}
+
+void stop() {
+    struct gpiod_chip *chip;
+    struct gpiod_line *line;
+    int ret;
+
+    chip = gpiod_chip_open("/dev/gpiochip0");
+    if (!chip) {
+        printf("Failed to open GPIO chip\n");
+        return;
+    }
+
+    line = gpiod_chip_get_line(chip, enA);
+    if (!line) {
+        printf("Failed to get line %d\n", enA);
+        gpiod_chip_close(chip);
+        return;
+    }
+
+    ret = gpiod_line_set_value(line, 0);
+    if (ret < 0) {
+        printf("Failed to set line %d\n", enA);
+        gpiod_line_release(line);
+        gpiod_chip_close(chip);
+        return;
+    }
+
+    // Similar setup for other GPIO pins
+
+    printf("Motors stopped\n");
+
+    gpiod_chip_close(chip);
+}
+
+int main() {
+    // Setup GPIO
+    setup();
+
+    // Move forward for a few seconds
+    forward();
+    sleep(5); // Move forward for 5 seconds
+    stop();
 
     return 0;
 }
