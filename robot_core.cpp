@@ -1,6 +1,8 @@
 #include <gpiod.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <python.h>
+#include <iostream>
 
 #define enA 5  
 #define in1 7  
