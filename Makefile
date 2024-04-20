@@ -1,12 +1,6 @@
 # Define compiler
 CXX = g++
 
-# Get compiler flags for Python
-PY_CFLAGS = $(shell python3-config --cflags)
-
-# Get linker flags for Python
-PY_LDFLAGS = $(shell python3-config --ldflags)
-
 # Combine Python flags with your flags
 CXXFLAGS = -Wall -std=c++11 $(PY_CFLAGS)
 LFLAGS = $(PY_LDFLAGS) -lpigpio -lgpiod -lrt -pthread
@@ -18,7 +12,8 @@ INCLUDES =
 LIBS = -lpigpio -lgpiod -lrt -pthread
 
 # Define the C++ source files
-SRCS = robot_core.cpp camera_module.cpp drive_module.cpp
+SRCS = robot_core.cpp camera_module.cpp drive_module.cpp gps_module.cpp
+
 
 # Define the C++ object files 
 OBJS = $(SRCS:.cpp=.o)

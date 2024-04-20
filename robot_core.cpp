@@ -5,24 +5,44 @@
 #include <iostream>
 #include <Python.h>
 #include <unistd.h> // For sleep()
+
+#include "gps_module.h"
 #include "camera_module.h"
 #include "drive_module.h"
 
 int main() 
 {
     int photoCounter = 0;
+    GPSModule gps;
 
-    // Initialize motor control
-    MotorControl::setup();
-    printf("set up done\n\n\n");
-    // Move forward for 2 seconds
-    MotorControl::forward();
-    printf("called forward\n\n\n");
-    sleep(7); // Sleep for 2 seconds
-    MotorControl::stop(); // Stop moving
+    while(true)
+    {
+        std::string gpsData;
+        if (gps.readData(gpsData)) {
+            // Process the received GPS data in gpsData
+            std::cout << "Received GPS data: " << gpsData << std::endl;
+            // ... (parse and extract relevant information)
+        }
+        else 
+        {
+            // Handle the case where no data is available
+            std::cout << "No GPS data available yet." << std::endl;
+        }
 
-    // Capture a photo
-    CameraModule::capturePhoto(photoCounter);
+        // Initialize motor control
+        MotorControl::setup();
+        std::cout <<"set up done"<< std::endl;
+        // Move forward for 2 seconds
+        MotorControl::forward();
+        std::cout <<"called forward"<< std::endl;
+        sleep(2); // Sleep for 2 seconds
+        MotorControl::stop(); // Stop moving
+
+        // Capture a photo
+        CameraModule::capturePhoto(photoCounter);
+
+        if(photoCounter==3) break ; 
+    }
 
     return 0;
 }

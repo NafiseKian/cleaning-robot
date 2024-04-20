@@ -14,3 +14,6 @@ cd cleaning-robot
 
 sudo apt update
 sudo apt install libgpiod-dev
+
+sudo apt install onboard
+sudo apt install at-spi2-core
