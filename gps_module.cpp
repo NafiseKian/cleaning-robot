@@ -6,7 +6,7 @@
 #include <sstream>
 #include <iostream>
 
-#define GPS_PORT "/dev/ttyAMA0" // Adjust if needed based on Raspberry Pi model
+#define GPS_PORT "/dev/ttyS0" 
 #define BAUDRATE B9600
 
 using namespace std;
