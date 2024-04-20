@@ -17,3 +17,5 @@ sudo apt install libgpiod-dev
 
 sudo apt install onboard
 sudo apt install at-spi2-core
+
+sudo cat /dev/ttyAMA0
