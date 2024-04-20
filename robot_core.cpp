@@ -9,11 +9,13 @@
 #include "gps_module.h"
 #include "camera_module.h"
 #include "drive_module.h"
+#include "ultra_sensor.h"
 
 int main() 
 {
     int photoCounter = 0;
     GPSModule gps;
+    //UltrasonicSensor sensor1 = UltrasonicSensor();
 
     while(true)
     {
