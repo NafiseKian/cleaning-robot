@@ -18,4 +18,15 @@ sudo apt install libgpiod-dev
 sudo apt install onboard
 sudo apt install at-spi2-core
 
+sudo apt remove onboard  # Uninstall onboard
+sudo apt remove at-spi2-core  # Uninstall at-spi2-core
+
 sudo cat /dev/ttyAMA0
+sudo cat /dev/ttyS0
+
+enable_uart=1
+dtoverlay=gps
+
+
+sudo apt update
+sudo apt install gpsd gpsd-clients
