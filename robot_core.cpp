@@ -1,7 +1,7 @@
 #include <gpiod.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <python.h>
+#include <Python.h>
 #include <iostream>
 
 #define enA 5  
