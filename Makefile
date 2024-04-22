@@ -12,7 +12,7 @@ INCLUDES =
 LIBS = -lpigpio -lgpiod -lrt -pthread
 
 # Define the C++ source files
-SRCS = robot_core.cpp camera_module.cpp drive_module.cpp gps_module.cpp
+SRCS = robot_core.cpp camera_module.cpp drive_module.cpp gps_module.cpp wifi_module.cpp
 
 
 # Define the C++ object files 
