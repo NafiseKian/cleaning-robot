@@ -18,14 +18,14 @@ public:
 
 private:
     std::vector<AccessPoint> access_points;
-    
+
     std::pair<double, double> trilaterate(  const std::vector<std::pair<double, double>>& accessPoints,
                                         const std::vector<double>& distances,
                                         double minX, double maxX, double minY, double maxY);
 
     double distance(double x1, double y1, double x2, double y2);
 
-    std::vector<double> Localization::calculateDistanceFromRSSI(const std::vector<double>& observedRSS);
+    std::vector<double> calculateDistanceFromRSSI(const std::vector<double>& observedRSS);
 
     // Methods for controlling WiFi interface and capturing packets
     void setMonitorMode();

@@ -22,7 +22,7 @@ int main()
 
     GPSModule gps;
 
-    std::vector<Localization::AccessPoint> access_points = {
+    std::vector<AccessPoint> access_points = {
       {1.0, 1.0, "0A:96:71:47:4C:FF"}, // JN extension
       {5.0, 1.0, "F6:43:35:08:ED:BD"},  // JN
       {3.0, 5.0, "2A:F4:8D:C2:36:E5"}   // recordreaker
@@ -33,7 +33,7 @@ int main()
     // Get current position based on measured distances from WiFi packets
     std::pair<double, double> estimated_position = wifi_loc.getCurrentPositionFromWiFi();
 
-    if (!std::isnan(estimated_position.first)) {
+    if (!isnan(estimated_position.first)) {
         std::cout << "Estimated Robot Position (x, y): " << estimated_position.first << ", " << estimated_position.second << std::endl;
     } else {
         std::cerr << "Error: Robot location estimation failed." << std::endl;
