@@ -1,5 +1,8 @@
 /**
-**this code is the main core of the project and it should call all modules through headers 
+** robot_core.cpp
+** author : Nafise Kian 
+** date : 01/04/2024
+** this code is the main core of the project and it should call all modules through headers 
 */
 
 #include <iostream>
@@ -42,10 +45,32 @@ int main()
     
 
 
-    //UltrasonicSensor sensor1 = UltrasonicSensor();
+    UltrasonicSensor sensor1 = UltrasonicSensor(10 , 11);
 
     while(true)
     {
+        int distance = sensor1.getDistanceCm();
+        std::cout << "Distance to obstacle: " << distance << " cm" << std::endl;
+
+        if (distance < 20) 
+        {
+            MotorControl::turnRight();
+             std::cout <<"called turn right"<< std::endl;
+            sleep(2); // Sleep for 2 seconds
+
+        }
+        else
+        {
+            MotorControl::forward();
+            std::cout <<"called forward"<< std::endl;
+            sleep(2); // Sleep for 2 seconds
+        }
+        
+        
+        MotorControl::stop(); // Stop moving
+
+        // Capture a photo
+        CameraModule::capturePhoto(photoCounter);
         std::string gpsData;
         if (gps.readData(gpsData)) {
             // Process the received GPS data in gpsData
@@ -57,16 +82,6 @@ int main()
             // Handle the case where no data is available
             std::cout << "No GPS data available yet." << std::endl;
         }
-
-        
-        // Move forward for 2 seconds
-        MotorControl::forward();
-        std::cout <<"called forward"<< std::endl;
-        sleep(2); // Sleep for 2 seconds
-        MotorControl::stop(); // Stop moving
-
-        // Capture a photo
-        CameraModule::capturePhoto(photoCounter);
         
         //call object detection
         //call arm module to pick the trash 
