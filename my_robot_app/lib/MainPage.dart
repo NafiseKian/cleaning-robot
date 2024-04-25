@@ -21,9 +21,8 @@ class _RobotMainPageState extends State<RobotMainPage> {
   double robotLatitude = 40.05;
   double robotLongitude = -73.95;
 
-  // These dimensions should match the displayed size of your map image in the app
-  final double mapWidth = 600; // Adjust to your displayed map image's width
-  final double mapHeight = 300; // Adjust to your displayed map image's height
+  final double mapWidth = 600;
+  final double mapHeight = 300;
 
   double findxPosition(double x, double y) {
     return (robotLongitude - mapLeftLongitude) /
@@ -53,8 +52,7 @@ class _RobotMainPageState extends State<RobotMainPage> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Colors.black, width: 3), // Frame effect
+                      border: Border.all(color: Colors.black, width: 3),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: ClipRRect(
@@ -84,13 +82,13 @@ class _RobotMainPageState extends State<RobotMainPage> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      BatteryIndicator(batteryLevel: 90.0),
+                      BatteryIndicator(batteryLevel: 80.0),
                     ],
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TrashIndicator(trashLevel: 90.0),
+                      TrashIndicator(trashLevel: 70.0),
                     ],
                   ),
                 ],
@@ -104,7 +102,7 @@ class _RobotMainPageState extends State<RobotMainPage> {
                   onPressed: () {
                     // Handle Start Cleaning action
                   },
-                  child: Text('Start Cleaning'),
+                  child: Text('Locate The Robot'),
                 ),
                 ElevatedButton(
                   onPressed: () {
