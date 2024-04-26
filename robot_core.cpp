@@ -33,7 +33,11 @@ int main()
     };
 
     Localization wifi_loc(access_points);
-
+    std::string wi_packs = wifi_loc.captureWiFiPackets();
+    std::cout<<wi_packs<<std::endl;
+    double rssi = wifi_loc.extractRSSIFromTcpdump(wi_packs);
+    std::cout<<rssi<<std::endl ;
+    /*
     // Get current position based on measured distances from WiFi packets
     std::pair<double, double> estimated_position = wifi_loc.getCurrentPositionFromWiFi();
 
@@ -42,7 +46,7 @@ int main()
     } else {
         std::cerr << "Error: Robot location estimation failed." << std::endl;
     }
-    
+    */
 
 
     UltrasonicSensor sensor1 = UltrasonicSensor(14 , 15);

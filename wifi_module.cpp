@@ -6,7 +6,7 @@
 #include <vector>
 #include <Eigen/Dense>
 
-double extractRSSIFromTcpdump(const std::string& tcpdumpOutput) {
+double Localization::extractRSSIFromTcpdump(const std::string& tcpdumpOutput) {
     // Parse tcpdump output to extract RSSI value
     // This is just a placeholder implementation, you'll need to implement proper parsing
     // Example: "Signal strength (dBm): -70"
@@ -126,6 +126,7 @@ std::string Localization::captureWiFiPackets() {
     return result;
 }
 
+/*
 // Method to get current position based on measured distances from WiFi packets
 std::pair<double, double> Localization::getCurrentPositionFromWiFi() {
     setMonitorMode();
@@ -136,3 +137,4 @@ std::pair<double, double> Localization::getCurrentPositionFromWiFi() {
     std::vector<double> distances(access_points.size(), distance);
     return trilaterate(distances);
 }
+*/

@@ -15,6 +15,8 @@ class Localization {
 public:
     Localization(const std::vector<AccessPoint>& access_points);
     std::pair<double, double> getCurrentPositionFromWiFi();
+    std::string captureWiFiPackets();
+    double extractRSSIFromTcpdump(const std::string& tcpdumpOutput);
 
 private:
     std::vector<AccessPoint> access_points;
@@ -29,7 +31,7 @@ private:
 
     // Methods for controlling WiFi interface and capturing packets
     void setMonitorMode();
-    std::string captureWiFiPackets();
+  
 };
 
 #endif 
