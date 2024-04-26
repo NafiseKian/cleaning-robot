@@ -33,10 +33,8 @@ int main()
     };
 
     Localization wifi_loc(access_points);
-    std::string wi_packs = wifi_loc.captureWiFiPackets();
-    std::cout<<wi_packs<<std::endl;
-    double rssi = wifi_loc.extractRSSIFromTcpdump(wi_packs);
-    std::cout<<rssi<<std::endl ;
+    double rssi = wifi_loc.findRSSIforMAC("0A:96:71:47:4C:FF");
+    ;
     /*
     // Get current position based on measured distances from WiFi packets
     std::pair<double, double> estimated_position = wifi_loc.getCurrentPositionFromWiFi();

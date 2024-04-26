@@ -6,24 +6,14 @@
 #include <vector>
 #include <Eigen/Dense>
 
-double Localization::extractRSSIFromTcpdump(const std::string& tcpdumpOutput) {
-    // Parse tcpdump output to extract RSSI value
-    // This is just a placeholder implementation, you'll need to implement proper parsing
-    // Example: "Signal strength (dBm): -70"
-    size_t pos = tcpdumpOutput.find("Signal strength (dBm):");
-    if (pos != std::string::npos) {
-        std::string rssiStr = tcpdumpOutput.substr(pos + 22);
-        return std::stod(rssiStr);
-    }
-    return 0.0; // Return 0 if RSSI value not found
-}
-
 
 // Constructor
 Localization::Localization(const std::vector<AccessPoint>& access_points) : access_points(access_points) 
 {
 
 }
+
+
 
 // Function to calculate distance between two points
 double Localization::distance(double x1, double y1, double x2, double y2) 
@@ -112,10 +102,19 @@ void Localization::setMonitorMode() {
 }
 
 // Method to capture WiFi packets and extract RSSI values
-std::string Localization::captureWiFiPackets() {
-    std::string tcpdumpCmd = "sudo tcpdump -i mon0 -e -s 256 type mgt subtype beacon -vvv 2>&1";
+double Localization::findRSSIforMAC(std::string mac) 
+{
+    // Run tcpdump command and capture its output
+    std::string tcpdumpCmd = "sudo tcpdump -i wlo1 ether host ";
+    tcpdumpCmd += mac ;
+    tcpdumpCmd += " -vvv";
+
     FILE* pipe = popen(tcpdumpCmd.c_str(), "r");
-    if (!pipe) return "Error";
+    if (!pipe) {
+        std::cerr << "Error: Failed to execute tcpdump command." << std::endl;
+        return 1;
+    }
+
     char buffer[128];
     std::string result = "";
     while (!feof(pipe)) {
@@ -123,8 +122,21 @@ std::string Localization::captureWiFiPackets() {
             result += buffer;
     }
     pclose(pipe);
-    return result;
+
+    double rssi = extractRSSIFromTcpdump(result, mac);
+    std::cout << "RSSI for MAC address " << mac << ": " << rssi << std::endl;
+    return rssi;
 }
+
+double Localization::extractRSSIFromTcpdump(const std::string& tcpdumpOutput, const std::string& macAddress) {
+    size_t pos = tcpdumpOutput.find(macAddress);
+    if (pos != std::string::npos) {
+        std::string rssiStr = tcpdumpOutput.substr(pos + macAddress.length() + 1, 3); // Assuming RSSI value is 3 digits
+        return std::stod(rssiStr);
+    }
+    return 0.0; // Return 0 if RSSI value not found
+}
+
 
 /*
 // Method to get current position based on measured distances from WiFi packets

@@ -32,3 +32,5 @@ dtoverlay=gps
 sudo apt update
 sudo apt install gpsd gpsd-clients
 sudo apt install eigen3-dev
+ip addr
+sudo apt install tcpdump
