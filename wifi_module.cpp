@@ -105,7 +105,7 @@ void Localization::setMonitorMode() {
 double Localization::findRSSIforMAC(std::string mac) 
 {
     // Run tcpdump command and capture its output
-    std::string tcpdumpCmd = "sudo tcpdump -i wlo1 ether host ";
+    std::string tcpdumpCmd = "sudo tcpdump -i wlan0 ether host ";
     tcpdumpCmd += mac ;
     tcpdumpCmd += " -vvv";
 
