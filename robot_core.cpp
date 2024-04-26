@@ -45,7 +45,7 @@ int main()
     
 
 
-    UltrasonicSensor sensor1 = UltrasonicSensor(10 , 11);
+    UltrasonicSensor sensor1 = UltrasonicSensor(14 , 15);
 
     while(true)
     {

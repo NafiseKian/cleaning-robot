@@ -1,6 +1,6 @@
 #ifndef ULTRA_SENSOR_H
 #define ULTRA_SENSOR_H
-#include <sys/time.h>  // For gettimeofday
+
 
 class UltrasonicSensor {
 public:
