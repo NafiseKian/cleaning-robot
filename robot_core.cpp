@@ -35,9 +35,8 @@ void* gps_wifi_thread(void* args)
 
     while (true)
     {
-        std::cout<<"worker thread loop"<<std::endl ; 
-        double rssi = wifi.findRSSIforMAC("8A:A2:1B:2A:70:44");
-        std::cout<<rssi<<std::endl;
+        std::cout<<"worker thread loop"<<std::endl ;
+
 
         std::string gpsData;
         if (gps.readData(gpsData)) {
@@ -50,6 +49,15 @@ void* gps_wifi_thread(void* args)
             // Handle the case where no data is available
             std::cout << "No GPS data available yet." << std::endl;
         }
+
+         
+        std::string ret = wifi.captureWifiSignal("8A:A2:1B:2A:70:44");
+        std::cout<<ret<<std::endl;
+        double rssi = wifi.extractRSSIFromTcpdump(ret, "8A:A2:1B:2A:70:44");
+        std::cout<<rssi<<std::endl; 
+        
+        sleep(5);
+        
     }
     
 
@@ -115,7 +123,7 @@ int main()
 
         // Capture a photo
         CameraModule::capturePhoto(photoCounter);
-        sleep(2);
+        sleep(7);
         
         //call object detection
         //call arm module to pick the trash 

@@ -102,7 +102,7 @@ void Localization::setMonitorMode() {
 }
 
 // Method to capture WiFi packets and extract RSSI values
-double Localization::findRSSIforMAC(std::string mac) 
+std::string Localization::captureWifiSignal(std::string mac) 
 {
     // Run tcpdump command and capture its output
     std::string tcpdumpCmd = "sudo tcpdump -i wlan0 ether host ";
@@ -123,9 +123,7 @@ double Localization::findRSSIforMAC(std::string mac)
     }
     pclose(pipe);
 
-    double rssi = extractRSSIFromTcpdump(result, mac);
-    std::cout << "RSSI for MAC address " << mac << ": " << rssi << std::endl;
-    return rssi;
+    return result;
 }
 
 double Localization::extractRSSIFromTcpdump(const std::string& tcpdumpOutput, const std::string& macAddress) {

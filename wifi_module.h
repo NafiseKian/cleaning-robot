@@ -15,7 +15,7 @@ class Localization {
 public:
     Localization(const std::vector<AccessPoint>& access_points);
     std::pair<double, double> getCurrentPositionFromWiFi();
-    double findRSSIforMAC(std::string mac);
+    std::string captureWifiSignal(std::string mac);
     double extractRSSIFromTcpdump(const std::string& tcpdumpOutput, const std::string& macAddress) ;
 
 private:
