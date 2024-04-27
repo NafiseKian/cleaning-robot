@@ -6,6 +6,10 @@
 */
 
 #include <iostream>
+#include <thread> // For std::thread
+#include <mutex>  // For std::mutex
+#include <condition_variable> // For std::condition_variable
+#include <chrono> // For std::chrono for timing
 #include<math.h>
 //#include <Python.h>
 #include <unistd.h> // For sleep()
@@ -16,14 +20,9 @@
 #include "ultra_sensor.h"
 #include "wifi_module.h"
 
-int main() 
+
+void* gps_wifi_thread(void* args)
 {
-    // Initialize motor control
-    MotorControl::setup();
-    std::cout <<"motor controller set up done"<< std::endl;
-
-    int photoCounter = 0;
-
     GPSModule gps;
 
     std::vector<AccessPoint> access_points = {
@@ -32,9 +31,49 @@ int main()
       {3.0, 5.0, "2A:F4:8D:C2:36:E5"}   // recordreaker
     };
 
-    Localization wifi_loc(access_points);
-    double rssi = wifi_loc.findRSSIforMAC("8A:A2:1B:2A:70:44");
-    ;
+    Localization wifi(access_points);
+
+    while (true)
+    {
+        std::cout<<"worker thread loop"<<std::endl ; 
+        double rssi = wifi.findRSSIforMAC("8A:A2:1B:2A:70:44");
+        std::cout<<rssi<<std::endl;
+
+        std::string gpsData;
+        if (gps.readData(gpsData)) {
+            // Process the received GPS data in gpsData
+            std::cout << "Received GPS data: " << gpsData << std::endl;
+            // ... (parse and extract relevant information)
+        }
+        else 
+        {
+            // Handle the case where no data is available
+            std::cout << "No GPS data available yet." << std::endl;
+        }
+    }
+    
+
+}
+
+
+
+int main() 
+{
+
+    pthread_t cThread;
+    if(pthread_create(&cThread, NULL, &gps_wifi_thread,NULL)){
+        perror("ERROR creating thread.");
+    }
+
+
+    // Initialize motor control
+    MotorControl::setup();
+    std::cout <<"motor controller set up done"<< std::endl;
+
+    int photoCounter = 0;
+
+    
+
     /*
     // Get current position based on measured distances from WiFi packets
     std::pair<double, double> estimated_position = wifi_loc.getCurrentPositionFromWiFi();
@@ -48,6 +87,9 @@ int main()
 
 
     //UltrasonicSensor sensor1 = UltrasonicSensor(14 , 15);
+
+    
+
 
     while(true)
     {
@@ -69,27 +111,19 @@ int main()
         }
         */
         
-        MotorControl::stop(); // Stop moving
+        //MotorControl::stop(); // Stop moving
 
         // Capture a photo
         CameraModule::capturePhoto(photoCounter);
-        std::string gpsData;
-        if (gps.readData(gpsData)) {
-            // Process the received GPS data in gpsData
-            std::cout << "Received GPS data: " << gpsData << std::endl;
-            // ... (parse and extract relevant information)
-        }
-        else 
-        {
-            // Handle the case where no data is available
-            std::cout << "No GPS data available yet." << std::endl;
-        }
+        sleep(2);
         
         //call object detection
         //call arm module to pick the trash 
 
         if(photoCounter==2) break ; 
     }
+
+    
 
     return 0;
 }
