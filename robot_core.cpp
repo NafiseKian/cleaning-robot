@@ -33,7 +33,7 @@ int main()
     };
 
     Localization wifi_loc(access_points);
-    double rssi = wifi_loc.findRSSIforMAC("0A:96:71:47:4C:FF");
+    double rssi = wifi_loc.findRSSIforMAC("8A:A2:1B:2A:70:44");
     ;
     /*
     // Get current position based on measured distances from WiFi packets
