@@ -95,7 +95,7 @@ int main()
     }
     */
 
-    UltrasonicSensor frontSensor = UltrasonicSensor();
+    UltrasonicSensor frontSensor = UltrasonicSensor(20,21);
 
     
 
