@@ -124,14 +124,14 @@ int main()
         
         MotorControl::forward();
         sleep(5);
-        MotorControl::turnLeft();
-        sleep(2);
-        MotorControl::stop();
-        sleep(5);
-        MotorControl::forward();
-        sleep(5);
-        MotorControl::turnRight();
-        sleep(2);
+        //MotorControl::turnLeft();
+        //sleep(2);
+        //MotorControl::stop();
+        //sleep(5);
+        //MotorControl::forward();
+        //sleep(5);
+        //MotorControl::turnRight();
+        //sleep(2);
         MotorControl::forward();
         sleep(5);
         MotorControl::stop(); // Stop moving
@@ -142,7 +142,7 @@ int main()
         //call object detection
         //call arm module to pick the trash 
 
-        if(photoCounter==2) break ; 
+        if(photoCounter==3) break ; 
     }
 
     
