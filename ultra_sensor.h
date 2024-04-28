@@ -1,12 +1,17 @@
-#include "ultra_sensor.h"
+#ifndef ULTRA_SENSOR_H
+#define ULTRA_SENSOR_H
 
-// Constructor definition
-UltrasonicSensor::UltrasonicSensor(int echo, int trigger) {
-    echoPin = echo;
-    triggerPin = trigger;
-}
 
-// Other member function implementations...
-int UltrasonicSensor::getDistanceCm() {
-    // Implementation of getDistanceCm function
-}
+class UltrasonicSensor {
+public:
+    UltrasonicSensor(int echo , int trigger); // Constructor
+    int getDistanceCm();
+
+private:
+    int triggerPin;
+    int echoPin;
+};
+
+// change to old code
+#endif
+
