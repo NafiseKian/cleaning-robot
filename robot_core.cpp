@@ -96,7 +96,7 @@ int main()
     */
 
 
-    UltrasonicSensor frontSensor = UltrasonicSensor(20 , 21);
+    UltrasonicSensor frontSensor = UltrasonicSensor();
 
     
 
@@ -108,7 +108,7 @@ int main()
 
         MotorControl::forward();
         sleep(3);
-        
+
         if (distance < 20) 
         {
             MotorControl::turnRight();

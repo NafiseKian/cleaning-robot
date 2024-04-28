@@ -5,54 +5,28 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <string.h>
+#include <pigpio.h>
 
-UltrasonicSensor::UltrasonicSensor(int triggerPin, int echoPin) : triggerPin(triggerPin), echoPin(echoPin) {
-    // Export GPIO pins
-    char buffer[20];
-    snprintf(buffer, sizeof(buffer), "/sys/class/gpio/export");
-    int export_fd = open(buffer, O_WRONLY);
-    if (export_fd == -1) {
-        perror("gpio/export");
-        exit(1);
-    }
-    snprintf(buffer, sizeof(buffer), "%d", triggerPin);
-    write(export_fd, buffer, strlen(buffer));
-    close(export_fd);
+#define echo 20
+#define  trigger 21
 
-    snprintf(buffer, sizeof(buffer), "/sys/class/gpio/export");
-    export_fd = open(buffer, O_WRONLY);
-    if (export_fd == -1) {
-        perror("gpio/export");
-        exit(1);
+UltrasonicSensor::UltrasonicSensor()
+{
+    if (gpioInitialise() < 0) {
+          printf("set up failed \n");
+        return;
     }
-    snprintf(buffer, sizeof(buffer), "%d", echoPin);
-    write(export_fd, buffer, strlen(buffer));
-    close(export_fd);
 
-    // Set trigger pin as output and echo pin as input
-    snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%d/direction", triggerPin);
-    int direction_fd = open(buffer, O_WRONLY);
-    if (direction_fd == -1) {
-        perror("gpio/direction");
-        exit(1);
-    }
-    write(direction_fd, "out", 3);
-    close(direction_fd);
-
-    snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%d/direction", echoPin);
-    direction_fd = open(buffer, O_WRONLY);
-    if (direction_fd == -1) {
-        perror("gpio/direction");
-        exit(1);
-    }
-    write(direction_fd, "in", 2);
-    close(direction_fd);
+    gpioSetMode(echo, PI_INPUT);
+    printf("echo setupped \n");
+    gpioSetMode(trigger, PI_OUTPUT);
+    printf("enB setupped \n");
 }
 
 int UltrasonicSensor::getDistanceCm() {
     char buffer[20];
     // Send a pulse
-    snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%d/value", triggerPin);
+    snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%d/value", trigger);
     int value_fd = open(buffer, O_WRONLY);
     if (value_fd == -1) {
         perror("gpio/value");
@@ -67,7 +41,7 @@ int UltrasonicSensor::getDistanceCm() {
     struct timeval start_time, end_time;
     gettimeofday(&start_time, NULL);
 
-    snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%d/value", echoPin);
+    snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%d/value", echo);
     value_fd = open(buffer, O_RDONLY);
     if (value_fd == -1) {
         perror("gpio/value");
