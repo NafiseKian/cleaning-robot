@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <pigpio.h>
-
+#include <linux/gpio.h>
 
 UltrasonicSensor::UltrasonicSensor(int echo , int trigger)
 {
