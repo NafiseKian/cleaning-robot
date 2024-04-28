@@ -92,7 +92,7 @@ std::vector<std::pair<std::string, double>> Localization::parseIwlistOutput(cons
 }
 
 
-
+/*
 std::vector<std::pair<std::string, double>>  Localization::readWiFiFingerprintFile(const std::string& filename) {
     std::vector<std::pair<std::string, double>> fingerprintData;
     std::ifstream fingerprintFile(filename);
@@ -139,7 +139,7 @@ std::pair<double, double> Localization::findLocation(const std::vector<std::pair
     return bestLocation;
 }
 
-
+*/
 /*
 // Method to get current position based on measured distances from WiFi packets
 std::pair<double, double> Localization::getCurrentPositionFromWiFi() {
