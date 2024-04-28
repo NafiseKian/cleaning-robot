@@ -51,6 +51,7 @@ int UltrasonicSensor::getDistanceCm()
 
     // Calculate the distance in centimeters using the speed of sound (343 m/s)
     // Distance = (duration / 2) * speed_of_sound
+    std::cout<<pulseDuration<<std::endl;
     float distanceCm = pulseDuration / 2.0 * 0.0343; // Convert microseconds to seconds (34300 cm/s)
 
     return distanceCm;
