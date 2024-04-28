@@ -96,16 +96,19 @@ int main()
     */
 
 
-    //UltrasonicSensor sensor1 = UltrasonicSensor(14 , 15);
+    UltrasonicSensor frontSensor = UltrasonicSensor(20 , 21);
 
     
 
 
     while(true)
     {
-        /*int distance = sensor1.getDistanceCm();
+        int distance = frontSensor.getDistanceCm();
         std::cout << "Distance to obstacle: " << distance << " cm" << std::endl;
 
+        MotorControl::forward();
+        sleep(3);
+        
         if (distance < 20) 
         {
             MotorControl::turnRight();
@@ -119,11 +122,11 @@ int main()
             std::cout <<"called forward"<< std::endl;
             sleep(2); // Sleep for 2 seconds
         }
-        */
+        
         
         
         MotorControl::forward();
-        sleep(3);
+        sleep(2);
         MotorControl::turnLeft();
         sleep(1);
         //MotorControl::stop();
