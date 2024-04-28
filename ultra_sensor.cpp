@@ -16,6 +16,8 @@ UltrasonicSensor::UltrasonicSensor(int echo , int trigger)
         return;
     }
 
+    this->echoPin = echo ;
+    this->triggerPin = trigger;
     gpioSetMode(echo, PI_INPUT);
     printf("echo setupped \n");
     gpioSetMode(trigger, PI_OUTPUT);
