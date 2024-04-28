@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <pigpio.h>
-#include <linux/gpio.h>
+
 
 
 UltrasonicSensor::UltrasonicSensor(int echo , int trigger)
@@ -28,7 +28,7 @@ int UltrasonicSensor::getDistanceCm()
     // Send a 10 microsecond pulse to trigger the sensor
     gpioTrigger(this->triggerPin, 10, PI_HIGH);
     // Wait for the echo pin to go high
-    int echoLevel = gpioWaitForEdge(this->echoPin, RISING_EDGE, 10000); // Wait for up to 10 milliseconds
+    int echoLevel = gpioTrigger(triggerPin, 10, PI_HIGH);
 
     if (echoLevel == TIMEOUT) {
         printf("Timeout waiting for echo signal.\n");
@@ -38,7 +38,7 @@ int UltrasonicSensor::getDistanceCm()
     // Measure the duration of the echo pulse
     struct timeval startTime, endTime;
     gettimeofday(&startTime, NULL);
-    echoLevel = gpioWaitForEdge(this->echoPin, FALLING_EDGE, 10000); // Wait for up to 10 milliseconds
+    echoLevel = gpioTrigger(triggerPin, 10, PI_HIGH);
     gettimeofday(&endTime, NULL);
 
     if (echoLevel == TIMEOUT) {
