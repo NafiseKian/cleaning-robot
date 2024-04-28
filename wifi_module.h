@@ -15,15 +15,16 @@ class Localization {
 public:
     Localization(const std::vector<AccessPoint>& access_points);
     std::pair<double, double> getCurrentPositionFromWiFi();
-    std::string captureWifiSignal(std::string mac);
-    double extractRSSIFromTcpdump(const std::string& tcpdumpOutput, const std::string& macAddress) ;
+    std::string captureWifiSignal();
+    std::vector<std::pair<std::string, double>> parseIwlistOutput(const std::string& iwlistOutput) ;
+    std::vector<std::pair<std::string, double>>  readWiFiFingerprintFile(const std::string& filename);
+    std::pair<double, double> findLocation(const std::vector<std::pair<std::string, double>>& fingerprintData,
+                                       const std::vector<std::pair<std::string, double>>& observedRSSI);
 
 private:
     std::vector<AccessPoint> access_points;
 
-    std::pair<double, double> trilaterate(  const std::vector<std::pair<double, double>>& accessPoints,
-                                        const std::vector<double>& distances,
-                                        double minX, double maxX, double minY, double maxY);
+   
 
     double distance(double x1, double y1, double x2, double y2);
 

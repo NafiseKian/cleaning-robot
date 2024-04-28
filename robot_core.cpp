@@ -51,10 +51,11 @@ void* gps_wifi_thread(void* args)
         }
 
          
-        std::string ret = wifi.captureWifiSignal("8A:A2:1B:2A:70:44");
+        std::string ret = wifi.captureWifiSignal();
         std::cout<<ret<<std::endl;
-        double rssi = wifi.extractRSSIFromTcpdump(ret, "8A:A2:1B:2A:70:44");
-        std::cout<<rssi<<std::endl; 
+        std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(ret);
+        std::vector<std::pair<std::string, double>> fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
+        std::pair<double, double> location = wifi.findLocation(fingerprintData, observedRSSI);
         
         sleep(5);
         

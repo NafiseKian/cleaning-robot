@@ -21,57 +21,6 @@ double Localization::distance(double x1, double y1, double x2, double y2)
     return std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
 }
 
-// Function to estimate location using trilateration
-std::pair<double, double> trilaterate(  const std::vector<std::pair<double, double>>& accessPoints,
-                                        const std::vector<double>& distances,
-                                        double minX, double maxX, double minY, double maxY) 
-    
-{
-
-  // Check if access point and distance sizes match
-  if (accessPoints.size() != distances.size()) {
-    std::cerr << "Error: Access point and distance sizes don't match." << std::endl;
-    return {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()};
-  }
-
-  int numAPs = accessPoints.size();
-
-  // Create a matrix to store equation coefficients
-  Eigen::MatrixXd A(numAPs, 2);
-
-  // Create a vector to store distance constants
-  Eigen::VectorXd b(numAPs);
-
-  // Fill the A and b matrices based on trilateration equations
-  for (int i = 0; i < numAPs; ++i) {
-    double x = accessPoints[i].first;
-    double y = accessPoints[i].second;
-    double d = distances[i];
-
-    A(i, 0) = 2.0 * x;
-    A(i, 1) = 2.0 * y;
-    b(i) = pow(d, 2) - pow(x, 2) - pow(y, 2);
-  }
-
-  // Solve the linear system (Ax = b) using Eigen library
-  Eigen::VectorXd solution = A.colPivHouseholderQr().solve(b);
-
-  // Check if solution exists
-  if (solution.size() != 2 || !solution.allFinite()) {
-    std::cerr << "Error: No solution found for trilateration." << std::endl;
-    return {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN()};
-  }
-
-  // Extract and validate estimated location
-  double estimatedX = solution(0);
-  double estimatedY = solution(1);
-
-  if (estimatedX < minX || estimatedX > maxX || estimatedY < minY || estimatedY > maxY) {
-    std::cerr << "Warning: Estimated location outside provided bounds." << std::endl;
-  }
-
-  return {estimatedX, estimatedY};
-}
 
 
 // Function to calculate distance from RSSI
@@ -96,23 +45,17 @@ std::vector<double> Localization::calculateDistanceFromRSSI(const std::vector<do
 
 }
 
-// Method to put WiFi interface into monitor mode
-void Localization::setMonitorMode() {
-    system("sudo iw dev wlan0 interface add mon0 type monitor");
-}
 
-// Method to capture WiFi packets and extract RSSI values
-std::string Localization::captureWifiSignal(std::string mac) 
+
+// Method to capture WiFi signal information and extract RSSI values
+std::string Localization::captureWifiSignal() 
 {
-    // Run tcpdump command and capture its output
-    std::string tcpdumpCmd = "sudo tcpdump -i wlan0 ether host ";
-    tcpdumpCmd += mac ;
-    tcpdumpCmd += " -vvv";
-
-    FILE* pipe = popen(tcpdumpCmd.c_str(), "r");
+    // Run iwconfig command and capture its output
+    std::string iwconfigCmd = "iwlist wlan0 scanning | grep 'Address\\|Signal level'";
+    FILE* pipe = popen(iwconfigCmd.c_str(), "r");
     if (!pipe) {
-        std::cerr << "Error: Failed to execute tcpdump command." << std::endl;
-        return 1;
+        std::cerr << "Error: Failed to execute iwlist command." << std::endl;
+        return "error";
     }
 
     char buffer[128];
@@ -126,13 +69,74 @@ std::string Localization::captureWifiSignal(std::string mac)
     return result;
 }
 
-double Localization::extractRSSIFromTcpdump(const std::string& tcpdumpOutput, const std::string& macAddress) {
-    size_t pos = tcpdumpOutput.find(macAddress);
-    if (pos != std::string::npos) {
-        std::string rssiStr = tcpdumpOutput.substr(pos + macAddress.length() + 1, 3); // Assuming RSSI value is 3 digits
-        return std::stod(rssiStr);
+// Function to parse iwlist output and extract MAC addresses and RSSI values
+std::vector<std::pair<std::string, double>> Localization::parseIwlistOutput(const std::string& iwlistOutput) {
+    std::vector<std::pair<std::string, double>> observedRSSI;
+    std::istringstream iss(iwlistOutput);
+    std::string line;
+    std::string macAddress;
+    double rssi;
+    while (std::getline(iss, line)) {
+        if (line.find("Address") != std::string::npos) {
+            macAddress = line.substr(line.find(":") + 2); // Extract MAC address
+        } else if (line.find("Signal level") != std::string::npos) {
+            std::istringstream lineStream(line);
+            std::string signalStr;
+            lineStream >> signalStr >> signalStr >> rssi; // Extract RSSI value
+            // Convert signal strength to dBm
+            rssi = std::stod(signalStr.substr(0, signalStr.size() - 4));
+            observedRSSI.push_back({macAddress, rssi});
+        }
     }
-    return 0.0; // Return 0 if RSSI value not found
+    return observedRSSI;
+}
+
+
+
+std::vector<std::pair<std::string, double>>  Localization::readWiFiFingerprintFile(const std::string& filename) {
+    std::vector<std::pair<std::string, double>> fingerprintData;
+    std::ifstream fingerprintFile(filename);
+    if (fingerprintFile.is_open()) {
+        std::string macAddress;
+        double rssi;
+        while (fingerprintFile >> macAddress >> rssi) {
+            fingerprintData.push_back({macAddress, rssi});
+        }
+        fingerprintFile.close();
+    } else {
+        std::cerr << "Error: Unable to open WiFi fingerprint file for reading." << std::endl;
+    }
+    return fingerprintData;
+}
+
+
+// Function to find the best match in WiFi fingerprint data
+std::pair<double, double> Localization::findLocation(const std::vector<std::pair<std::string, double>>& fingerprintData,
+                                       const std::vector<std::pair<std::string, double>>& observedRSSI) {
+    // Define a similarity measure (e.g., Euclidean distance) between observed and stored RSSI values
+    auto similarity = [](double rssi1, double rssi2) {
+        return std::abs(rssi1 - rssi2);
+    };
+
+    // Find the best match between observed and stored RSSI values
+    double minDifference = std::numeric_limits<double>::max();
+    std::pair<double, double> bestLocation = {0.0, 0.0};
+    for (const auto& fingerprint : fingerprintData) {
+        double sumDifference = 0.0;
+        for (const auto& observed : observedRSSI) {
+            if (fingerprint.first == observed.first) {
+                sumDifference += similarity(fingerprint.second, observed.second);
+                break; // Exit inner loop once a match is found
+            }
+        }
+        if (sumDifference < minDifference) {
+            minDifference = sumDifference;
+            // Here, you could use the known location of the access point for trilateration
+            // For simplicity, let's just return the observed location for the matched access point
+            bestLocation = {fingerprint.first, fingerprint.second};
+        }
+    }
+    return bestLocation;
 }
 
 
