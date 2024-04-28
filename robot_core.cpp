@@ -123,17 +123,19 @@ int main()
         
         
         MotorControl::forward();
-        sleep(5);
-        //MotorControl::turnLeft();
-        //sleep(2);
+        sleep(3);
+        MotorControl::turnLeft();
+        sleep(1);
         //MotorControl::stop();
         //sleep(5);
         //MotorControl::forward();
         //sleep(5);
-        //MotorControl::turnRight();
-        //sleep(2);
         MotorControl::forward();
-        sleep(5);
+        sleep(3);
+        MotorControl::turnRight();
+        sleep(1);
+        MotorControl::forward();
+        sleep(3);
         MotorControl::stop(); // Stop moving
         // Capture a photo
         CameraModule::capturePhoto(photoCounter);

@@ -27,7 +27,7 @@ void setup() {
     gpioSetMode(enB, PI_OUTPUT);
     printf("enB setupped \n");
 
-    if (gpioPWM(enA, 240) != 0 || gpioPWM(enB, 240) != 0) {
+    if (gpioPWM(enA, 120) != 0 || gpioPWM(enB, 120) != 0) {
         printf( "Failed to set PWM on Enable pins." );
         return;
     }
