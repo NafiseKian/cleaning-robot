@@ -23,6 +23,7 @@ UltrasonicSensor::UltrasonicSensor(int echo , int trigger)
 
 int UltrasonicSensor::getDistanceCm() 
 {
+    int TIMEOUT= 1000; 
     // Send a 10 microsecond pulse to trigger the sensor
     gpioTrigger(this->triggerPin, 10, PI_HIGH);
     // Wait for the echo pin to go high
