@@ -38,10 +38,10 @@ void forward()
 {
     
 
-    if (gpioWrite(in1, PI_LOW) != 0 ||
-        gpioWrite(in2, PI_HIGH) != 0 ||
-        gpioWrite(in3, PI_HIGH) != 0 ||
-        gpioWrite(in4, PI_LOW) != 0) {
+    if (gpioWrite(in1, PI_HIGH) != 0 ||
+        gpioWrite(in2, PI_LOW) != 0 ||
+        gpioWrite(in3, PI_LOW) != 0 ||
+        gpioWrite(in4, PI_HIGH) != 0) {
         printf( "Failed to set motor direction pins.");
         return;
     }
