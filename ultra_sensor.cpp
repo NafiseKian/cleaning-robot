@@ -7,7 +7,7 @@
 #include <string.h>
 #include <pigpio.h>
 #include <linux/gpio.h>
-#include <gpio-utils.h>
+
 
 UltrasonicSensor::UltrasonicSensor(int echo , int trigger)
 {
