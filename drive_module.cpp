@@ -27,15 +27,16 @@ void setup() {
     gpioSetMode(enB, PI_OUTPUT);
     printf("enB setupped \n");
 
+    if (gpioPWM(enA, 220) != 0 || gpioPWM(enB, 220) != 0) {
+        printf( "Failed to set PWM on Enable pins." );
+        return;
+    }
    
 }
 
 void forward() 
 {
-    if (gpioPWM(enA, 180) != 0 || gpioPWM(enB, 180) != 0) {
-        printf( "Failed to set PWM on Enable pins." );
-        return;
-    }
+    
 
     if (gpioWrite(in1, PI_LOW) != 0 ||
         gpioWrite(in2, PI_HIGH) != 0 ||
@@ -50,11 +51,7 @@ void forward()
 
 void turnRight()
 {
-    if (gpioPWM(enA, 180) != 0 || gpioPWM(enB, 180) != 0) {
-        printf( "Failed to set PWM on Enable pins." );
-        return;
-    }
-
+   
     if (gpioWrite(in1, PI_LOW) != 0 ||
         gpioWrite(in2, PI_HIGH) != 0 ||
         gpioWrite(in3, PI_LOW) != 0 ||
@@ -69,10 +66,7 @@ void turnRight()
 
 void turnLeft()
 {
-    if (gpioPWM(enA, 180) != 0 || gpioPWM(enB, 180) != 0) {
-        printf( "Failed to set PWM on Enable pins." );
-        return;
-    }
+   
 
     if (gpioWrite(in1, PI_HIGH) != 0 ||
         gpioWrite(in2, PI_LOW) != 0 ||
