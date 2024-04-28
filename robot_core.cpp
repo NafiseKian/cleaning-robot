@@ -121,11 +121,21 @@ int main()
         }
         */
         
-        //MotorControl::stop(); // Stop moving
-
+        
+        MotorControl::forward();
+        sleep(2);
+        MotorControl::turnLeft();
+        sleep(1);
+        MotorControl::forward();
+        sleep(2);
+        MotorControl::turnRight();
+        sleep(1);
+        MotorControl::forward();
+        sleep(2);
+        MotorControl::stop(); // Stop moving
         // Capture a photo
         CameraModule::capturePhoto(photoCounter);
-        sleep(7);
+        sleep(5);
         
         //call object detection
         //call arm module to pick the trash 
