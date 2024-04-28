@@ -7,10 +7,8 @@
 #include <string.h>
 #include <pigpio.h>
 
-#define echo 20
-#define  trigger 21
 
-UltrasonicSensor::UltrasonicSensor()
+UltrasonicSensor::UltrasonicSensor(int echo , int trigger)
 {
     if (gpioInitialise() < 0) {
           printf("set up failed \n");
@@ -20,40 +18,38 @@ UltrasonicSensor::UltrasonicSensor()
     gpioSetMode(echo, PI_INPUT);
     printf("echo setupped \n");
     gpioSetMode(trigger, PI_OUTPUT);
-    printf("enB setupped \n");
+    printf("trigger setupped \n");
 }
 
-int UltrasonicSensor::getDistanceCm() {
-    char buffer[20];
-    // Send a pulse
-    snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%d/value", trigger);
-    int value_fd = open(buffer, O_WRONLY);
-    if (value_fd == -1) {
-        perror("gpio/value");
-        exit(1);
+int UltrasonicSensor::getDistanceCm() 
+{
+    // Send a 10 microsecond pulse to trigger the sensor
+    gpioTrigger(this->triggerPin, 10, PI_HIGH);
+    // Wait for the echo pin to go high
+    int echoLevel = gpioWaitForEdge(this->echoPin, RISING_EDGE, 10000); // Wait for up to 10 milliseconds
+
+    if (echoLevel == TIMEOUT) {
+        printf("Timeout waiting for echo signal.\n");
+        return -1; // Return error value
     }
-    write(value_fd, "1", 1);
-    usleep(10); // Delay for 10 microseconds
-    write(value_fd, "0", 1);
-    close(value_fd);
 
-    // Measure pulse duration
-    struct timeval start_time, end_time;
-    gettimeofday(&start_time, NULL);
+    // Measure the duration of the echo pulse
+    struct timeval startTime, endTime;
+    gettimeofday(&startTime, NULL);
+    echoLevel = gpioWaitForEdge(this->echoPin, FALLING_EDGE, 10000); // Wait for up to 10 milliseconds
+    gettimeofday(&endTime, NULL);
 
-    snprintf(buffer, sizeof(buffer), "/sys/class/gpio/gpio%d/value", echo);
-    value_fd = open(buffer, O_RDONLY);
-    if (value_fd == -1) {
-        perror("gpio/value");
-        exit(1);
+    if (echoLevel == TIMEOUT) {
+        printf("Timeout waiting for echo signal.\n");
+        return -1; // Return error value
     }
-    while (read(value_fd, buffer, 1) != 1 || buffer[0] == '0');
-    gettimeofday(&end_time, NULL);
-    while (read(value_fd, buffer, 1) != 1 || buffer[0] == '1');
-    close(value_fd);
 
-    long pulseDuration = (end_time.tv_sec - start_time.tv_sec) * 1000000 + (end_time.tv_usec - start_time.tv_usec);
+    // Calculate the duration of the echo pulse in microseconds
+    long int pulseDuration = (endTime.tv_sec - startTime.tv_sec) * 1000000L + (endTime.tv_usec - startTime.tv_usec);
 
-    // Calculate distance (adjust based on sensor specifications and speed of sound)
-    return pulseDuration / 58; // Assuming speed of sound is 343 m/s, convert to cm
+    // Calculate the distance in centimeters using the speed of sound (343 m/s)
+    // Distance = (duration / 2) * speed_of_sound
+    float distanceCm = pulseDuration / 2.0 * 0.0343; // Convert microseconds to seconds (34300 cm/s)
+
+    return distanceCm;
 }

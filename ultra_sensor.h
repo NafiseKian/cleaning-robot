@@ -4,7 +4,7 @@
 
 class UltrasonicSensor {
 public:
-    UltrasonicSensor(int triggerPin, int echoPin); // Constructor
+    UltrasonicSensor(); // Constructor
     int getDistanceCm();
 
 private:

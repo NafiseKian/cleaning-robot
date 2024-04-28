@@ -12,7 +12,7 @@ INCLUDES = -I/usr/include/eigen3
 LIBS = -lpigpio -lgpiod -lrt -pthread -lpcap
 
 # Define the C++ source files
-SRCS = robot_core.cpp camera_module.cpp drive_module.cpp gps_module.cpp wifi_module.cpp ultra_sensor.
+SRCS = robot_core.cpp camera_module.cpp drive_module.cpp gps_module.cpp wifi_module.cpp ultra_sensor.cpp
 
 
 # Define the C++ object files 
