@@ -129,7 +129,7 @@ std::vector<std::pair<std::string, double>>  Localization::readWiFiFingerprintFi
     return fingerprintData;
 }
 
-
+/*
 // Function to find the best match in WiFi fingerprint data
 std::pair<double, double> Localization::findLocation(const std::vector<std::pair<std::string, double>>& fingerprintData,
                                        const std::vector<std::pair<std::string, double>>& observedRSSI) {
@@ -158,7 +158,7 @@ std::pair<double, double> Localization::findLocation(const std::vector<std::pair
     }
     return bestLocation;
 }
-
+*/
 
 /*
 // Method to get current position based on measured distances from WiFi packets
