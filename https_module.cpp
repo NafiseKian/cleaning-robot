@@ -1,44 +1,28 @@
-#include "https_moudle.h"
 #include <iostream>
-#include <curl/curl.h>
+#include <boost/asio.hpp>
+#include "https_module.h"
 
-// Callback function to handle the response
-size_t write_callback(char* ptr, size_t size, size_t nmemb, std::string* data) {
-    data->append(ptr, size * nmemb);
-    return size * nmemb;
+using namespace boost::asio;
+
+HTTPS::HTTPS() : service(), ep(ip::address::from_string("127.0.0.1"), 2001), sock(service) {
+    sock.connect(ep);
+    std::cout << "Connected to server." << std::endl;
 }
 
-int main() {
-    CURL* curl;
-    CURLcode res;
-    std::string response;
+int HTTPS::WriteToSocket(std::string gpsData) {
+    try {
+        // Send GPS data to server
+        write(sock, buffer(gpsData));
 
-    curl_global_init(CURL_GLOBAL_ALL);
-    curl = curl_easy_init();
+        // Wait for response from server (if any)
+        char data[1024];
+        size_t length = sock.read_some(buffer(data));
 
-    if (curl) {
-        // Set the URL you want to send the request to
-        curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
-
-        // Set the callback function to handle the response
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-
-        // Perform the request
-        res = curl_easy_perform(curl);
-
-        // Check for errors
-        if (res != CURLE_OK) {
-            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-        } else {
-            std::cout << "Response received: " << response << std::endl;
-        }
-
-        // Clean up
-        curl_easy_cleanup(curl);
+        std::cout << "Response from server: " << std::string(data, length) << std::endl;
+        
+        return 0;
+    } catch (std::exception& e) {
+        std::cerr << "Exception in thread: " << e.what() << std::endl;
+        return 1;
     }
-
-    curl_global_cleanup();
-
-    return 0;
 }
