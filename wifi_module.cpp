@@ -89,15 +89,38 @@ std::vector<std::pair<std::string, double>> Localization::parseIwlistOutput(cons
 }
 
 
-/*
+
 std::vector<std::pair<std::string, double>>  Localization::readWiFiFingerprintFile(const std::string& filename) {
     std::vector<std::pair<std::string, double>> fingerprintData;
     std::ifstream fingerprintFile(filename);
-    if (fingerprintFile.is_open()) {
-        std::string macAddress;
-        double rssi;
-        while (fingerprintFile >> macAddress >> rssi) {
-            fingerprintData.push_back({macAddress, rssi});
+    std::string line;
+    std::string macAddress;
+    double rssi, x, y;
+    if (fingerprintFile.is_open()) 
+    {
+
+        while (std::getline(fingerprintFile, line)) 
+        {
+            std::istringstream lineStream(line);
+            std::string keyword;
+            if (std::getline(lineStream, keyword, '=') && keyword == "Address") {
+                if (lineStream >> macAddress)
+                {
+                    if (lineStream >> keyword >> rssi)
+                    {
+                        std::cout<<"fingerprint data --> "<<macAddress<<"    "<<rssi<<std::endl;
+                        fingerprintData.push_back({macAddress, rssi});
+                    }
+                    else
+                    {
+                        std::cout<<"rssi not found "<<std::endl;
+                    }
+                }
+                else
+                {
+                     std::cout<<"mac addr not found "<<std::endl;
+                }
+            }
         }
         fingerprintFile.close();
     } else {
@@ -106,7 +129,7 @@ std::vector<std::pair<std::string, double>>  Localization::readWiFiFingerprintFi
     return fingerprintData;
 }
 
-
+/*
 // Function to find the best match in WiFi fingerprint data
 std::pair<double, double> Localization::findLocation(const std::vector<std::pair<std::string, double>>& fingerprintData,
                                        const std::vector<std::pair<std::string, double>>& observedRSSI) {
@@ -135,8 +158,8 @@ std::pair<double, double> Localization::findLocation(const std::vector<std::pair
     }
     return bestLocation;
 }
-
 */
+
 /*
 // Method to get current position based on measured distances from WiFi packets
 std::pair<double, double> Localization::getCurrentPositionFromWiFi() {

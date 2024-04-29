@@ -1,3 +1,4 @@
 Address= 50:D4:F7:47:0B:34 Signal level= -60 x= 1 y= 1
 Address= 50:C7:BF:35:59:28 Signal level= -80 x= 2 y= 2
 Address= 40:3F:8C:7E:52:72 Signal level= -75 x= 3 y= 3
+Address= 20:3F:2C:7E:12:71 Signal level= -50 x= 1 y= 0
