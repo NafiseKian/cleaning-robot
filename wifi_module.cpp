@@ -96,37 +96,40 @@ std::vector<std::pair<std::string, double>> Localization::parseIwlistOutput(cons
 
 
 std::vector<std::tuple<std::string, double, double, double>> Localization::readWiFiFingerprintFile(const std::string& filename) {
-  std::vector<std::tuple<std::string, double, double, double>> fingerprintData;
-  std::ifstream fingerprintFile(filename);
-  if (fingerprintFile.is_open()) {
-    std::string line;
-    while (std::getline(fingerprintFile, line)) {
-      std::istringstream iss(line);
-      std::string macAddress, rssi_str, x_str, y_str;
-      double rssi, x, y;
+   std::vector<std::tuple<std::string, double, double, double>> fingerprints;
+        std::ifstream file(filename);
+        std::string line;
 
-      if (std::getline(iss, macAddress, ',') &&
-          std::getline(iss, rssi_str, ',') &&
-          std::getline(iss, x_str, ',') &&
-          std::getline(iss, y_str)) 
-      {
-        try {
-          rssi = std::stod(rssi_str);
-          x = std::stod(x_str);
-          y = std::stod(y_str);
-          fingerprintData.emplace_back(macAddress, rssi, x, y);
-        } catch (const std::exception& e) {
-          std::cerr << "Error parsing line: " << line << std::endl;
+
+        while (getline(file, line)) {
+            std::istringstream iss(line);
+            std::string mac;
+            double rssi, value1, value2;
+
+            getline(iss, mac, ',');
+            std::string temp;
+
+            // Parse RSSI
+            if (getline(iss, temp, ',')) {
+                rssi = std::stod(temp);
+            }
+
+            // Parse first additional double
+            if (getline(iss, temp, ',')) {
+                value1 = std::stod(temp);
+            }
+
+            // Parse second additional double
+            if (getline(iss, temp, ',')) {
+                value2 = std::stod(temp);
+            }
+            
+            std::cout<<"finger print data -->"<< mac<<"   "<<rssi<<"   "<<value1<<std::endl;
+            fingerprints.push_back(std::make_tuple(mac, rssi, value1, value2));
         }
-      } else {
-        std::cerr << "Error parsing line: " << line << std::endl;
-      }
-    }
-    fingerprintFile.close();
-  } else {
-    std::cerr << "Error: Unable to open WiFi fingerprint file for reading." << std::endl;
-  }
-  return fingerprintData;
+
+        file.close();
+        return fingerprints;
 }
 
 
@@ -148,7 +151,6 @@ std::tuple<double, double> Localization::findLocation( const std::vector<std::tu
                 if (difference < minDifference) {
                     minDifference = difference;
                     bestLocation = {std::get<1>(fingerprint), std::get<2>(fingerprint)};
-                    std::cout<<"The best location is ----> x="<<std::get<1>(fingerprint) <<" , y="<<std::get<2>(fingerprint)<<std::endl;
                 }
                 break; // Exit inner loop once a match is found
             }

@@ -1,60 +1,60 @@
 #include "ultra_sensor.h"
 #include <iostream>
 #include <unistd.h>
-#include <stdio.h>
-#include <fcntl.h>
 #include <sys/time.h>
-#include <string.h>
-#include <pigpio.h>
+#include <cstdio>
 
-
-
-UltrasonicSensor::UltrasonicSensor(int echo , int trigger)
-{
+UltrasonicSensor::UltrasonicSensor(int echo, int trigger) : echoPin(echo), triggerPin(trigger), startTimeUs(0), echoTimeUs(0), echoReceived(false) {
     if (gpioInitialise() < 0) {
-          printf("set up failed \n");
+        std::cout << "GPIO initialization failed." << std::endl;
         return;
     }
 
-    this->echoPin = echo ;
-    this->triggerPin = trigger;
-    gpioSetMode(echo, PI_INPUT);
-    printf("echo setupped \n");
-    gpioSetMode(trigger, PI_OUTPUT);
-    printf("trigger setupped \n");
+    gpioSetMode(triggerPin, PI_OUTPUT);
+    gpioSetMode(echoPin, PI_INPUT);
+    gpioWrite(triggerPin, PI_LOW);
+    gpioSetAlertFuncEx(echoPin, echoCallback, this);
 }
 
-int UltrasonicSensor::getDistanceCm() 
-{
-    int TIMEOUT= 1000; 
-    // Send a 10 microsecond pulse to trigger the sensor
-    gpioTrigger(this->triggerPin, 10, PI_HIGH);
-    // Wait for the echo pin to go high
-    int echoLevel = gpioTrigger(triggerPin, 10, PI_HIGH);
-
-    if (echoLevel == TIMEOUT) {
-        printf("Timeout waiting for echo signal.\n");
-        return -1; // Return error value
-    }
-
-    // Measure the duration of the echo pulse
-    struct timeval startTime, endTime;
-    gettimeofday(&startTime, NULL);
-    echoLevel = gpioTrigger(triggerPin, 10, PI_HIGH);
-    gettimeofday(&endTime, NULL);
-
-    if (echoLevel == TIMEOUT) {
-        printf("Timeout waiting for echo signal.\n");
-        return -1; // Return error value
-    }
-
-    // Calculate the duration of the echo pulse in microseconds
-    long int pulseDuration = (endTime.tv_sec - startTime.tv_sec) * 1000000L + (endTime.tv_usec - startTime.tv_usec);
-
-    // Calculate the distance in centimeters using the speed of sound (343 m/s)
-    // Distance = (duration / 2) * speed_of_sound
-    std::cout<<pulseDuration<<std::endl;
-    float distanceCm = pulseDuration / 2.0 * 0.0343; // Convert microseconds to seconds (34300 cm/s)
-
-    return distanceCm;
+UltrasonicSensor::~UltrasonicSensor() {
+    gpioTerminate();
 }
+
+int UltrasonicSensor::getDistanceCm() {
+    const int TIMEOUT = 21000; // Timeout in microseconds
+    echoReceived = false;
+
+    // Send trigger pulse
+    gpioWrite(triggerPin, PI_LOW);
+    usleep(2); // Settle time
+    gpioWrite(triggerPin, PI_HIGH);
+    usleep(10); // Trigger pulse duration
+    gpioWrite(triggerPin, PI_LOW);
+
+    // Wait for echo
+    int waitTime = 0;
+    while (!echoReceived && waitTime < TIMEOUT) {
+        usleep(100); // Check every 100 microseconds
+        waitTime += 100;
+    }
+
+    if (!echoReceived) {
+        std::cout << "Echo not received within timeout." << std::endl;
+        return -1;
+    }
+
+    float distanceCm = (echoTimeUs * 0.0343) / 2.0;  // Correct for sound speed and round trip
+    return static_cast<int>(distanceCm);
+}
+
+void UltrasonicSensor::echoCallback(int gpio, int level, uint32_t tick, void* userdata) {
+    UltrasonicSensor* sensor = reinterpret_cast<UltrasonicSensor*>(userdata);
+    std::cout << "GPIO: " << gpio << " Level: " << level << " Tick: " << tick << std::endl;
+    if (level == 1) { // Rising edge
+        sensor->startTimeUs = tick;
+    } else if (level == 0) { // Falling edge
+        sensor->echoTimeUs = tick - sensor->startTimeUs;
+        sensor->echoReceived = true;
+    }
+}
+
