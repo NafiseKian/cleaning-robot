@@ -95,34 +95,48 @@ int main()
         std::cerr << "Error: Robot location estimation failed." << std::endl;
     }
     */
+UltrasonicSensor frontSensor("Front", 26, 24);
+UltrasonicSensor rightSensor("Right", 18, 17);
+UltrasonicSensor leftSensor("Left", 22, 27);
 
-    UltrasonicSensor frontSensor = UltrasonicSensor(23,24);
 
     
 
 
-    while(true)
-    {
-        int distance = frontSensor.getDistanceCm();
-        std::cout << "Distance to obstacle: " << distance << " cm" << std::endl;
+   #include <iostream>
+#include <unistd.h> // For sleep function
 
-        MotorControl::forward();
-        sleep(3);
+int main() {
+    while (true) {
+        int distanceFront = frontSensor.getDistanceCm();
+        int distanceRight = rightSensor.getDistanceCm();
+        int distanceLeft = leftSensor.getDistanceCm();
 
-        if (distance < 20) 
-        {
+        std::cout << "Front Distance: " << distanceFront << " cm" << std::endl;
+        std::cout << "Right Distance: " << distanceRight << " cm" << std::endl;
+        std::cout << "Left Distance: " << distanceLeft << " cm" << std::endl;
+
+        if (distanceFront < 20) {
             MotorControl::turnRight();
-             std::cout <<"called turn right"<< std::endl;
-            sleep(2); // Sleep for 2 seconds
-
-        }
-        else
-        {
+            std::cout << "Obstacle detected in front. Turning right." << std::endl;
+            sleep(2); // Sleep for 2 seconds after turning
+        } else if (distanceRight < 20) {
+            MotorControl::turnLeft();
+            std::cout << "Obstacle detected on the right. Turning left." << std::endl;
+            sleep(2); // Sleep for 2 seconds after turning
+        } else if (distanceLeft < 20) {
+            MotorControl::turnRight();
+            std::cout << "Obstacle detected on the left. Turning right." << std::endl;
+            sleep(2); // Sleep for 2 seconds after turning
+        } else {
             MotorControl::forward();
-            std::cout <<"called forward"<< std::endl;
-            sleep(2); // Sleep for 2 seconds
+            std::cout << "Path is clear. Moving forward." << std::endl;
+            sleep(3); // Continue moving forward for 3 seconds
         }
-        
+    }
+
+
+
         
         
         MotorControl::forward();
