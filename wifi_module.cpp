@@ -108,7 +108,8 @@ std::vector<std::tuple<std::string, double, double, double>> Localization::readW
       if (std::getline(iss, macAddress, ',') &&
           std::getline(iss, rssi_str, ',') &&
           std::getline(iss, x_str, ',') &&
-          std::getline(iss, y_str)) {
+          std::getline(iss, y_str)) 
+      {
         try {
           rssi = std::stod(rssi_str);
           x = std::stod(x_str);
@@ -129,10 +130,9 @@ std::vector<std::tuple<std::string, double, double, double>> Localization::readW
 }
 
 
-/*
 // Function to find the best match in WiFi fingerprint data
-std::pair<double, double> Localization::findLocation(const std::vector<std::pair<std::string, double>>& fingerprintData,
-                                       const std::vector<std::pair<std::string, double>>& observedRSSI) {
+std::tuple<double, double> Localization::findLocation( const std::vector<std::tuple<std::string, double, double>>& fingerprintData,
+                                                      const std::vector<std::pair<std::string, double>>& observedRSSI) {
     // Define a similarity measure (e.g., Euclidean distance) between observed and stored RSSI values
     auto similarity = [](double rssi1, double rssi2) {
         return std::abs(rssi1 - rssi2);
@@ -140,25 +140,23 @@ std::pair<double, double> Localization::findLocation(const std::vector<std::pair
 
     // Find the best match between observed and stored RSSI values
     double minDifference = std::numeric_limits<double>::max();
-    std::pair<double, double> bestLocation = {0.0, 0.0};
-    for (const auto& fingerprint : fingerprintData) {
-        double sumDifference = 0.0;
-        for (const auto& observed : observedRSSI) {
-            if (fingerprint.first == observed.first) {
-                sumDifference += similarity(fingerprint.second, observed.second);
+    std::tuple<double, double> bestLocation = {0.0, 0.0}; // Initialize with dummy values
+    for (const auto& observed : observedRSSI) {
+        for (const auto& fingerprint : fingerprintData) {
+            if (std::get<0>(fingerprint) == observed.first) { // Check if MAC address matches
+                double difference = similarity(std::get<1>(fingerprint), observed.second);
+                if (difference < minDifference) {
+                    minDifference = difference;
+                    bestLocation = {std::get<1>(fingerprint), std::get<2>(fingerprint)};
+                }
                 break; // Exit inner loop once a match is found
             }
-        }
-        if (sumDifference < minDifference) {
-            minDifference = sumDifference;
-            // Here, you could use the known location of the access point for trilateration
-            // For simplicity, let's just return the observed location for the matched access point
-            bestLocation = {fingerprint.first, fingerprint.second};
         }
     }
     return bestLocation;
 }
-*/
+
+
 
 /*
 // Method to get current position based on measured distances from WiFi packets

@@ -14,12 +14,17 @@ struct AccessPoint {
 class Localization {
 public:
     Localization(const std::vector<AccessPoint>& access_points);
+    
     std::pair<double, double> getCurrentPositionFromWiFi();
+    
     std::string captureWifiSignal();
+    
     std::vector<std::pair<std::string, double>> parseIwlistOutput(const std::string& iwlistOutput) ;
+    
     std::vector<std::tuple<std::string, double, double, double>>  readWiFiFingerprintFile(const std::string& filename);
-    std::pair<double, double> findLocation(const std::vector<std::pair<std::string, double>>& fingerprintData,
-                                       const std::vector<std::pair<std::string, double>>& observedRSSI);
+    
+    std::tuple<double, double> findLocation( const std::vector<std::tuple<std::string, double, double>>& fingerprintData,
+                                              const std::vector<std::pair<std::string, double>>& observedRSSI);
 
 private:
     std::vector<AccessPoint> access_points;
