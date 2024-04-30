@@ -4,6 +4,7 @@
 #include <iostream>
 #include <limits>
 #include <vector>
+#include <fstream>
 #include <Eigen/Dense>
 
 
@@ -88,45 +89,31 @@ std::vector<std::pair<std::string, double>> Localization::parseIwlistOutput(cons
     return observedRSSI;
 }
 
-
-
-std::vector<std::pair<std::string, double>>  Localization::readWiFiFingerprintFile(const std::string& filename) {
-    std::vector<std::pair<std::string, double>> fingerprintData;
-    std::ifstream fingerprintFile(filename);
+std::vector<std::tuple<std::string, double, double, double>>  Localization::readWiFiFingerprintFile(const std::string& filename) {
+  std::vector<std::tuple<std::string, double, double, double>> fingerprintData;
+  std::ifstream fingerprintFile(filename);
+  if (fingerprintFile.is_open()) {
     std::string line;
     std::string macAddress;
     double rssi, x, y;
-    if (fingerprintFile.is_open()) 
-    {
+    while (std::getline(fingerprintFile, line)) {
+      // Split the line using commas (",") as delimiters
+      std::istringstream lineStream(line);
+      std::getline(lineStream, macAddress, ',');  // Extract MAC address
+      std::getline(lineStream, keyword, ',');    // Skip comma
 
-        while (std::getline(fingerprintFile, line)) 
-        {
-            std::istringstream lineStream(line);
-            std::string keyword;
-            if (std::getline(lineStream, keyword, '=') && keyword == "Address") {
-                if (lineStream >> macAddress)
-                {
-                    if (lineStream >> keyword >> rssi)
-                    {
-                        std::cout<<"fingerprint data --> "<<macAddress<<"    "<<rssi<<std::endl;
-                        fingerprintData.push_back({macAddress, rssi});
-                    }
-                    else
-                    {
-                        std::cout<<"rssi not found "<<std::endl;
-                    }
-                }
-                else
-                {
-                     std::cout<<"mac addr not found "<<std::endl;
-                }
-            }
-        }
-        fingerprintFile.close();
-    } else {
-        std::cerr << "Error: Unable to open WiFi fingerprint file for reading." << std::endl;
+      if (lineStream >> rssi >> x >> y) {          // Extract RSSI, X, and Y
+        std::cout<<"fingerprint data --->"<<macAddress <<"  "<<rssi<<"  "<<x<<"  "<<y<<std::endl;
+        fingerprintData.push_back(std::make_tuple(macAddress, rssi, x, y));
+      } else {
+        std::cerr << "Error: Invalid format in line: " << line << std::endl;
+      }
     }
-    return fingerprintData;
+    fingerprintFile.close();
+  } else {
+    std::cerr << "Error: Unable to open WiFi fingerprint file for reading." << std::endl;
+  }
+  return fingerprintData;
 }
 
 /*
