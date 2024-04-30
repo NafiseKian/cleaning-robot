@@ -47,14 +47,18 @@ int UltrasonicSensor::getDistanceCm() {
     return static_cast<int>(distanceCm);
 }
 
+
 void UltrasonicSensor::echoCallback(int gpio, int level, uint32_t tick, void* userdata) {
     UltrasonicSensor* sensor = reinterpret_cast<UltrasonicSensor*>(userdata);
     std::cout << "GPIO: " << gpio << " Level: " << level << " Tick: " << tick << std::endl;
     if (level == 1) { // Rising edge
         sensor->startTimeUs = tick;
+        std::cout << "Start Time Set: " << sensor->startTimeUs << std::endl;
     } else if (level == 0) { // Falling edge
         sensor->echoTimeUs = tick - sensor->startTimeUs;
+        std::cout << "Echo Time Calculated: " << sensor->echoTimeUs << std::endl;
         sensor->echoReceived = true;
     }
 }
+
 
