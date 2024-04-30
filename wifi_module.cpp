@@ -75,6 +75,7 @@ std::vector<std::pair<std::string, double>> Localization::parseIwlistOutput(cons
     std::istringstream iss(iwlistOutput);
     std::string line;
     std::string macAddress;
+    std::string keyword;
     double rssi;
     while (std::getline(iss, line)) {
         if (line.find("Address") != std::string::npos) {
@@ -95,6 +96,7 @@ std::vector<std::tuple<std::string, double, double, double>>  Localization::read
   if (fingerprintFile.is_open()) {
     std::string line;
     std::string macAddress;
+    std::string keyword;
     double rssi, x, y;
     while (std::getline(fingerprintFile, line)) {
       // Split the line using commas (",") as delimiters
