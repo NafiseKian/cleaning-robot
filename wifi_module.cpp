@@ -148,6 +148,7 @@ std::tuple<double, double> Localization::findLocation( const std::vector<std::tu
                 if (difference < minDifference) {
                     minDifference = difference;
                     bestLocation = {std::get<1>(fingerprint), std::get<2>(fingerprint)};
+                    std::cout<<"The best location is ----> x="<<std::get<1>(fingerprint) <<" , y="<<std::get<2>(fingerprint)<<std::endl;
                 }
                 break; // Exit inner loop once a match is found
             }
