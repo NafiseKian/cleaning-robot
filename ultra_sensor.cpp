@@ -54,7 +54,15 @@ void UltrasonicSensor::echoCallback(int gpio, int level, uint32_t tick, void* us
     if (level == 1) { // Rising edge
         sensor->startTimeUs = tick;
         std::cout << "Start Time Set: " << sensor->startTimeUs << std::endl;
-    } else if (level == 0) { // Falling edge
+    } 
+    else if (level == 0) 
+    {
+        if(sensor->startTimeUs == 0)
+        {
+            std::cout<< "falling edge detected before rising edge"<<std::endl;
+            return ; 
+        }
+         // Falling edge
         sensor->echoTimeUs = tick - sensor->startTimeUs;
         std::cout << "Echo Time Calculated: " << sensor->echoTimeUs << std::endl;
         sensor->echoReceived = true;
