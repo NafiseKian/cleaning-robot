@@ -5,6 +5,10 @@
 #include <limits>
 #include <vector>
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <tuple>
+
 #include <Eigen/Dense>
 
 
@@ -90,25 +94,31 @@ std::vector<std::pair<std::string, double>> Localization::parseIwlistOutput(cons
     return observedRSSI;
 }
 
-std::vector<std::tuple<std::string, double, double, double>>  Localization::readWiFiFingerprintFile(const std::string& filename) {
+
+std::vector<std::tuple<std::string, double, double, double>> Localization::readWiFiFingerprintFile(const std::string& filename) {
   std::vector<std::tuple<std::string, double, double, double>> fingerprintData;
   std::ifstream fingerprintFile(filename);
   if (fingerprintFile.is_open()) {
     std::string line;
-    std::string macAddress;
-    std::string keyword;
-    double rssi, x, y;
     while (std::getline(fingerprintFile, line)) {
-      // Split the line using commas (",") as delimiters
-      std::istringstream lineStream(line);
-      std::getline(lineStream, macAddress, ',');  // Extract MAC address
-      std::getline(lineStream, keyword, ',');    // Skip comma
+      std::istringstream iss(line);
+      std::string macAddress, rssi_str, x_str, y_str;
+      double rssi, x, y;
 
-      if (lineStream >> rssi >> x >> y) {          // Extract RSSI, X, and Y
-        std::cout<<"fingerprint data --->"<<macAddress <<"  "<<rssi<<"  "<<x<<"  "<<y<<std::endl;
-        fingerprintData.push_back(std::make_tuple(macAddress, rssi, x, y));
+      if (std::getline(iss, macAddress, ',') &&
+          std::getline(iss, rssi_str, ',') &&
+          std::getline(iss, x_str, ',') &&
+          std::getline(iss, y_str)) {
+        try {
+          rssi = std::stod(rssi_str);
+          x = std::stod(x_str);
+          y = std::stod(y_str);
+          fingerprintData.emplace_back(macAddress, rssi, x, y);
+        } catch (const std::exception& e) {
+          std::cerr << "Error parsing line: " << line << std::endl;
+        }
       } else {
-        std::cerr << "Error: Invalid format in line: " << line << std::endl;
+        std::cerr << "Error parsing line: " << line << std::endl;
       }
     }
     fingerprintFile.close();
@@ -117,6 +127,7 @@ std::vector<std::tuple<std::string, double, double, double>>  Localization::read
   }
   return fingerprintData;
 }
+
 
 /*
 // Function to find the best match in WiFi fingerprint data
