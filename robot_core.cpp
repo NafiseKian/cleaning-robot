@@ -56,8 +56,8 @@ void* gps_wifi_thread(void* args)
         std::cout<<ret<<std::endl;
         std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(ret);
         auto fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
-        //std::pair<double, double> location = wifi.findLocation(fingerprintData, observedRSSI);
-        //std::cout<<"best location is --->"<<location.first<<"      "<<location.second << std::endl;
+        std::pair<double, double> location = wifi.findLocation(fingerprintData, observedRSSI);
+        std::cout<<"best location is --->"<<location.first<<"      "<<location.second << std::endl;
         
         sleep(5);
         
