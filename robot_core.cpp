@@ -128,12 +128,8 @@ UltrasonicSensor leftSensor("Left", 22, 27);
             std::cout << "Path is clear. Moving forward." << std::endl;
             sleep(3); // Continue moving forward for 3 seconds
         }
-    }
 
 
-
-        
-        
         MotorControl::forward();
         sleep(2);
         MotorControl::turnLeft();
@@ -157,6 +153,13 @@ UltrasonicSensor leftSensor("Left", 22, 27);
         //call arm module to pick the trash 
 
         if(photoCounter==3) break ; 
+    }
+
+
+
+        
+        
+       
     
 
     
