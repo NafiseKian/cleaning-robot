@@ -100,13 +100,8 @@ UltrasonicSensor rightSensor("Right", 18, 17);
 UltrasonicSensor leftSensor("Left", 22, 27);
 
 
-    
 
 
-   #include <iostream>
-#include <unistd.h> // For sleep function
-
-int main() {
     while (true) {
         int distanceFront = frontSensor.getDistanceCm();
         int distanceRight = rightSensor.getDistanceCm();
@@ -162,7 +157,7 @@ int main() {
         //call arm module to pick the trash 
 
         if(photoCounter==3) break ; 
-    }
+    
 
     
 
