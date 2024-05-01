@@ -66,7 +66,45 @@ void* gps_wifi_thread(void* args)
 
 }
 
+const int OBSTACLE_CLOSE = 20;
+const int OBSTACLE_NEAR = 30;
+const int ERROR_VALUE = 999;
+const int SLEEP_AFTER_TURN = 2;
+const int SLEEP_FORWARD = 3;
 
+int getValidDistance(Sensor sensor) {
+    int distance = sensor.getDistanceCm();
+    return (distance == -1) ? ERROR_VALUE : distance;
+}
+
+void handleMovement(int frontLeft, int frontRight, int right, int left) {
+    if ((frontLeft < OBSTACLE_CLOSE || frontRight < OBSTACLE_CLOSE) && left > OBSTACLE_CLOSE && right > OBSTACLE_CLOSE) {
+        if (frontLeft < frontRight) {
+            MotorControl::turnRight();
+            std::cout << "Obstacle detected in front. Turning right." << std::endl;
+        } else {
+            MotorControl::turnLeft();
+            std::cout << "Obstacle detected in front. Turning left." << std::endl;
+        }
+        sleep(SLEEP_AFTER_TURN);
+    } else if (right < OBSTACLE_CLOSE && left > OBSTACLE_CLOSE && frontRight > OBSTACLE_NEAR) {
+        MotorControl::turnLeft();
+        std::cout << "Obstacle detected on the right. Turning left." << std::endl;
+        sleep(SLEEP_AFTER_TURN);
+    } else if (left < OBSTACLE_CLOSE && right > OBSTACLE_CLOSE && frontLeft > OBSTACLE_NEAR) {
+        MotorControl::turnRight();
+        std::cout << "Obstacle detected on the left. Turning right." << std::endl;
+        sleep(SLEEP_AFTER_TURN);
+    } else if (frontLeft < OBSTACLE_NEAR && frontRight < OBSTACLE_NEAR) {
+        MotorControl::turnRight();
+        std::cout << "Obstacles too close in front. Executing turn." << std::endl;
+        sleep(SLEEP_AFTER_TURN);
+    } else {
+        MotorControl::forward();
+        std::cout << "Path is clear. Moving forward." << std::endl;
+        sleep(SLEEP_FORWARD);
+    }
+}
 
 int main() 
 {
@@ -95,40 +133,12 @@ int main()
         std::cerr << "Error: Robot location estimation failed." << std::endl;
     }
     */
-UltrasonicSensor frontSensor("Front", 26, 24);
-UltrasonicSensor rightSensor("Right", 18, 17);
-UltrasonicSensor leftSensor("Left", 22, 27);
+    int distanceFrontL = getValidDistance(frontSensorL);
+    int distanceFrontR = getValidDistance(frontSensorR);
+    int distanceRight = getValidDistance(rightSensor);
+    int distanceLeft = getValidDistance(leftSensor);
 
-
-
-
-    while (true) {
-        int distanceFront = frontSensor.getDistanceCm();
-        int distanceRight = rightSensor.getDistanceCm();
-        int distanceLeft = leftSensor.getDistanceCm();
-
-        std::cout << "Front Distance: " << distanceFront << " cm" << std::endl;
-        std::cout << "Right Distance: " << distanceRight << " cm" << std::endl;
-        std::cout << "Left Distance: " << distanceLeft << " cm" << std::endl;
-
-        if (distanceFront < 20) {
-            MotorControl::turnRight();
-            std::cout << "Obstacle detected in front. Turning right." << std::endl;
-            sleep(2); // Sleep for 2 seconds after turning
-        } else if (distanceRight < 20) {
-            MotorControl::turnLeft();
-            std::cout << "Obstacle detected on the right. Turning left." << std::endl;
-            sleep(2); // Sleep for 2 seconds after turning
-        } else if (distanceLeft < 20) {
-            MotorControl::turnRight();
-            std::cout << "Obstacle detected on the left. Turning right." << std::endl;
-            sleep(2); // Sleep for 2 seconds after turning
-        } else {
-            MotorControl::forward();
-            std::cout << "Path is clear. Moving forward." << std::endl;
-            sleep(3); // Continue moving forward for 3 seconds
-        }
-
+    handleMovement(distanceFrontL, distanceFrontR, distanceRight, distanceLeft);
 
         MotorControl::forward();
         sleep(2);
@@ -154,6 +164,7 @@ UltrasonicSensor leftSensor("Left", 22, 27);
 
         if(photoCounter==3) break ; 
     }
+    
 
 
 
