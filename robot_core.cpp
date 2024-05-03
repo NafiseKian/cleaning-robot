@@ -55,7 +55,7 @@ void* gps_wifi_thread(void* args)
         std::cout<<"------------------------wifi signal levels -----------------------"<<std::endl;
         std::cout<<ret<<std::endl;
         std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(ret);
-        auto fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
+        std::vector<std::tuple<std::string, double, double, double>> fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
         std::pair<double, double> location = wifi.findLocation(fingerprintData, observedRSSI);
         std::cout<<"best location is --->"<<location.first<<"      "<<location.second << std::endl;
         
@@ -66,48 +66,8 @@ void* gps_wifi_thread(void* args)
 
 }
 
-const int OBSTACLE_CLOSE = 20;
-const int OBSTACLE_NEAR = 30;
-const int ERROR_VALUE = 999;
-const int SLEEP_AFTER_TURN = 2;
-const int SLEEP_FORWARD = 3;
 
-int getValidDistance(Sensor sensor) {
-    int distance = sensor.getDistanceCm();
-    return (distance == -1) ? ERROR_VALUE : distance;
-}
-
-void handleMovement(int frontLeft, int frontRight, int right, int left) {
-    if ((frontLeft < OBSTACLE_CLOSE || frontRight < OBSTACLE_CLOSE) && left > OBSTACLE_CLOSE && right > OBSTACLE_CLOSE) {
-        if (frontLeft < frontRight) {
-            MotorControl::turnRight();
-            std::cout << "Obstacle detected in front. Turning right." << std::endl;
-        } else {
-            MotorControl::turnLeft();
-            std::cout << "Obstacle detected in front. Turning left." << std::endl;
-        }
-        sleep(SLEEP_AFTER_TURN);
-    } else if (right < OBSTACLE_CLOSE && left > OBSTACLE_CLOSE && frontRight > OBSTACLE_NEAR) {
-        MotorControl::turnLeft();
-        std::cout << "Obstacle detected on the right. Turning left." << std::endl;
-        sleep(SLEEP_AFTER_TURN);
-    } else if (left < OBSTACLE_CLOSE && right > OBSTACLE_CLOSE && frontLeft > OBSTACLE_NEAR) {
-        MotorControl::turnRight();
-        std::cout << "Obstacle detected on the left. Turning right." << std::endl;
-        sleep(SLEEP_AFTER_TURN);
-    } else if (frontLeft < OBSTACLE_NEAR && frontRight < OBSTACLE_NEAR) {
-        MotorControl::turnRight();
-        std::cout << "Obstacles too close in front. Executing turn." << std::endl;
-        sleep(SLEEP_AFTER_TURN);
-    } else {
-        MotorControl::forward();
-        std::cout << "Path is clear. Moving forward." << std::endl;
-        sleep(SLEEP_FORWARD);
-    }
-}
-
-int main() 
-{
+int main() {
 
     pthread_t cThread;
     if(pthread_create(&cThread, NULL, &gps_wifi_thread,NULL)){
@@ -133,45 +93,64 @@ int main()
         std::cerr << "Error: Robot location estimation failed." << std::endl;
     }
     */
-    int distanceFrontL = getValidDistance(frontSensorL);
-    int distanceFrontR = getValidDistance(frontSensorR);
-    int distanceRight = getValidDistance(rightSensor);
-    int distanceLeft = getValidDistance(leftSensor);
 
-    handleMovement(distanceFrontL, distanceFrontR, distanceRight, distanceLeft);
+    UltrasonicSensor frontSensorL("Front-left", 26, 24);
+    UltrasonicSensor frontSensorR("Front-right", 20, 21);
+    UltrasonicSensor rightSensor("Right", 18, 17);
+    UltrasonicSensor leftSensor("Left", 22, 27);
 
-        MotorControl::forward();
-        sleep(2);
-        MotorControl::turnLeft();
-        sleep(1);
-        //MotorControl::stop();
-        //sleep(5);
-        //MotorControl::forward();
-        //sleep(5);
-        MotorControl::forward();
-        sleep(3);
-        MotorControl::turnRight();
-        sleep(1);
-        MotorControl::forward();
-        sleep(3);
-        MotorControl::stop(); // Stop moving
-        // Capture a photo
-        CameraModule::capturePhoto(photoCounter);
-        sleep(5);
-        
-        //call object detection
-        //call arm module to pick the trash 
+
+
+
+    while (true) 
+    {
+        int distanceFrontL = frontSensorL.getDistanceCm();
+        int distanceFrontR = frontSensorR.getDistanceCm();
+        int distanceRight = rightSensor.getDistanceCm();
+        int distanceLeft = leftSensor.getDistanceCm();
+
+        std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
+        std::cout << "Front Distance sensor right : " << distanceFrontR << " cm" << std::endl;
+        std::cout << "Right Distance: " << distanceRight << " cm" << std::endl;
+        std::cout << "Left Distance: " << distanceLeft << " cm" << std::endl;
+
+        if ((distanceFrontL < 20 || distanceFrontR < 20) && distanceLeft > 20 && distanceRight > 20) 
+        {
+            if (distanceFrontL < distanceFrontR)
+                MotorControl::turnRight();
+            else
+                MotorControl::turnLeft();
+            std::cout << "Obstacle detected in front. Turning." << std::endl;
+            sleep(2); // Sleep for 2 seconds after turning
+        } else if (distanceRight < 20 && distanceLeft > 20 && distanceFrontR > 20) {
+            MotorControl::turnLeft();
+            std::cout << "Obstacle detected on the right. Turning left." << std::endl;
+            sleep(2); // Sleep for 2 seconds after turning
+        } else if (distanceLeft < 20 && distanceRight > 20 && distanceFrontL > 20) {
+            MotorControl::turnRight();
+            std::cout << "Obstacle detected on the left. Turning right." << std::endl;
+            sleep(2); // Sleep for 2 seconds after turning
+        } else if (distanceFrontL < 20 && distanceFrontR < 20) {
+            MotorControl::turnRight(); // Or any suitable maneuver
+            std::cout << "Obstacles too close in front. Turning." << std::endl;
+            sleep(2); // Sleep for 2 seconds after turning
+        }
+         else if (distanceFrontL < 5 && distanceFrontR < 5) {
+            MotorControl::backward(); // Or any suitable maneuver
+            std::cout << "Obstacles too close in front. Turning." << std::endl;
+            sleep(4); // Sleep for 2 seconds after turning
+        } 
+        else 
+        {
+            MotorControl::forward();
+            std::cout << "Path is clear. Moving forward." << std::endl;
+            CameraModule::capturePhoto(photoCounter);
+            sleep(3); // Continue moving forward for 3 seconds
+        }
+
 
         if(photoCounter==3) break ; 
     }
-    
-
-
-
-        
-        
-       
-    
 
     
 

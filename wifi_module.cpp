@@ -134,7 +134,7 @@ std::vector<std::tuple<std::string, double, double, double>> Localization::readW
 
 
 // Function to find the best match in WiFi fingerprint data
-std::tuple<double, double> Localization::findLocation( const std::vector<std::tuple<std::string, double, double>>& fingerprintData,
+std::tuple<double, double> Localization::findLocation( const std::vector<std::tuple<std::string, double, double , double>>& fingerprintData,
                                                       const std::vector<std::pair<std::string, double>>& observedRSSI) {
     // Define a similarity measure (e.g., Euclidean distance) between observed and stored RSSI values
     auto similarity = [](double rssi1, double rssi2) {
@@ -150,7 +150,7 @@ std::tuple<double, double> Localization::findLocation( const std::vector<std::tu
                 double difference = similarity(std::get<1>(fingerprint), observed.second);
                 if (difference < minDifference) {
                     minDifference = difference;
-                    bestLocation = {std::get<1>(fingerprint), std::get<2>(fingerprint)};
+                    bestLocation = {std::get<2>(fingerprint), std::get<3>(fingerprint)};
                 }
                 break; // Exit inner loop once a match is found
             }

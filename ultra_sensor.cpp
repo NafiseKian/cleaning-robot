@@ -24,7 +24,7 @@ int UltrasonicSensor::getDistanceCm() {
     const int TIMEOUT = 21000; // Timeout in microseconds
     echoReceived = false;
 
-    // Send trigger pulse
+    //ensures that the trigger pin is at a low level before you send the pulse
     gpioWrite(triggerPin, PI_LOW);
     usleep(2); // Settle time
     gpioWrite(triggerPin, PI_HIGH);
