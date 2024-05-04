@@ -112,31 +112,37 @@ int main() {
         std::cout << "Left Distance: " << distanceLeft << " cm" << std::endl;
         std::cout << "Right Distance: " << distanceRight << " cm" << std::endl;
 
-        if (distanceFrontL < 20 || distanceFrontR < 20) {
-            if (distanceLeft > 20 && distanceRight > 20) {
-                if (distanceFrontL < distanceFrontR) {
+      // Handle -1 sensor errors
+        bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
+        bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 20);
+        bool validLeft = (distanceLeft != -1 && distanceLeft > 20);
+        bool validRight = (distanceRight != -1 && distanceRight > 20);
+
+        if (validFrontL || validFrontR) {
+            if (validLeft && validRight) {
+                if (validFrontL && (!validFrontR || distanceFrontL < distanceFrontR)) {
                     MotorControl::turnRight();
                     std::cout << "Obstacle closer on left; turning right." << std::endl;
                 } else {
                     MotorControl::turnLeft();
                     std::cout << "Obstacle closer on right; turning left." << std::endl;
                 }
-            } else if (distanceLeft > 20) {
+            } else if (validLeft) {
                 MotorControl::turnLeft();
-                std::cout << "Right side blocked; turning left." << std::endl;
-            } else if (distanceRight > 20) {
+                std::cout << "Right side blocked or invalid; turning left." << std::endl;
+            } else if (validRight) {
                 MotorControl::turnRight();
-                std::cout << "Left side blocked; turning right." << std::endl;
+                std::cout << "Left side blocked or invalid; turning right." << std::endl;
             } else {
-                // If both sides are blocked, perhaps consider reversing or stopping
+                // If both sides are invalid or blocked, move forward cautiously
                 MotorControl::forward(); // Placeholder for stop or reverse
-                std::cout << "Both sides blocked; moving forward cautiously." << std::endl;
+                std::cout << "Both sides blocked or invalid; moving forward cautiously." << std::endl;
             }
             usleep(1000000); // Wait 1 second to give time for the turn to be executed
         } else {
-            // If no obstacle is directly in front, move forward
+            // If no valid obstacle is directly in front, move forward
             MotorControl::forward();
-            std::cout << "Path is clear. Moving forward." << std::endl;
+            std::cout << "Path is clear or sensor data invalid. Moving forward." << std::endl;
         }
 
         usleep(500000); // 0.5 second delay for general loop control
