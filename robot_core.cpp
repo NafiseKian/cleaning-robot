@@ -114,42 +114,51 @@ int main() {
         std::cout << "Right Distance: " << distanceRight << " cm" << std::endl;
         std::cout << "Left Distance: " << distanceLeft << " cm" << std::endl;
 
-        if ((distanceFrontL < 20 || distanceFrontR < 20) && distanceLeft > 20 && distanceRight > 20) 
-        {
-            if (distanceFrontL < distanceFrontR)
-                MotorControl::turnRight();
-            else
-                MotorControl::turnLeft();
-            std::cout << "Obstacle detected in front. Turning." << std::endl;
-            sleep(2); // Sleep for 2 seconds after turning
-        } else if (distanceRight < 20 && distanceLeft > 20 && distanceFrontR > 20) {
-            MotorControl::turnLeft();
-            std::cout << "Obstacle detected on the right. Turning left." << std::endl;
-            sleep(2); // Sleep for 2 seconds after turning
-        } else if (distanceLeft < 20 && distanceRight > 20 && distanceFrontL > 20) {
+       if ((distanceFrontL < 20 || distanceFrontR < 20) && distanceLeft > 20 && distanceRight > 20) {
+        // Determine which direction to turn based on the shorter distance
+        if (distanceFrontL < distanceFrontR) {
             MotorControl::turnRight();
-            std::cout << "Obstacle detected on the left. Turning right." << std::endl;
-            sleep(2); // Sleep for 2 seconds after turning
-        } else if (distanceFrontL < 20 && distanceFrontR < 20) {
-            MotorControl::stop(); // Or any suitable maneuver
-            std::cout << "Obstacles too close in front. Stopping." << std::endl;
-            sleep(2); // Sleep for 2 seconds after turning
-        }
-         else if (distanceFrontL < 5 && distanceFrontR < 5) {
-            MotorControl::backward(); // Or any suitable maneuver
-            std::cout << "Obstacles too close in front. Turning." << std::endl;
-            sleep(4); // Sleep for 2 seconds after turning
-        } 
-        else 
-        {
-            MotorControl::forward();
-            std::cout << "Path is clear. Moving forward." << std::endl;
-            CameraModule::capturePhoto(photoCounter);
-            sleep(3); // Continue moving forward for 3 seconds
+            std::cout << "Obstacle detected in front. Turning right." << std::endl;
+        } else {
+            MotorControl::turnLeft();
+            std::cout << "Obstacle detected in front. Turning left." << std::endl;
         }
 
-        sleep(5);
-        if(photoCounter==3) break ; 
+        // Wait for a short duration before checking again
+        usleep(2000000); 
+    } else {
+        // No obstacle detected in front, move forward
+        MotorControl::forward();
+        std::cout << "Path is clear. Moving forward." << std::endl;
+    }
+        // } else if (distanceRight < 20 && distanceLeft > 20 && distanceFrontR > 20) {
+        //     MotorControl::turnLeft();
+        //     std::cout << "Obstacle detected on the right. Turning left." << std::endl;
+        //     sleep(2); // Sleep for 2 seconds after turning
+        // } else if (distanceLeft < 20 && distanceRight > 20 && distanceFrontL > 20) {
+        //     MotorControl::turnRight();
+        //     std::cout << "Obstacle detected on the left. Turning right." << std::endl;
+        //     sleep(2); // Sleep for 2 seconds after turning
+        // } else if (distanceFrontL < 20 && distanceFrontR < 20) {
+        //     MotorControl::stop(); // Or any suitable maneuver
+        //     std::cout << "Obstacles too close in front. Stopping." << std::endl;
+        //     sleep(2); // Sleep for 2 seconds after turning
+        // }
+        //  else if (distanceFrontL < 5 && distanceFrontR < 5) {
+        //     MotorControl::backward(); // Or any suitable maneuver
+        //     std::cout << "Obstacles too close in front. Turning." << std::endl;
+        //     sleep(4); // Sleep for 2 seconds after turning
+        // } 
+        // else 
+        // {
+        //     MotorControl::forward();
+        //     std::cout << "Path is clear. Moving forward." << std::endl;
+        //     CameraModule::capturePhoto(photoCounter);
+        //     sleep(3); // Continue moving forward for 3 seconds
+        // }
+
+        // sleep(5);
+        // if(photoCounter==3) break ; 
     }
 
     
