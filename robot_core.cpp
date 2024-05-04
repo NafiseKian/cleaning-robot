@@ -101,28 +101,38 @@ int main() {
 
 
  while (true) {
-        // Assuming sensor classes are correctly defined and returning the current distance in cm
         int distanceFrontL = frontSensorL.getDistanceCm();
         int distanceFrontR = frontSensorR.getDistanceCm();
-        int distanceRight = rightSensor.getDistanceCm();
         int distanceLeft = leftSensor.getDistanceCm();
+        int distanceRight = rightSensor.getDistanceCm();
 
-        // Debug outputs to trace sensor values
+        // Output the distances to help with debugging
         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
         std::cout << "Front Distance sensor right: " << distanceFrontR << " cm" << std::endl;
-        std::cout << "Right Distance: " << distanceRight << " cm" << std::endl;
         std::cout << "Left Distance: " << distanceLeft << " cm" << std::endl;
+        std::cout << "Right Distance: " << distanceRight << " cm" << std::endl;
 
-              if (distanceFrontL < 20 || distanceFrontR < 20) {
-            // Determine which direction to turn based on the shorter distance
-            if (distanceFrontL < distanceFrontR) {
-                MotorControl::turnRight();
-                std::cout << "Obstacle detected in front. Turning right." << std::endl;
-            } else {
+        if (distanceFrontL < 20 || distanceFrontR < 20) {
+            if (distanceLeft > 20 && distanceRight > 20) {
+                if (distanceFrontL < distanceFrontR) {
+                    MotorControl::turnRight();
+                    std::cout << "Obstacle closer on left; turning right." << std::endl;
+                } else {
+                    MotorControl::turnLeft();
+                    std::cout << "Obstacle closer on right; turning left." << std::endl;
+                }
+            } else if (distanceLeft > 20) {
                 MotorControl::turnLeft();
-                std::cout << "Obstacle detected in front. Turning left." << std::endl;
+                std::cout << "Right side blocked; turning left." << std::endl;
+            } else if (distanceRight > 20) {
+                MotorControl::turnRight();
+                std::cout << "Left side blocked; turning right." << std::endl;
+            } else {
+                // If both sides are blocked, perhaps consider reversing or stopping
+                MotorControl::forward(); // Placeholder for stop or reverse
+                std::cout << "Both sides blocked; moving forward cautiously." << std::endl;
             }
-            usleep(2000000); // Wait 2 seconds to give time for the turn to be executed
+            usleep(1000000); // Wait 1 second to give time for the turn to be executed
         } else {
             // If no obstacle is directly in front, move forward
             MotorControl::forward();
