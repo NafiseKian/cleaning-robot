@@ -131,6 +131,9 @@ int main() {
         MotorControl::forward();
         std::cout << "Path is clear. Moving forward." << std::endl;
     }
+            // Add a small delay to prevent too fast looping
+        usleep(500000); // Additional 0.5 second delay for general loop control
+    
         // } else if (distanceRight < 20 && distanceLeft > 20 && distanceFrontR > 20) {
         //     MotorControl::turnLeft();
         //     std::cout << "Obstacle detected on the right. Turning left." << std::endl;
