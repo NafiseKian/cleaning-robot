@@ -2,10 +2,10 @@
 #include <iostream>
 
 // Constants for the GPIO pin numbers used for each servo
-const int TURN_SERVO_PIN = 0;       // Replace 0 with the GPIO pin number for the turn servo
-const int SHOULDER_SERVO_PIN = 1;   // Replace 1 with the GPIO pin number for the shoulder servo
-const int GRAB_SERVO_PIN = 2;       // Replace 2 with the GPIO pin number for the grab servo
-const int UP_DOWN_SERVO_PIN = 3;    // Replace 3 with the GPIO pin number for the up/down servo
+const int TURN_SERVO_PIN = 1;       // Replace 0 with the GPIO pin number for the turn servo
+const int SHOULDER_SERVO_PIN = 13;   // Replace 1 with the GPIO pin number for the shoulder servo
+const int GRAB_SERVO_PIN = 12;       // Replace 2 with the GPIO pin number for the grab servo
+const int UP_DOWN_SERVO_PIN = 16;    // Replace 3 with the GPIO pin number for the up/down servo
 
 // Function to initialize GPIO and wiringPi
 void setup() {
