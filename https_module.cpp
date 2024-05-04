@@ -9,10 +9,10 @@ HTTPS::HTTPS() : service(), ep(ip::address::from_string("127.0.0.1"), 2001), soc
     std::cout << "Connected to server." << std::endl;
 }
 
-int HTTPS::WriteToSocket(std::string gpsData) {
+int HTTPS::WriteToSocket(std::string dataToSend) {
     try {
         // Send GPS data to server
-        write(sock, buffer(gpsData));
+        write(sock, buffer(dataToSend));
 
         // Wait for response from server (if any)
         char data[1024];

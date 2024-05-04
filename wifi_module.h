@@ -23,7 +23,7 @@ public:
     
     std::vector<std::tuple<std::string, double, double, double>>  readWiFiFingerprintFile(const std::string& filename);
     
-    std::tuple<double, double> findLocation( const std::vector<std::tuple<std::string, double, double>>& fingerprintData,
+    std::tuple<double, double> findLocation( const std::vector<std::tuple<std::string, double, double , double>>& fingerprintData,
                                               const std::vector<std::pair<std::string, double>>& observedRSSI);
 
 private:

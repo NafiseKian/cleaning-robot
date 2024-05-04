@@ -20,7 +20,7 @@ int main() {
             size_t length = sock.read_some(buffer(data));
 
             if (length > 0) {
-                std::cout << "Received GPS data from client: " << std::string(data, length) << std::endl;
+                std::cout << "Received data from client: " << std::string(data, length) << std::endl;
             }
         }
     } catch (std::exception& e) {
