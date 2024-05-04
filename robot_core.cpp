@@ -113,8 +113,7 @@ int main() {
         std::cout << "Right Distance: " << distanceRight << " cm" << std::endl;
         std::cout << "Left Distance: " << distanceLeft << " cm" << std::endl;
 
-        // Check if there's an obstacle in front and adequate space on the sides
-        if ((distanceFrontL < 20 || distanceFrontR < 20) && distanceLeft > 20 && distanceRight > 20) {
+              if (distanceFrontL < 20 || distanceFrontR < 20) {
             // Determine which direction to turn based on the shorter distance
             if (distanceFrontL < distanceFrontR) {
                 MotorControl::turnRight();
@@ -123,17 +122,16 @@ int main() {
                 MotorControl::turnLeft();
                 std::cout << "Obstacle detected in front. Turning left." << std::endl;
             }
-            // Wait for 2 seconds before checking again
-            usleep(2000000); 
+            usleep(2000000); // Wait 2 seconds to give time for the turn to be executed
         } else {
-            // No obstacle detected in front, command the robot to move forward
+            // If no obstacle is directly in front, move forward
             MotorControl::forward();
             std::cout << "Path is clear. Moving forward." << std::endl;
         }
 
-        // General delay to prevent too fast looping, allowing sensor values to refresh
-        usleep(500000); // 0.5 second delay for loop control
+        usleep(500000); // 0.5 second delay for general loop control
     }
+
     return 0;
 }
 
