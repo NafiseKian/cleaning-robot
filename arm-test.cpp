@@ -1,58 +1,71 @@
-import RPi.GPIO as GPIO
-import time
+#include <wiringPi.h>
+#include <iostream>
 
-//Set up GPIO using BCM numbering
-GPIO.setmode(GPIO.BCM)
+// Constants for the GPIO pin numbers used for each servo
+const int TURN_SERVO_PIN = 0;       // Replace 0 with the GPIO pin number for the turn servo
+const int SHOULDER_SERVO_PIN = 1;   // Replace 1 with the GPIO pin number for the shoulder servo
+const int GRAB_SERVO_PIN = 2;       // Replace 2 with the GPIO pin number for the grab servo
+const int UP_DOWN_SERVO_PIN = 3;    // Replace 3 with the GPIO pin number for the up/down servo
 
-//Define the GPIO pins for the servo motors
-servo_pins = [18, 19, 20, 21]
+// Function to initialize GPIO and wiringPi
+void setup() {
+    wiringPiSetup();  // Initialize wiringPi
+    pinMode(TURN_SERVO_PIN, OUTPUT);
+    pinMode(SHOULDER_SERVO_PIN, OUTPUT);
+    pinMode(GRAB_SERVO_PIN, OUTPUT);
+    pinMode(UP_DOWN_SERVO_PIN, OUTPUT);
+}
 
-//Set the frequency for PWM
-frequency = 50
+// Function to control the turn action
+void turn(int angle) {
+    int pulse = map(angle, 0, 180, 50, 250);  // Map angle to pulse width range
+    digitalWrite(TURN_SERVO_PIN, HIGH);
+    delayMicroseconds(pulse);
+    digitalWrite(TURN_SERVO_PIN, LOW);
+    delay(20 - pulse / 1000);
+}
 
-//Set up the GPIO pins for PWM
-for pin in servo_pins:
-    GPIO.setup(pin, GPIO.OUT)
-//Create PWM instances for each servo motor
-pwms = [GPIO.PWM(pin, frequency) for pin in servo_pins]
+// Function to control the shoulder movement
+void moveShoulder(int angle) {
+    int pulse = map(angle, 0, 180, 50, 250);
+    digitalWrite(SHOULDER_SERVO_PIN, HIGH);
+    delayMicroseconds(pulse);
+    digitalWrite(SHOULDER_SERVO_PIN, LOW);
+    delay(20 - pulse / 1000);
+}
 
+// Function to control the grabbing action
+void grab(int position) {
+    int pulse = map(position, 0, 180, 50, 250);
+    digitalWrite(GRAB_SERVO_PIN, HIGH);
+    delayMicroseconds(pulse);
+    digitalWrite(GRAB_SERVO_PIN, LOW);
+    delay(20 - pulse / 1000);
+}
 
+// Function to control the up and down movement
+void moveUpDown(int height) {
+    int pulse = map(height, 0, 180, 50, 250);
+    digitalWrite(UP_DOWN_SERVO_PIN, HIGH);
+    delayMicroseconds(pulse);
+    digitalWrite(UP_DOWN_SERVO_PIN, LOW);
+    delay(20 - pulse / 1000);
+}
 
-duty_cycle_min = 2.5  
-duty_cycle_max = 12.5 
-
-def move_servo(servo_index, angle):
-    duty_cycle = duty_cycle_min + (angle / 180) * (duty_cycle_max - duty_cycle_min)
-    pwms[servo_index].ChangeDutyCycle(duty_cycle)
-    time.sleep(0.5) 
-
-
-def move_servo1(angle):
-    move_servo(0, angle)
-
-
-def move_servo2(angle):
-    move_servo(1, angle)
-
-
-def move_servo3(angle):
-    move_servo(2, angle)
-
-def move_servo4(angle):
-    move_servo(3, angle)
-
-
-try:
-    while True:
+// Main function
+int main() {
+    setup();
     
-        move_servo1(0)
-        move_servo2(90)
-        move_servo3(180)
-        move_servo4(270)
-        time.sleep(1)  
+    // Example usage
+    turn(90);
+    moveShoulder(45);
+    grab(135);
+    moveUpDown(70);
 
-except KeyboardInterrupt:
+    return 0;
+}
 
-    for pwm in pwms:
-        pwm.stop()
-    GPIO.cleanup()
+// Helper function to map values (similar to the Arduino map function)
+int map(int x, int in_min, int in_max, int out_min, int out_max) {
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
