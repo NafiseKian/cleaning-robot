@@ -58,7 +58,7 @@ void* gps_wifi_thread(void* args)
         std::vector<std::tuple<std::string, double, double, double>> fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
         std::tuple<double, double> location = wifi.findLocation(fingerprintData, observedRSSI);
         std::cout << "best location is ---> " << std::get<0>(location) << "      " << std::get<1>(location) << std::endl;
-        
+
         sleep(5);
         
     }
@@ -96,8 +96,8 @@ int main() {
 
     UltrasonicSensor frontSensorL("Front-left", 26, 24);
     UltrasonicSensor frontSensorR("Front-right", 20, 21);
-    UltrasonicSensor rightSensor("Right", 18, 17);
-    UltrasonicSensor leftSensor("Left", 22, 27);
+    UltrasonicSensor rightSensor("Right", 22, 27);
+    UltrasonicSensor leftSensor("Left", 18 , 17);
 
 
 
