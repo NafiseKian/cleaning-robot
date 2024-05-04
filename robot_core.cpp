@@ -100,71 +100,94 @@ int main() {
     UltrasonicSensor leftSensor("Left", 18 , 17);
 
 
-
-
-    while (true) 
-    {
+ while (true) {
+        // Assuming sensor classes are correctly defined and returning the current distance in cm
         int distanceFrontL = frontSensorL.getDistanceCm();
         int distanceFrontR = frontSensorR.getDistanceCm();
         int distanceRight = rightSensor.getDistanceCm();
         int distanceLeft = leftSensor.getDistanceCm();
 
+        // Debug outputs to trace sensor values
         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
-        std::cout << "Front Distance sensor right : " << distanceFrontR << " cm" << std::endl;
+        std::cout << "Front Distance sensor right: " << distanceFrontR << " cm" << std::endl;
         std::cout << "Right Distance: " << distanceRight << " cm" << std::endl;
         std::cout << "Left Distance: " << distanceLeft << " cm" << std::endl;
 
-       if ((distanceFrontL < 20 || distanceFrontR < 20) && distanceLeft > 20 && distanceRight > 20) {
-        // Determine which direction to turn based on the shorter distance
-        if (distanceFrontL < distanceFrontR) {
-            MotorControl::turnRight();
-            std::cout << "Obstacle detected in front. Turning right." << std::endl;
+        // Check if there's an obstacle in front and adequate space on the sides
+        if ((distanceFrontL < 20 || distanceFrontR < 20) && distanceLeft > 20 && distanceRight > 20) {
+            // Determine which direction to turn based on the shorter distance
+            if (distanceFrontL < distanceFrontR) {
+                MotorControl::turnRight();
+                std::cout << "Obstacle detected in front. Turning right." << std::endl;
+            } else {
+                MotorControl::turnLeft();
+                std::cout << "Obstacle detected in front. Turning left." << std::endl;
+            }
+            // Wait for 2 seconds before checking again
+            usleep(2000000); 
         } else {
-            MotorControl::turnLeft();
-            std::cout << "Obstacle detected in front. Turning left." << std::endl;
+            // No obstacle detected in front, command the robot to move forward
+            MotorControl::forward();
+            std::cout << "Path is clear. Moving forward." << std::endl;
         }
 
-        // Wait for a short duration before checking again
-        usleep(2000000); 
-    } else {
-        // No obstacle detected in front, move forward
-        MotorControl::forward();
-        std::cout << "Path is clear. Moving forward." << std::endl;
+        // General delay to prevent too fast looping, allowing sensor values to refresh
+        usleep(500000); // 0.5 second delay for loop control
     }
-            // Add a small delay to prevent too fast looping
-        usleep(500000); // Additional 0.5 second delay for general loop control
-    
-        // } else if (distanceRight < 20 && distanceLeft > 20 && distanceFrontR > 20) {
-        //     MotorControl::turnLeft();
-        //     std::cout << "Obstacle detected on the right. Turning left." << std::endl;
-        //     sleep(2); // Sleep for 2 seconds after turning
-        // } else if (distanceLeft < 20 && distanceRight > 20 && distanceFrontL > 20) {
-        //     MotorControl::turnRight();
-        //     std::cout << "Obstacle detected on the left. Turning right." << std::endl;
-        //     sleep(2); // Sleep for 2 seconds after turning
-        // } else if (distanceFrontL < 20 && distanceFrontR < 20) {
-        //     MotorControl::stop(); // Or any suitable maneuver
-        //     std::cout << "Obstacles too close in front. Stopping." << std::endl;
-        //     sleep(2); // Sleep for 2 seconds after turning
-        // }
-        //  else if (distanceFrontL < 5 && distanceFrontR < 5) {
-        //     MotorControl::backward(); // Or any suitable maneuver
-        //     std::cout << "Obstacles too close in front. Turning." << std::endl;
-        //     sleep(4); // Sleep for 2 seconds after turning
-        // } 
-        // else 
-        // {
-        //     MotorControl::forward();
-        //     std::cout << "Path is clear. Moving forward." << std::endl;
-        //     CameraModule::capturePhoto(photoCounter);
-        //     sleep(3); // Continue moving forward for 3 seconds
-        // }
-
-        // sleep(5);
-        // if(photoCounter==3) break ; 
-    }
-
-    
-
     return 0;
 }
+
+//     while (true) 
+//     {
+//         int distanceFrontL = frontSensorL.getDistanceCm();
+//         int distanceFrontR = frontSensorR.getDistanceCm();
+//         int distanceRight = rightSensor.getDistanceCm();
+//         int distanceLeft = leftSensor.getDistanceCm();
+
+//         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
+//         std::cout << "Front Distance sensor right : " << distanceFrontR << " cm" << std::endl;
+//         std::cout << "Right Distance: " << distanceRight << " cm" << std::endl;
+//         std::cout << "Left Distance: " << distanceLeft << " cm" << std::endl;
+
+//         if ((distanceFrontL < 20 || distanceFrontR < 20) && distanceLeft > 20 && distanceRight > 20) 
+//         {
+//             if (distanceFrontL < distanceFrontR)
+//                 MotorControl::turnRight();
+//             else
+//                 MotorControl::turnLeft();
+//             std::cout << "Obstacle detected in front. Turning." << std::endl;
+//             sleep(2); // Sleep for 2 seconds after turning
+//         } else if (distanceRight < 20 && distanceLeft > 20 && distanceFrontR > 20) {
+//             MotorControl::turnLeft();
+//             std::cout << "Obstacle detected on the right. Turning left." << std::endl;
+//             sleep(2); // Sleep for 2 seconds after turning
+//         } else if (distanceLeft < 20 && distanceRight > 20 && distanceFrontL > 20) {
+//             MotorControl::turnRight();
+//             std::cout << "Obstacle detected on the left. Turning right." << std::endl;
+//             sleep(2); // Sleep for 2 seconds after turning
+//         } else if (distanceFrontL < 20 && distanceFrontR < 20) {
+//             MotorControl::stop(); // Or any suitable maneuver
+//             std::cout << "Obstacles too close in front. Stopping." << std::endl;
+//             sleep(2); // Sleep for 2 seconds after turning
+//         }
+//          else if (distanceFrontL < 5 && distanceFrontR < 5) {
+//             MotorControl::backward(); // Or any suitable maneuver
+//             std::cout << "Obstacles too close in front. Turning." << std::endl;
+//             sleep(4); // Sleep for 2 seconds after turning
+//         } 
+//         else 
+//         {
+//             MotorControl::forward();
+//             std::cout << "Path is clear. Moving forward." << std::endl;
+//             CameraModule::capturePhoto(photoCounter);
+//             sleep(3); // Continue moving forward for 3 seconds
+//         }
+
+//         sleep(5);
+//         if(photoCounter==3) break ; 
+//     }
+
+    
+
+//     return 0;
+// }
