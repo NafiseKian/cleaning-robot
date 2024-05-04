@@ -25,8 +25,13 @@ void* gps_wifi_thread(void* args)
 {
     GPSModule gps;
 
+    std::vector<AccessPoint> access_points = {
+      {1.0, 1.0, "0A:96:71:47:4C:FF"}, // JN extension
+      {5.0, 1.0, "F6:43:35:08:ED:BD"},  // JN
+      {3.0, 5.0, "2A:F4:8D:C2:36:E5"}   // recordreaker
+    };
 
-    Localization wifi();
+    Localization wifi(access_points);
 
     while (true)
     {
@@ -54,7 +59,7 @@ void* gps_wifi_thread(void* args)
         std::tuple<double, double> location = wifi.findLocation(fingerprintData, observedRSSI);
         std::cout << "best location is ---> " << std::get<0>(location) << "      " << std::get<1>(location) << std::endl;
 
-        
+        sleep(5);
         
     }
     
@@ -111,43 +116,26 @@ int main() {
 
         if ((distanceFrontL < 20 || distanceFrontR < 20) && distanceLeft > 20 && distanceRight > 20) 
         {
-            std::cout << "Obstacle detected in front. Turning." << std::endl;
-            MotorControl::stop();
-            CameraModule::capturePhoto(photoCounter);
-            //pass photo to AI to detect it 
-            sleep(3);
             if (distanceFrontL < distanceFrontR)
                 MotorControl::turnRight();
             else
                 MotorControl::turnLeft();
-             // Sleep for 2 seconds after turning
-        } 
-        else if (distanceRight < 20 && distanceLeft > 20 && distanceFrontR > 20) 
-        {
+            std::cout << "Obstacle detected in front. Turning." << std::endl;
+            sleep(2); // Sleep for 2 seconds after turning
+        } else if (distanceRight < 20 && distanceLeft > 20 && distanceFrontR > 20) {
             MotorControl::turnLeft();
             std::cout << "Obstacle detected on the right. Turning left." << std::endl;
             sleep(2); // Sleep for 2 seconds after turning
-        } 
-        else if (distanceLeft < 20 && distanceRight > 20 && distanceFrontL > 20) 
-        {
+        } else if (distanceLeft < 20 && distanceRight > 20 && distanceFrontL > 20) {
             MotorControl::turnRight();
             std::cout << "Obstacle detected on the left. Turning right." << std::endl;
             sleep(2); // Sleep for 2 seconds after turning
-        } 
-        else if (distanceFrontL < 20 && distanceFrontR < 20) 
-        {
-            std::cout << "Obstacle detected in front. Turning." << std::endl;
-            MotorControl::stop();
-            CameraModule::capturePhoto(photoCounter);
-            //pass photo to AI to detect it 
-            sleep(3);
-            if (distanceFrontL < distanceFrontR)
-                MotorControl::turnRight();
-            else
-                MotorControl::turnLeft();
+        } else if (distanceFrontL < 20 && distanceFrontR < 20) {
+            MotorControl::stop(); // Or any suitable maneuver
+            std::cout << "Obstacles too close in front. Stopping." << std::endl;
+            sleep(2); // Sleep for 2 seconds after turning
         }
-        else if (distanceFrontL < 5 && distanceFrontR < 5) 
-        {
+         else if (distanceFrontL < 5 && distanceFrontR < 5) {
             MotorControl::backward(); // Or any suitable maneuver
             std::cout << "Obstacles too close in front. Turning." << std::endl;
             sleep(4); // Sleep for 2 seconds after turning
@@ -156,7 +144,7 @@ int main() {
         {
             MotorControl::forward();
             std::cout << "Path is clear. Moving forward." << std::endl;
-            
+            CameraModule::capturePhoto(photoCounter);
             sleep(3); // Continue moving forward for 3 seconds
         }
 

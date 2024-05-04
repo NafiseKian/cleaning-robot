@@ -4,9 +4,16 @@
 #include <vector>
 #include <string>
 
+// Struct to represent an access point with its coordinates
+struct AccessPoint {
+    double x;
+    double y;
+    std::string mac_address;
+};
+
 class Localization {
 public:
-    Localization();
+    Localization(const std::vector<AccessPoint>& access_points);
     
     std::pair<double, double> getCurrentPositionFromWiFi();
     
@@ -20,7 +27,10 @@ public:
                                               const std::vector<std::pair<std::string, double>>& observedRSSI);
 
 private:
+    std::vector<AccessPoint> access_points;
+
    
+
     double distance(double x1, double y1, double x2, double y2);
 
     std::vector<double> calculateDistanceFromRSSI(const std::vector<double>& observedRSS);

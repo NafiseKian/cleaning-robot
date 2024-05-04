@@ -13,7 +13,7 @@
 
 
 // Constructor
-Localization::Localization() 
+Localization::Localization(const std::vector<AccessPoint>& access_points) : access_points(access_points) 
 {
 }
 
