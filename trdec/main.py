@@ -1,7 +1,9 @@
 import cv2
 import os
 
-path = 'cascade.xml'
+# Define the path to the cascade.xml file
+cascade_path = r'C:\Users\mosim\trdec\cascade.xml'
+
 objectName = 'TRASH'
 color = (255, 0, 255)
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -14,7 +16,13 @@ def empty(a):
 
 cv2.namedWindow("Result")
 
-cascade = cv2.CascadeClassifier(path)
+# Add error handling to load the cascade classifier
+try:
+    cascade = cv2.CascadeClassifier(cascade_path)
+except cv2.error as e:
+    print("Error: Unable to load cascade classifier file.")
+    print(e)
+    exit()
 
 def detect_trash(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -24,7 +32,7 @@ def detect_trash(image):
     objects = cascade.detectMultiScale(gray, scaleVal, neig)
 
     if len(objects) == 0:
-        return "No trash detected"
+        return 0, "Not trash detected"  # No trash detected
     
     for (x, y, w, h) in objects:
         area = w * h
@@ -32,8 +40,9 @@ def detect_trash(image):
         if area > minArea:
             cv2.rectangle(image, (x, y), (x + w, y + h), color, 3)
             cv2.putText(image, objectName, (x, y - 5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, color, 2)
+            return 1, "Trash detected"  # Trash detected
         
-    return "Trash detected"
+    return 0, "Not trash detected"  # No trash detected
 
 # Example usage:
 image_dir = r'C:\Users\mosim\OneDrive\Desktop\images to detect'  # Provide the absolute path to your input image directory
@@ -44,8 +53,9 @@ for filename in image_files:
     if img is None:
         print(f"Error: Image '{filename}' not found or cannot be read.")
     else:
-        result = detect_trash(img)
-        cv2.putText(img, result, (50, 50), font, fontScale, fontColor, lineType)
+        result, message = detect_trash(img)
+        cv2.putText(img, message, (50, 50), font, fontScale, fontColor, lineType)
         cv2.imshow("Result", img)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        cv2.waitKey(0)  # Display image until a key is pressed
+        cv2.destroyAllWindows()  # Close all OpenCV windows
+        print(f"{message}: {result}")
