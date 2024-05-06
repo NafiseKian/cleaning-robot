@@ -69,7 +69,7 @@ void backward()
 
 void turnRight()
 {
-    if (gpioPWM(enA, 160) != 0 || gpioPWM(enB, 160) != 0) {
+    if (gpioPWM(enA, 120) != 0 || gpioPWM(enB, 120) != 0) {
         printf( "Failed to set PWM on Enable pins." );
         return;
     }
@@ -88,7 +88,7 @@ void turnRight()
 
 void turnLeft()
 {
-    if (gpioPWM(enA, 160) != 0 || gpioPWM(enB, 160) != 0) {
+    if (gpioPWM(enA, 120) != 0 || gpioPWM(enB, 120) != 0) {
         printf( "Failed to set PWM on Enable pins." );
         return;
     }
