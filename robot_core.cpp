@@ -32,6 +32,7 @@ void* gps_wifi_thread(void* args)
     };
 
     Localization wifi(access_points);
+    std::vector<std::tuple<std::string, double, double, double>> fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
 
     while (true)
     {
@@ -55,7 +56,6 @@ void* gps_wifi_thread(void* args)
         std::cout<<"------------------------wifi signal levels -----------------------"<<std::endl;
         std::cout<<ret<<std::endl;
         std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(ret);
-        std::vector<std::tuple<std::string, double, double, double>> fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
         std::tuple<double, double> location = wifi.findLocation(fingerprintData, observedRSSI);
         std::cout << "best location is ---> " << std::get<0>(location) << "      " << std::get<1>(location) << std::endl;
 
