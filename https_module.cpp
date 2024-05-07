@@ -5,7 +5,7 @@
 // Helper function to set up the CURL handle for JSON POST requests
 static void setup_curl_for_json(CURL *curl, const std::string& data, struct curl_slist *headers) {
     // Set the URL that the request is sent to
-    curl_easy_setopt(curl, CURLOPT_URL, "http://yourserverip:3000/update");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://35.225.141.60:3000/update");
 
     // Set the content-type header
     headers = curl_slist_append(headers, "Content-Type: application/json");
