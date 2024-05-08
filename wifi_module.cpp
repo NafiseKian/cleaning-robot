@@ -12,6 +12,25 @@
 #include <Eigen/Dense>
 
 
+
+/*  wifi coordinates for ST building 
+**  main door (150,50)
+**  back door (0,0)
+**  coffe tria door(50,50)
+**  GE door(100,0)
+**  st parking door(100,50)
+**  lib door (50,0)
+**  class 118(125,25) 
+**  class 104(25,25)
+**  under stairs of back door middle of back door and middle  (25,0)
+**  middle of back middle and GE (75,0)
+**  between main and parking (100,50)
+**  between parling and coffee (75,50)
+**  intersection of coridor (75,25)
+*/
+
+
+
 // Constructor
 Localization::Localization(const std::vector<AccessPoint>& access_points) : access_points(access_points) 
 {
@@ -142,7 +161,7 @@ std::tuple<double, double> Localization::findLocation( const std::vector<std::tu
     };
 
     // Find the best match between observed and stored RSSI values
-    double minDifference = std::numeric_limits<double>::max();
+    double minDifference = 100;
     std::tuple<double, double> bestLocation = {0.0, 0.0}; // Initialize with dummy values
     for (const auto& observed : observedRSSI) {
         for (const auto& fingerprint : fingerprintData) {
@@ -173,3 +192,4 @@ std::pair<double, double> Localization::getCurrentPositionFromWiFi() {
     return trilaterate(distances);
 }
 */
+
