@@ -2,7 +2,7 @@
 CXX = g++
 
 # Combine Python flags with your flags
-CXXFLAGS = -Wall -std=c++11 $(PY_CFLAGS)
+CXXFLAGS = -Wall -std=c++14 $(PY_CFLAGS)
 LFLAGS = $(PY_LDFLAGS) -lpigpio -lgpiod -lrt -pthread -lpcap
 
 # Define any directories containing header files other than /usr/include

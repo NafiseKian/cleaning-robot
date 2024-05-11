@@ -195,7 +195,9 @@ std::tuple<double, double> Localization::knnLocation(const std::vector<std::tupl
     for (const auto& observed : observedRSSI) {
         for (const auto& fingerprint : fingerprintData) {
             if (std::get<0>(fingerprint) == observed.first) {
+                std::cout<<"found match"<<std::endl;
                 double distance = rssiDistance(std::get<1>(fingerprint), observed.second);
+                std::cout << "Distance for MAC " << observed.first << ": " << distance << std::endl;
                 distances.push_back(std::make_tuple(distance, std::get<2>(fingerprint), std::get<3>(fingerprint)));
             }
         }
@@ -214,7 +216,15 @@ std::tuple<double, double> Localization::knnLocation(const std::vector<std::tupl
         ySum += std::get<2>(distances[i]);
     }
 
-    return {xSum / count, ySum / count};
+    if (count > 0) {
+        double bestX = xSum / count;
+        double bestY = ySum / count;
+        return {bestX, bestY};
+    } else {
+        std::cerr << "No valid fingerprints found for the observed RSSI values." << std::endl;
+        return {0.0, 0.0}; // Or any other default or error handling value
+    }
+
 }
 
 /*
