@@ -17,6 +17,7 @@ def empty(a):
 
 cv2.namedWindow("Result")
 
+
 # Add error handling to load the cascade classifier
 try:
     cascade = cv2.CascadeClassifier(cascade_path)
