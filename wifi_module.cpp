@@ -151,16 +151,18 @@ std::vector<std::tuple<std::string, double, double, double>> Localization::readW
         return fingerprints;
 }
 
+// Define a function to calculate weight based on RSSI difference
+auto calculateWeight = [](double rssiDifference) {
+    return exp(-rssiDifference / 20); 
+};
+
+
 std::tuple<double, double> Localization::findLocation(const std::vector<std::tuple<std::string, double, double , double>>& fingerprintData,
                                                       const std::vector<std::pair<std::string, double>>& observedRSSI) {
     double xWeightedSum = 0.0;
     double yWeightedSum = 0.0;
     double totalWeight = 0.0;
 
-    // Define a function to calculate weight based on RSSI difference
-    auto calculateWeight = [](double rssiDifference) {
-        return exp(-rssiDifference / 10);  // Smaller RSSI differences result in higher weights
-    };
 
     for (const auto& observed : observedRSSI) {
         for (const auto& fingerprint : fingerprintData) {
@@ -181,6 +183,39 @@ std::tuple<double, double> Localization::findLocation(const std::vector<std::tup
     return {bestX, bestY};
 }
 
+double rssiDistance(double rssi1, double rssi2) {
+    return std::abs(rssi1 - rssi2);
+}
+
+std::tuple<double, double> Localization::knnLocation(const std::vector<std::tuple<std::string, double, double, double>>& fingerprintData,
+                                                     const std::vector<std::pair<std::string, double>>& observedRSSI,
+                                                     int k) {
+    std::vector<std::tuple<double, double, double>> distances; // Store (distance, x, y)
+
+    for (const auto& observed : observedRSSI) {
+        for (const auto& fingerprint : fingerprintData) {
+            if (std::get<0>(fingerprint) == observed.first) {
+                double distance = rssiDistance(std::get<1>(fingerprint), observed.second);
+                distances.push_back(std::make_tuple(distance, std::get<2>(fingerprint), std::get<3>(fingerprint)));
+            }
+        }
+    }
+
+    // Sort by distance
+    std::sort(distances.begin(), distances.end(), [](const auto& a, const auto& b) {
+        return std::get<0>(a) < std::get<0>(b);
+    });
+
+    // Calculate the average of the k nearest locations
+    double xSum = 0, ySum = 0;
+    int count = std::min(k, static_cast<int>(distances.size()));
+    for (int i = 0; i < count; i++) {
+        xSum += std::get<1>(distances[i]);
+        ySum += std::get<2>(distances[i]);
+    }
+
+    return {xSum / count, ySum / count};
+}
 
 /*
 // Method to get current position based on measured distances from WiFi packets

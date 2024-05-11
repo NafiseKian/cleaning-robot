@@ -26,6 +26,10 @@ public:
     std::tuple<double, double> findLocation( const std::vector<std::tuple<std::string, double, double , double>>& fingerprintData,
                                               const std::vector<std::pair<std::string, double>>& observedRSSI);
 
+    std::tuple<double, double> knnLocation(const std::vector<std::tuple<std::string, double, double, double>>& fingerprintData,
+                                                     const std::vector<std::pair<std::string, double>>& observedRSSI,
+                                                     int k);
+
 private:
     std::vector<AccessPoint> access_points;
 
