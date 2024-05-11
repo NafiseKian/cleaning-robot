@@ -151,33 +151,35 @@ std::vector<std::tuple<std::string, double, double, double>> Localization::readW
         return fingerprints;
 }
 
-
-// Function to find the best match in WiFi fingerprint data
-std::tuple<double, double> Localization::findLocation( const std::vector<std::tuple<std::string, double, double , double>>& fingerprintData,
+std::tuple<double, double> Localization::findLocation(const std::vector<std::tuple<std::string, double, double , double>>& fingerprintData,
                                                       const std::vector<std::pair<std::string, double>>& observedRSSI) {
-    // Define a similarity measure (e.g., Euclidean distance) between observed and stored RSSI values
-    auto similarity = [](double rssi1, double rssi2) {
-        return std::abs(rssi1 - rssi2);
+    double xWeightedSum = 0.0;
+    double yWeightedSum = 0.0;
+    double totalWeight = 0.0;
+
+    // Define a function to calculate weight based on RSSI difference
+    auto calculateWeight = [](double rssiDifference) {
+        return exp(-rssiDifference / 10);  // Smaller RSSI differences result in higher weights
     };
 
-    // Find the best match between observed and stored RSSI values
-    double minDifference = 100;
-    std::tuple<double, double> bestLocation = {0.0, 0.0}; // Initialize with dummy values
     for (const auto& observed : observedRSSI) {
         for (const auto& fingerprint : fingerprintData) {
             if (std::get<0>(fingerprint) == observed.first) { // Check if MAC address matches
-                double difference = similarity(std::get<1>(fingerprint), observed.second);
-                if (difference < minDifference) {
-                    minDifference = difference;
-                    bestLocation = {std::get<2>(fingerprint), std::get<3>(fingerprint)};
-                }
-                break; // Exit inner loop once a match is found
+                double difference = std::abs(std::get<1>(fingerprint) - observed.second);
+                double weight = calculateWeight(difference);
+                
+                xWeightedSum += std::get<2>(fingerprint) * weight;
+                yWeightedSum += std::get<3>(fingerprint) * weight;
+                totalWeight += weight;
             }
         }
     }
-    return bestLocation;
-}
 
+    double bestX = totalWeight > 0 ? xWeightedSum / totalWeight : 0.0;
+    double bestY = totalWeight > 0 ? yWeightedSum / totalWeight : 0.0;
+
+    return {bestX, bestY};
+}
 
 
 /*
