@@ -151,7 +151,9 @@ int main() {
             std::cout << "Path is clear or sensor data invalid. Moving forward." << std::endl;
         }
 
+        CameraModule::capturePhoto(photoCounter);
         usleep(500000); // 0.5 second delay for general loop control
+
     }
 
     return 0;
