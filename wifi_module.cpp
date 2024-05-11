@@ -195,6 +195,7 @@ std::tuple<double, double> Localization::knnLocation(const std::vector<std::tupl
     for (const auto& observed : observedRSSI) {
         for (const auto& fingerprint : fingerprintData) {
             if (std::get<0>(fingerprint) == observed.first) {
+                std::cout<<std::get<0>(fingerprint)<<"    and the received mac is -->   "<<observed.first<<std::endl;
                 std::cout<<"found match"<<std::endl;
                 double distance = rssiDistance(std::get<1>(fingerprint), observed.second);
                 std::cout << "Distance for MAC " << observed.first << ": " << distance << std::endl;
