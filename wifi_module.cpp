@@ -102,7 +102,7 @@ std::vector<std::pair<std::string, double>> Localization::parseIwlistOutput(cons
     double rssi;
     while (std::getline(iss, line)) {
         if (line.find("Address") != std::string::npos) {
-            macAddress = line.substr(line.find(":") + 2 , 12); // Extract MAC address
+            macAddress = line.substr(line.find(":") + 2 , 17); // Extract MAC address
         } else if (line.find("Signal level") != std::string::npos) {
             std::istringstream lineStream(line);
             std::string signalStr;
