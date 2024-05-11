@@ -24,6 +24,7 @@
 void* gps_wifi_thread(void* args)
 {
     GPSModule gps;
+    int k = 5; // Example: You might choose more or fewer neighbors based on testing
 
     std::vector<AccessPoint> access_points = {
       {1.0, 1.0, "0A:96:71:47:4C:FF"}, // JN extension
@@ -56,8 +57,13 @@ void* gps_wifi_thread(void* args)
         std::cout<<"------------------------wifi signal levels -----------------------"<<std::endl;
         std::cout<<ret<<std::endl;
         std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(ret);
-        std::tuple<double, double> location = wifi.findLocation(fingerprintData, observedRSSI);
-        std::cout << "best location is ---> " << std::get<0>(location) << "      " << std::get<1>(location) << std::endl;
+        
+        std::tuple<double, double> estimatedLocation = wifi.knnLocation(fingerprintData, observedRSSI, k);
+        std::cout << "Estimated location using KNN: X = " << std::get<0>(estimatedLocation)
+                    << ", Y = " << std::get<1>(estimatedLocation) << std::endl;
+
+        //std::tuple<double, double> location = wifi.findLocation(fingerprintData, observedRSSI);
+        //std::cout << "best location is ---> " << std::get<0>(location) << "      " << std::get<1>(location) << std::endl;
 
         sleep(5);
         
