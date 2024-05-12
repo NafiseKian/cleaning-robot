@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import 'battery_indicator.dart';
 import 'trash_indicator.dart';
@@ -7,6 +8,28 @@ class RobotMainPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _RobotMainPageState();
 }
+
+
+
+
+Future<void> _sendHelloToServer() async {
+  try {
+    
+    var response = await http.post(
+      Uri.parse('https://34.165.89.174:3389'), 
+      body: 'App,',
+    );
+    if (response.statusCode == 200) {
+      print('Successfully sent "hello" to the server');
+      print('Server response: ${response.body}');
+    } else {
+      print('Failed to send "hello" to the server. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Exception while sending "hello" to the server: $e');
+  }
+}
+
 
 class _RobotMainPageState extends State<RobotMainPage> {
   @override
@@ -98,12 +121,12 @@ class _RobotMainPageState extends State<RobotMainPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle Start Cleaning action
-                  },
-                  child: Text('Locate The Robot'),
-                ),
+           ElevatedButton(
+              onPressed: () {
+              _sendHelloToServer() ;
+                       },
+                      child: Text('Locate The Robot'),
+                      ),
                 ElevatedButton(
                   onPressed: () {
                     setState(() {});
