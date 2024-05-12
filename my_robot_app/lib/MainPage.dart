@@ -1,6 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
+import 'config.dart';
 import 'battery_indicator.dart';
 import 'trash_indicator.dart';
 
@@ -9,32 +10,14 @@ class RobotMainPage extends StatefulWidget {
   State<StatefulWidget> createState() => _RobotMainPageState();
 }
 
-
-
-
-Future<void> _sendHelloToServer() async {
-  try {
-    
-    var response = await http.post(
-      Uri.parse('https://34.165.89.174:3389'), 
-      body: 'App,',
-    );
-    if (response.statusCode == 200) {
-      print('Successfully sent "hello" to the server');
-      print('Server response: ${response.body}');
-    } else {
-      print('Failed to send "hello" to the server. Status code: ${response.statusCode}');
-    }
-  } catch (e) {
-    print('Exception while sending "hello" to the server: $e');
-  }
-}
-
-
 class _RobotMainPageState extends State<RobotMainPage> {
+  bool isUniMap = true;  //  state for the map
+  bool _isConnected = false;  // Connection status
+
   @override
   void initState() {
     super.initState();
+
   }
 
   double mapTopLatitude = 40.0;
@@ -48,15 +31,52 @@ class _RobotMainPageState extends State<RobotMainPage> {
   final double mapHeight = 300;
 
   double findxPosition(double x, double y) {
-    return (robotLongitude - mapLeftLongitude) /
-        (mapRightLongitude - mapLeftLongitude) *
-        mapWidth;
+    return (robotLongitude - mapLeftLongitude) / (mapRightLongitude - mapLeftLongitude) * mapWidth;
   }
 
   double findyPosition(double x, double y) {
-    return (mapTopLatitude - robotLatitude) /
-        (mapTopLatitude - mapBottomLatitude) *
-        mapHeight;
+    return (mapTopLatitude - robotLatitude) / (mapTopLatitude - mapBottomLatitude) * mapHeight;
+  }
+
+  void _toggleMap() {
+    setState(() {
+      isUniMap = !isUniMap;  
+    });
+  }
+
+  Future<void> _sendHelloToServer() async {
+    var host = ServerConfig.host;
+    var port = ServerConfig.port;
+
+    try {
+      var socket = await Socket.connect(host, port);
+      print('Connected to: ${socket.remoteAddress.address}:${socket.remotePort}');
+      setState(() {
+        _isConnected = true; 
+      });
+
+      socket.write('APP,');  
+
+      socket.listen(
+        (data) {
+          print('Server response: ${utf8.decode(data)}');
+        },
+        onDone: () {
+          print('Done with the server.');
+          socket.destroy();
+        },
+        onError: (error) {
+          print('Error: $error');
+          socket.destroy();
+        },
+        cancelOnError: true,
+      );
+    } catch (e) {
+      print('Failed to connect to the server: $e');
+      setState(() {
+        _isConnected = false;  // Set connection status as disconnected
+      });
+    }
   }
 
   @override
@@ -69,6 +89,38 @@ class _RobotMainPageState extends State<RobotMainPage> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            Container(
+              alignment: Alignment.topLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Switch(
+                    value: isUniMap,
+                    onChanged: (value) => _toggleMap(),
+                    activeTrackColor: Colors.lightGreenAccent,
+                    activeColor: Colors.green,
+                  ),
+                  Text('Indoor / Outdoor Map'),
+                  SizedBox(width: 20),
+                  Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _isConnected ? Colors.green : Colors.red,
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    _isConnected ? 'Connected' : 'Disconnected',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: _isConnected ? Colors.green : Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               flex: 3,
               child: Stack(
@@ -81,38 +133,19 @@ class _RobotMainPageState extends State<RobotMainPage> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(9),
                       child: InteractiveViewer(
-                        child: Image.asset('assets/uni_map.jpg',
-                            width: mapWidth,
-                            height: mapHeight,
-                            fit: BoxFit.cover),
+                        child: Image.asset(
+                          isUniMap ? 'assets/uni_map.jpg' : 'assets/other_map.jpg',
+                          width: mapWidth,
+                          height: mapHeight,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
                   Positioned(
                     left: findxPosition(40, 40),
                     top: findyPosition(40, 40),
-                    child: Icon(Icons.location_on,
-                        color: Colors.red, size: 24), // Robot marker
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 20),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      BatteryIndicator(batteryLevel: 60.0),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TrashIndicator(trashLevel: 77.0),
-                    ],
+                    child: Icon(Icons.location_on, color: Colors.red, size: 24),
                   ),
                 ],
               ),
@@ -121,12 +154,18 @@ class _RobotMainPageState extends State<RobotMainPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-           ElevatedButton(
-              onPressed: () {
-              _sendHelloToServer() ;
-                       },
-                      child: Text('Locate The Robot'),
-                      ),
+                BatteryIndicator(batteryLevel: 100.0),
+                TrashIndicator(trashLevel: 7.0),
+              ],
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  onPressed: _sendHelloToServer,
+                  child: Text('Locate The Robot'),
+                ),
                 ElevatedButton(
                   onPressed: () {
                     setState(() {});
@@ -140,9 +179,10 @@ class _RobotMainPageState extends State<RobotMainPage> {
       ),
     );
   }
+}
+
 
 //TODO : add some functions to get the x y coordinates from robot and update the location
-//TODO : add a functin to get charger data from robot and update the widget
+//TODO : add a function to get charger data from robot and update the widget
 //TODO : add a function to get the trash bin status from robot and update the widget
 //hint : in all functions you need to call set state to update the state of the application in real time
-}
