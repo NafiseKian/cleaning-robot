@@ -82,13 +82,13 @@ class _RobotMainPageState extends State<RobotMainPage> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      BatteryIndicator(batteryLevel: 80.0),
+                      BatteryIndicator(batteryLevel: 60.0),
                     ],
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      TrashIndicator(trashLevel: 70.0),
+                      TrashIndicator(trashLevel: 77.0),
                     ],
                   ),
                 ],
