@@ -4,13 +4,15 @@ description: A new Flutter project.
 publish_to: 'none'
 
 version: 1.0.0+1
+
 environment:
   sdk: ">=2.12.0 <4.0.0"
-
 
 dependencies:
   flutter:
     sdk: flutter
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.1  # Updated version
   http: ^1.2.1
 
 flutter:
@@ -18,4 +20,3 @@ flutter:
   assets:
     - assets/uni_map.jpg
     - assets/logo.png
-

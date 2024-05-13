@@ -146,7 +146,7 @@ class DialogOverlay extends StatelessWidget {
   onPressed: onDismiss,
   child: Text('Dismiss'),
   style: ButtonStyle(
-    backgroundColor: MaterialStateProperty.all(Colors.red), // Correct usage
+    backgroundColor: MaterialStateProperty.all(Colors.red), 
     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
       RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
