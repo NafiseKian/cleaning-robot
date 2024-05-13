@@ -40,7 +40,7 @@ class _RobotMainPageState extends State<RobotMainPage> {
         (data) {
           var response = utf8.decode(data);
           print('Server response: $response');
-          _updateIndicators(response);  // Function to parse and update UI
+          _updateIndicators(response);  
         },
         onDone: () {
           print('Done with the server.');
@@ -169,8 +169,8 @@ class MapAndPosition extends StatelessWidget {
           ),
         ),
         Positioned(
-          left: 50, // Example static position, adjust based on actual data or remove if not needed
-          top: 50, // Example static position, adjust based on actual data or remove if not needed
+          left: 50, 
+          top: 50, 
           child: Icon(Icons.location_on, color: Colors.red, size: 24),
         ),
       ],
