@@ -14,9 +14,12 @@ dependencies:
   flutter_map: ^6.1.0
   latlong2: ^0.9.1  # Updated version
   http: ^1.2.1
+  flutter_test:
+    sdk: flutter
 
 flutter:
   uses-material-design: true
   assets:
     - assets/uni_map.jpg
     - assets/logo.png
+    - assets/st.jpeg

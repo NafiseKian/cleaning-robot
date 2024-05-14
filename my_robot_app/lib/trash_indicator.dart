@@ -93,7 +93,7 @@ class _TrashIndicatorState extends State<TrashIndicator> {
       ),
     );
 
-    Overlay.of(context)?.insert(overlayEntry!);
+    Overlay.of(context).insert(overlayEntry!);
   }
 }
 

@@ -160,7 +160,7 @@ class MapAndPosition extends StatelessWidget {
             borderRadius: BorderRadius.circular(9),
             child: InteractiveViewer(
               child: Image.asset(
-                isUniMap ? 'assets/uni_map.jpg' : 'assets/other_map.jpg',
+                isUniMap ? 'assets/st.jpeg' : 'assets/other_map.jpg',
                 width: mapWidth,
                 height: mapHeight,
                 fit: BoxFit.cover,
@@ -168,9 +168,40 @@ class MapAndPosition extends StatelessWidget {
             ),
           ),
         ),
+
+/*  wifi coordinates for ST building 
+**  main door (150,50)
+**  back door (0,0)
+**  coffe tria door(50,50)
+**  GE door(100,0)
+**  st parking door(100,50)
+**  lib door (50,0)
+**  class 118(125,25) 
+**  class 104(25,25)
+**  under stairs of back door middle of back door and middle  (25,0)
+**  middle of back middle and GE (75,0)
+**  between main and parking (100,50)
+**  between parling and coffee (75,50)
+**  intersection of coridor (75,25)
+*/
         Positioned(
-          left: 50, 
-          top: 50, 
+          left: 1, // down left
+          top: 240, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+            Positioned(
+          left: 200, //upp left  coffe 
+          top: 15, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+                 Positioned(
+          left: 565, //upp right
+          top: 2, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+           Positioned(
+          left: 410, // down right
+          top: 230, 
           child: Icon(Icons.location_on, color: Colors.red, size: 24),
         ),
       ],
