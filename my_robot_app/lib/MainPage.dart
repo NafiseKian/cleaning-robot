@@ -1,7 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
-
-import 'battery_indicator.dart';
-import 'trash_indicator.dart';
+import 'config.dart'; 
+import 'battery_indicator.dart'; 
+import 'trash_indicator.dart'; 
 
 class RobotMainPage extends StatefulWidget {
   @override
@@ -9,32 +11,64 @@ class RobotMainPage extends StatefulWidget {
 }
 
 class _RobotMainPageState extends State<RobotMainPage> {
+  bool isUniMap = true;  // State for  the map.
+  bool _isConnected = false;  // State to display connection status.
+  double batteryLevel = 0.0;  // State for battery level.
+  double trashLevel = 0.0;  // State for trash level.
+
   @override
   void initState() {
     super.initState();
+ 
   }
 
-  double mapTopLatitude = 40.0;
-  double mapBottomLatitude = 40.1;
-  double mapLeftLongitude = -74.0;
-  double mapRightLongitude = -73.9;
-  double robotLatitude = 40.05;
-  double robotLongitude = -73.95;
+  void _sendHelloToServer() async {
+    var host = ServerConfig.host;
+    var port = ServerConfig.port;
 
-  final double mapWidth = 600;
-  final double mapHeight = 300;
+    try {
+      var socket = await Socket.connect(host, port);
+      print('Connected to: ${socket.remoteAddress.address}:${socket.remotePort}');
+      setState(() {
+        _isConnected = true; 
+      });
 
-  double findxPosition(double x, double y) {
-    return (robotLongitude - mapLeftLongitude) /
-        (mapRightLongitude - mapLeftLongitude) *
-        mapWidth;
+      // Send a specific request to get status
+      socket.write('APP,STATUS');
+
+      socket.listen(
+        (data) {
+          var response = utf8.decode(data);
+          print('Server response: $response');
+          _updateIndicators(response);  
+        },
+        onDone: () {
+          print('Done with the server.');
+          socket.destroy();
+        },
+        onError: (error) {
+          print('Error: $error');
+          socket.destroy();
+        },
+        cancelOnError: true,
+      );
+    } catch (e) {
+      print('Failed to connect to the server: $e');
+      setState(() {
+        _isConnected = false;
+      });
+    }
   }
 
-  double findyPosition(double x, double y) {
-    return (mapTopLatitude - robotLatitude) /
-        (mapTopLatitude - mapBottomLatitude) *
-        mapHeight;
-  }
+void _updateIndicators(String responseData) {
+ 
+    var decoded = jsonDecode(responseData);
+    setState(() {
+      batteryLevel = double.parse(decoded['battery'].toString());
+      trashLevel = double.parse(decoded['trash'].toString());
+    });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -46,80 +80,179 @@ class _RobotMainPageState extends State<RobotMainPage> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            SwitchAndConnectionStatus(isUniMap: isUniMap, isConnected: _isConnected, toggleMap: _toggleMap),
             Expanded(
               flex: 3,
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black, width: 3),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(9),
-                      child: InteractiveViewer(
-                        child: Image.asset('assets/uni_map.jpg',
-                            width: mapWidth,
-                            height: mapHeight,
-                            fit: BoxFit.cover),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: findxPosition(40, 40),
-                    top: findyPosition(40, 40),
-                    child: Icon(Icons.location_on,
-                        color: Colors.red, size: 24), // Robot marker
-                  ),
-                ],
-              ),
+              child: MapAndPosition(isUniMap: isUniMap, mapWidth: 600, mapHeight: 300),
             ),
             SizedBox(height: 20),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      BatteryIndicator(batteryLevel: 80.0),
-                    ],
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TrashIndicator(trashLevel: 70.0),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle Start Cleaning action
-                  },
-                  child: Text('Locate The Robot'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {});
-                  },
-                  child: Text('Return Home'),
-                ),
-              ],
-            ),
+            BatteryAndTrash(batteryLevel: batteryLevel, trashLevel: trashLevel),
+            ControlButtons(sendToServer: _sendHelloToServer),
           ],
         ),
       ),
     );
   }
 
-//TODO : add some functions to get the x y coordinates from robot and update the location
-//TODO : add a functin to get charger data from robot and update the widget
-//TODO : add a function to get the trash bin status from robot and update the widget
-//hint : in all functions you need to call set state to update the state of the application in real time
+  void _toggleMap() {
+    setState(() {
+      isUniMap = !isUniMap;
+    });
+  }
+}
+
+class SwitchAndConnectionStatus extends StatelessWidget {
+  const SwitchAndConnectionStatus({
+    Key? key,
+    required this.isUniMap,
+    required this.isConnected,
+    required this.toggleMap,
+  }) : super(key: key);
+
+  final bool isUniMap;
+  final bool isConnected;
+  final Function toggleMap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Switch(
+          value: isUniMap,
+          onChanged: (value) => toggleMap(),
+          activeTrackColor: Colors.lightGreenAccent,
+          activeColor: Colors.green,
+        ),
+        Text('Indoor / Outdoor Map'),
+        SizedBox(width: 20),
+        Icon(
+          isConnected ? Icons.signal_wifi_4_bar : Icons.signal_wifi_off,
+          color: isConnected ? Colors.green : Colors.red,
+        ),
+        Text(isConnected ? 'Connected' : 'Disconnected'),
+      ],
+    );
+  }
+}
+
+class MapAndPosition extends StatelessWidget {
+  const MapAndPosition({
+    Key? key,
+    required this.isUniMap,
+    required this.mapWidth,
+    required this.mapHeight,
+  }) : super(key: key);
+
+  final bool isUniMap;
+  final double mapWidth;
+  final double mapHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.black, width: 3),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(9),
+            child: InteractiveViewer(
+              child: Image.asset(
+                isUniMap ? 'assets/st.jpeg' : 'assets/other_map.jpg',
+                width: mapWidth,
+                height: mapHeight,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ),
+
+/*  wifi coordinates for ST building 
+**  main door (150,50)
+**  back door (0,0)
+**  coffe tria door(50,50)
+**  GE door(100,0)
+**  st parking door(100,50)
+**  lib door (50,0)
+**  class 118(125,25) 
+**  class 104(25,25)
+**  under stairs of back door middle of back door and middle  (25,0)
+**  middle of back middle and GE (75,0)
+**  between main and parking (100,50)
+**  between parling and coffee (75,50)
+**  intersection of coridor (75,25)
+*/
+        Positioned(
+          left: 1, // down left
+          top: 240, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+            Positioned(
+          left: 200, //upp left  coffe 
+          top: 15, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+                 Positioned(
+          left: 565, //upp right
+          top: 2, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+           Positioned(
+          left: 410, // down right
+          top: 230, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+      ],
+    );
+  }
+}
+
+class BatteryAndTrash extends StatelessWidget {
+  const BatteryAndTrash({
+    Key? key,
+    required this.batteryLevel,
+    required this.trashLevel,
+  }) : super(key: key);
+
+  final double batteryLevel;
+  final double trashLevel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        BatteryIndicator(batteryLevel: batteryLevel),
+        TrashIndicator(trashLevel: trashLevel),
+      ],
+    );
+  }
+}
+
+class ControlButtons extends StatelessWidget {
+  const ControlButtons({
+    Key? key,
+    required this.sendToServer,
+  }) : super(key: key);
+
+  final Function sendToServer;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        ElevatedButton(
+          onPressed: () => sendToServer(),
+          child: Text('Locate The Robot'),
+        ),
+        ElevatedButton(
+          onPressed: () {},
+          child: Text('Return Home'),
+        ),
+      ],
+    );
+  }
 }

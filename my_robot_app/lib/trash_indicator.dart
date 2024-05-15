@@ -93,7 +93,7 @@ class _TrashIndicatorState extends State<TrashIndicator> {
       ),
     );
 
-    Overlay.of(context)?.insert(overlayEntry!);
+    Overlay.of(context).insert(overlayEntry!);
   }
 }
 
@@ -142,16 +142,19 @@ class DialogOverlay extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: onDismiss,
-                  child: Text('Dismiss'),
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.red,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
+         ElevatedButton(
+  onPressed: onDismiss,
+  child: Text('Dismiss'),
+  style: ButtonStyle(
+    backgroundColor: MaterialStateProperty.all(Colors.red), 
+    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    ),
+  ),
+)
+
               ],
             ),
           ),
