@@ -41,7 +41,7 @@ bool NetworkModule::connectToServer() {
     return true;
 }
 
-bool NetworkModule::sendData(const std::string& data) {
+bool NetworkModule::sendData( std::string& data) {
     if (send(socketFd, data.c_str(), data.length(), 0) != (ssize_t)data.length()) {
         std::cerr << "Failed to send data." << std::endl;
         return false;

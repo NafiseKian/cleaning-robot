@@ -10,7 +10,7 @@ public:
     ~NetworkModule();
 
     bool connectToServer();
-    bool sendData(const std::string& data);
+    bool sendData( std::string& data);
 
 private:
     std::string serverIp;
