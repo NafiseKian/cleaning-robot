@@ -144,6 +144,7 @@ int main() {
 
         CameraModule::capturePhoto(photoCounter);
         usleep(500000); // 0.5 second delay for general loop control
+        if (photoCounter == 20) break ; 
 
     }
 
