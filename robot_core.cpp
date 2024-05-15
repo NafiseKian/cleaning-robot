@@ -19,20 +19,17 @@
 #include "drive_module.h"
 #include "ultra_sensor.h"
 #include "wifi_module.h"
+#include "network_module.h"
 
 
 void* gps_wifi_thread(void* args)
 {
+    NetworkModule network("34.165.89.174", 3389);
+
     GPSModule gps;
-    int k = 5; // Example: You might choose more or fewer neighbors based on testing
+    int k = 3;
 
-    std::vector<AccessPoint> access_points = {
-      {1.0, 1.0, "0A:96:71:47:4C:FF"}, // JN extension
-      {5.0, 1.0, "F6:43:35:08:ED:BD"},  // JN
-      {3.0, 5.0, "2A:F4:8D:C2:36:E5"}   // recordreaker
-    };
-
-    Localization wifi(access_points);
+    Localization wifi ;
     std::vector<std::tuple<std::string, double, double, double>> fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
 
     while (true)
@@ -62,8 +59,12 @@ void* gps_wifi_thread(void* args)
         std::cout << "Estimated location using KNN: X = " << std::get<0>(estimatedLocation)
                     << ", Y = " << std::get<1>(estimatedLocation) << std::endl;
 
-        //std::tuple<double, double> location = wifi.findLocation(fingerprintData, observedRSSI);
-        //std::cout << "best location is ---> " << std::get<0>(location) << "      " << std::get<1>(location) << std::endl;
+        if (network.connectToServer()) {
+            std::cout << "Connected to server successfully." << std::endl;
+            network.sendData("ROBOT,"+std::get<0>(estimatedLocation)+std::get<1>(estimatedLocation));
+        } else {
+            std::cout << "Failed to connect to server." << std::endl;
+        }
 
         sleep(5);
         
@@ -87,18 +88,6 @@ int main() {
 
     int photoCounter = 0;
 
-    
-
-    /*
-    // Get current position based on measured distances from WiFi packets
-    std::pair<double, double> estimated_position = wifi_loc.getCurrentPositionFromWiFi();
-
-    if (!isnan(estimated_position.first)) {
-        std::cout << "Estimated Robot Position (x, y): " << estimated_position.first << ", " << estimated_position.second << std::endl;
-    } else {
-        std::cerr << "Error: Robot location estimation failed." << std::endl;
-    }
-    */
 
     UltrasonicSensor frontSensorL("Front-left", 26, 24);
     UltrasonicSensor frontSensorR("Front-right", 20, 21);

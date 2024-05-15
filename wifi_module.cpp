@@ -31,42 +31,8 @@
 
 
 
-// Constructor
-Localization::Localization(const std::vector<AccessPoint>& access_points) : access_points(access_points) 
-{
-}
 
 
-
-// Function to calculate distance between two points
-double Localization::distance(double x1, double y1, double x2, double y2) 
-{
-    return std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
-}
-
-
-
-// Function to calculate distance from RSSI
-std::vector<double> Localization::calculateDistanceFromRSSI(const std::vector<double>& observedRSS) 
-{
-
-  int numAPs = observedRSS.size();
-  std::vector<double> distances(numAPs);
-
-  // Replace with actual constants (frequency, Pt)
-  const double frequency = 2400; // MHz
-  const double transmittedPower = 20; // dBm
-
-  for (int i = 0; i < numAPs; ++i) {
-    double RSS = observedRSS[i];
-    // FSPL formula with adjustments for reference distance and Pt
-    double pathLoss = (27.55 - (20 * log10(frequency)) + abs(RSS)) / 20;
-    distances[i] = std::pow(10, pathLoss) * std::pow(10, transmittedPower / 10.0);
-  }
-
-  return distances;
-
-}
 
 
 
@@ -157,39 +123,14 @@ auto calculateWeight = [](double rssiDifference) {
 };
 
 
-std::tuple<double, double> Localization::findLocation(const std::vector<std::tuple<std::string, double, double , double>>& fingerprintData,
-                                                      const std::vector<std::pair<std::string, double>>& observedRSSI) {
-    double xWeightedSum = 0.0;
-    double yWeightedSum = 0.0;
-    double totalWeight = 0.0;
-
-
-    for (const auto& observed : observedRSSI) {
-        for (const auto& fingerprint : fingerprintData) {
-            if (std::get<0>(fingerprint) == observed.first) { // Check if MAC address matches
-                double difference = std::abs(std::get<1>(fingerprint) - observed.second);
-                double weight = calculateWeight(difference);
-                
-                xWeightedSum += std::get<2>(fingerprint) * weight;
-                yWeightedSum += std::get<3>(fingerprint) * weight;
-                totalWeight += weight;
-            }
-        }
-    }
-
-    double bestX = totalWeight > 0 ? xWeightedSum / totalWeight : 0.0;
-    double bestY = totalWeight > 0 ? yWeightedSum / totalWeight : 0.0;
-
-    return {bestX, bestY};
-}
-
 double rssiDistance(double rssi1, double rssi2) {
     return std::abs(rssi1 - rssi2);
 }
 
 std::tuple<double, double> Localization::knnLocation(const std::vector<std::tuple<std::string, double, double, double>>& fingerprintData,
                                                      const std::vector<std::pair<std::string, double>>& observedRSSI,
-                                                     int k) {
+                                                     int k) 
+{
     std::vector<std::tuple<double, double, double>> distances; // Store (distance, x, y)
 
     for (const auto& observed : observedRSSI) {
@@ -223,21 +164,10 @@ std::tuple<double, double> Localization::knnLocation(const std::vector<std::tupl
         return {bestX, bestY};
     } else {
         std::cerr << "No valid fingerprints found for the observed RSSI values." << std::endl;
-        return {0.0, 0.0}; // Or any other default or error handling value
+        return {0.0, 0.0};
     }
 
 }
 
-/*
-// Method to get current position based on measured distances from WiFi packets
-std::pair<double, double> Localization::getCurrentPositionFromWiFi() {
-    setMonitorMode();
-    std::string tcpdumpOutput = captureWiFiPackets();
-    double rssi = extractRSSIFromTcpdump(tcpdumpOutput);
-    double distance = calculateDistanceFromRSSI(rssi);
-    // Convert distance to vector of distances (for trilateration)
-    std::vector<double> distances(access_points.size(), distance);
-    return trilaterate(distances);
-}
-*/
+
 

@@ -4,12 +4,6 @@
 #include <vector>
 #include <string>
 
-// Struct to represent an access point with its coordinates
-struct AccessPoint {
-    double x;
-    double y;
-    std::string mac_address;
-};
 
 class Localization {
 public:
@@ -23,25 +17,12 @@ public:
     
     std::vector<std::tuple<std::string, double, double, double>>  readWiFiFingerprintFile(const std::string& filename);
     
-    std::tuple<double, double> findLocation( const std::vector<std::tuple<std::string, double, double , double>>& fingerprintData,
-                                              const std::vector<std::pair<std::string, double>>& observedRSSI);
-
     std::tuple<double, double> knnLocation(const std::vector<std::tuple<std::string, double, double, double>>& fingerprintData,
                                                      const std::vector<std::pair<std::string, double>>& observedRSSI,
                                                      int k);
 
 private:
-    std::vector<AccessPoint> access_points;
-
-   
-
-    double distance(double x1, double y1, double x2, double y2);
-
-    std::vector<double> calculateDistanceFromRSSI(const std::vector<double>& observedRSS);
-
-    // Methods for controlling WiFi interface and capturing packets
-    void setMonitorMode();
-  
+ 
 };
 
 #endif 
