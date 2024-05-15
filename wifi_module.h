@@ -7,9 +7,7 @@
 
 class Localization {
 public:
-    Localization(const std::vector<AccessPoint>& access_points);
-    
-    std::pair<double, double> getCurrentPositionFromWiFi();
+ 
     
     std::string captureWifiSignal();
     
