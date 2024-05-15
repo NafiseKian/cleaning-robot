@@ -13,6 +13,7 @@
 #include<math.h>
 //#include <Python.h>
 #include <unistd.h> // For sleep()
+#include <string>
 
 #include "gps_module.h"
 #include "camera_module.h"
@@ -59,9 +60,10 @@ void* gps_wifi_thread(void* args)
         std::cout << "Estimated location using KNN: X = " << std::get<0>(estimatedLocation)
                     << ", Y = " << std::get<1>(estimatedLocation) << std::endl;
 
-        if (network.connectToServer()) {
+        if (network.connectToServer()) 
+        {
             std::cout << "Connected to server successfully." << std::endl;
-            network.sendData("ROBOT,"+std::get<0>(estimatedLocation)+std::get<1>(estimatedLocation));
+            network.sendData("ROBOT,"+std::to_string(std::get<0>(estimatedLocation))+","+std::to_string(std::get<1>(estimatedLocation)));
         } else {
             std::cout << "Failed to connect to server." << std::endl;
         }
