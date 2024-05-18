@@ -25,6 +25,7 @@ classNames = ["not trash", "trash"]
 
 # Process each image in the directory
 for filename in os.listdir(image_dir):
+    print("opening the photo")
     if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
         # Read the image
         img_path = os.path.join(image_dir, filename)
@@ -51,6 +52,7 @@ for filename in os.listdir(image_dir):
 
         # Process detections
         for i, det in enumerate(pred):  # detections per image
+            print("detection started")
             if len(det):
                 det[:, :4] = scale_coords(img.shape[2:], det[:, :4], img0.shape).round()
 
