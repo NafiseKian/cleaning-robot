@@ -83,3 +83,5 @@ for filename in os.listdir(image_dir):
 
 # Close all OpenCV windows
 cv2.destroyAllWindows()
+
+#TODO 1. load all requirements only once 2.don't run for loop to find all photos in a a directory instead write a single function to accept the path of the photo which we want the detection for it 
