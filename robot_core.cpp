@@ -6,15 +6,13 @@
 */
 
 #include <iostream>
-#include <thread> // For std::thread
-#include <mutex>  // For std::mutex
-#include <condition_variable> // For std::condition_variable
-#include <chrono> // For std::chrono for timing
-#include<math.h>
-//#include <Python.h>
-#include <unistd.h> // For sleep()
+#include <thread> 
+#include <mutex> 
+#include <condition_variable> 
+#include <chrono> 
+#include <cmath>
+#include <unistd.h> 
 #include <string>
-
 #include "gps_module.h"
 #include "camera_module.h"
 #include "drive_module.h"
@@ -22,131 +20,145 @@
 #include "wifi_module.h"
 #include "network_module.h"
 
+// Global variables for synchronization
+std::mutex mtx;
+std::condition_variable cv;
+bool stopMovement = false;
+bool photoTaken = false;
+bool trashDetected = false;
 
-void* gps_wifi_thread(void* args)
-{
+void gps_wifi_thread() {
     NetworkModule network("34.165.89.174", 3389);
 
     GPSModule gps;
     int k = 3;
 
-    Localization wifi ;
+    Localization wifi;
     std::vector<std::tuple<std::string, double, double, double>> fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
 
-    while (true)
-    {
-        std::cout<<"worker thread loop"<<std::endl ;
-
+    while (true) {
+        std::cout << "worker thread loop" << std::endl;
 
         std::string gpsData;
         if (gps.readData(gpsData)) {
             // Process the received GPS data in gpsData
             std::cout << "Received GPS data: " << gpsData << std::endl;
             // ... (parse and extract relevant information)
-        }
-        else 
-        {
+        } else {
             // Handle the case where no data is available
             std::cout << "No GPS data available yet." << std::endl;
         }
 
-         
         std::string ret = wifi.captureWifiSignal();
-        std::cout<<"------------------------wifi signal levels -----------------------"<<std::endl;
-        std::cout<<ret<<std::endl;
+        std::cout << "------------------------wifi signal levels -----------------------" << std::endl;
+        std::cout << ret << std::endl;
         std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(ret);
-        
+
         std::tuple<double, double> estimatedLocation = wifi.knnLocation(fingerprintData, observedRSSI, k);
         std::cout << "Estimated location using KNN: X = " << std::get<0>(estimatedLocation)
-                    << ", Y = " << std::get<1>(estimatedLocation) << std::endl;
+                  << ", Y = " << std::get<1>(estimatedLocation) << std::endl;
 
-        if (network.connectToServer()) 
-        {
+        if (network.connectToServer()) {
             std::cout << "Connected to server successfully." << std::endl;
-            network.sendData("ROBOT,"+std::to_string(std::get<0>(estimatedLocation))+","+std::to_string(std::get<1>(estimatedLocation)));
+            network.sendData("ROBOT," + std::to_string(std::get<0>(estimatedLocation)) + "," + std::to_string(std::get<1>(estimatedLocation)));
         } else {
             std::cout << "Failed to connect to server." << std::endl;
         }
 
         sleep(5);
-        
     }
-    
-
 }
 
+void camera_thread(int &photoCounter) {
+    while (true) {
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [] { return stopMovement; });
+
+        CameraModule::capturePhoto(photoCounter);
+        std::cout << "Photo " << photoCounter << " taken." << std::endl;
+
+        //TODO : pass image to pythin side to process it 
+        std::cout << "Processing image " << photoCounter << "..." << std::endl;
+
+        /*TODO :get the response from ai and set the condition
+        if (trash == 0) { 
+            trashDetected = true;
+            std::cout << "Trash detected in photo " << photoCounter << "!" << std::endl;
+        } else {
+            trashDetected = false;
+            std::cout << "No trash detected in photo " << photoCounter << "." << std::endl;
+        }
+        */
+
+        photoCounter++;
+
+        // Signal main thread to resume movement
+        photoTaken = true;
+        stopMovement = false;
+        cv.notify_all();
+
+        if (photoCounter == 20) break;
+    }
+}
 
 int main() {
-
-    pthread_t cThread;
-    if(pthread_create(&cThread, NULL, &gps_wifi_thread,NULL)){
-        perror("ERROR creating thread.");
-    }
-
+    std::thread gpsWifiThread(gps_wifi_thread);
 
     // Initialize motor control
     MotorControl::setup();
-    std::cout <<"motor controller set up done"<< std::endl;
+    std::cout << "Motor controller set up done" << std::endl;
 
     int photoCounter = 0;
-
+    std::thread camThread(camera_thread, std::ref(photoCounter));
 
     UltrasonicSensor frontSensorL("Front-left", 26, 24);
     UltrasonicSensor frontSensorR("Front-right", 20, 21);
     UltrasonicSensor rightSensor("Right", 22, 27);
-    UltrasonicSensor leftSensor("Left", 18 , 17);
+    UltrasonicSensor leftSensor("Left", 18, 17);
 
+    while (true) {
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [] { return !stopMovement; });
 
- while (true) {
         int distanceFrontL = frontSensorL.getDistanceCm();
         int distanceFrontR = frontSensorR.getDistanceCm();
-        int distanceLeft = leftSensor.getDistanceCm();
-        int distanceRight = rightSensor.getDistanceCm();
 
         // Output the distances to help with debugging
         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
         std::cout << "Front Distance sensor right: " << distanceFrontR << " cm" << std::endl;
-        std::cout << "Left Distance: " << distanceLeft << " cm" << std::endl;
-        std::cout << "Right Distance: " << distanceRight << " cm" << std::endl;
 
-      // Handle -1 sensor errors
+        // Handle -1 sensor errors
         bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
         bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 20);
-        bool validLeft = (distanceLeft != -1 && distanceLeft > 20);
-        bool validRight = (distanceRight != -1 && distanceRight > 20);
 
-         if (validFrontL || validFrontR) {
-            if (validLeft && validRight) {
-                if (validFrontL && (!validFrontR || distanceFrontL < distanceFrontR)) {
-                    MotorControl::turnRight();
-                    std::cout << "Obstacle closer on left; turning right." << std::endl;
-                } else {
-                    MotorControl::turnLeft();
-                    std::cout << "Obstacle closer on right; turning left." << std::endl;
-                }
-            } else if (validLeft) {
-                MotorControl::turnLeft();
-                std::cout << "Right side blocked or invalid; turning left." << std::endl;
-            } else if (validRight) {
-                MotorControl::turnRight();
-                std::cout << "Left side blocked or invalid; turning right." << std::endl;
-            } else {
-                // If both sides and front are blocked, reverse
-                MotorControl::backward();
-                std::cout << "Blocked on all sides; moving backward." << std::endl;
+        if (validFrontL || validFrontR) {
+            // Stop the robot and notify the camera thread
+            MotorControl::stop();
+            std::cout << "Obstacle detected. Stopping and taking a photo..." << std::endl;
+            stopMovement = true;
+            photoTaken = false;
+            cv.notify_all();
+
+            // Wait for the camera thread to finish taking the photo and processing it
+            cv.wait(lock, [] { return photoTaken; });
+
+            if (trashDetected) {
+                std::cout << "Trash detected. Moving closer to pick it up..." << std::endl;
+                // TODO : Add code to move closer to the trash and pick it up
             }
-            usleep(1000000); // Wait 1 second to give time for the maneuver to be executed
+
+            // Continue moving after handling the detected trash
+            std::cout << "Resuming movement..." << std::endl;
         } else {
             // If no valid obstacle is directly in front, move forward
             MotorControl::forward();
-            std::cout << "Path is clear or sensor data invalid. Moving forward." << std::endl;
+            std::cout << "Path is clear. Moving forward..." << std::endl;
         }
 
-        CameraModule::capturePhoto(photoCounter);
         usleep(500000); // 0.5 second delay for general loop control
-        if (photoCounter == 20) break ; 
-
     }
+
+    camThread.join();
 
     return 0;
 }
