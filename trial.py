@@ -8,9 +8,9 @@ from models.experimental import attempt_load
 from utils.general import non_max_suppression, scale_coords
 
 # Directories
-image_dir = r"C:\Users\CIU\PycharmProjects\pythonProject\yolov7\images"  # Directory containing input images
-output_dir = r"C:\Users\CIU\PycharmProjects\pythonProject\yolov7\output"  # Directory to save output images
-weights_path = r"C:\Users\CIU\PycharmProjects\pythonProject\yolov7\epoch_054.pt"  # Path to the weights file
+image_dir = r"/home/ciuteam/cleaningrobot/cleaning-robot/images"  # Directory containing input images
+output_dir = r"/home/ciuteam/cleaningrobot/cleaning-robot/output"  # Directory to save output images
+weights_path = r"/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt"  # Path to the weights file
 
 # Create the output directory if it doesn't exist
 os.makedirs(output_dir, exist_ok=True)
