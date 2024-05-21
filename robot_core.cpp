@@ -102,7 +102,8 @@ void gps_wifi_thread() {
     }
 }
 
-void camera_thread(int &photoCounter) {
+void camera_thread(int &photoCounter) 
+{
     while (true) {
         std::unique_lock<std::mutex> lock(mtx);
         cv.wait(lock, [] { return stopMovement; });
@@ -114,14 +115,15 @@ void camera_thread(int &photoCounter) {
         std::cout << "Processing image " << photoCounter << "..." << std::endl;
         sleep(1); // Simulate processing delay
 
-        // Simulate trash detection (replace with actual detection logic)
-        if (photoCounter % 5 == 0) { // Assume every 5th photo detects trash
+
+        //TODO : call the model and wait for true or false and set the trashDetected flag to true or false 
+    
             trashDetected = true;
             std::cout << "Trash detected in photo " << photoCounter << "!" << std::endl;
-        } else {
+      
             trashDetected = false;
             std::cout << "No trash detected in photo " << photoCounter << "." << std::endl;
-        }
+
 
         photoCounter++;
 
@@ -130,11 +132,12 @@ void camera_thread(int &photoCounter) {
         stopMovement = false;
         cv.notify_all();
 
-        if (photoCounter == 20) break;
+        if (photoCounter == 10) break;
     }
 }
 
-int main() {
+int main() 
+{
     std::thread gpsWifiThread(gps_wifi_thread);
 
     // Initialize motor control
