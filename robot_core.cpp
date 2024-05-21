@@ -27,6 +27,7 @@ const double X_MAX = 100.0;
 const double Y_MIN = 0.0;
 const double Y_MAX = 100.0;
 
+/*
 // Function to initialize serial communication with Arduino
 sp_port* initSerial(const char* portName) {
     sp_port* serialPort;
@@ -60,7 +61,7 @@ void sendCommandToArduino(sp_port* serialPort, char command) {
 bool isWithinBoundaries(double x, double y) {
     return (x >= X_MIN && x <= X_MAX && y >= Y_MIN && y <= Y_MAX);
 }
-
+*/
 void gps_wifi_thread() {
     NetworkModule network("34.165.89.174", 3389);
 
@@ -200,14 +201,9 @@ int main()
     MotorControl::setup();
     std::cout << "Motor controller set up done" << std::endl;
 
-    // Initialize serial communication with Arduino
-    sp_port* serialPort = initSerial("/dev/ttyUSB0"); // Replace with the actual port
-    if (serialPort == nullptr) {
-        return 1; // Exit if serial initialization fails
-    }
 
     int photoCounter = 0;
-    std::thread camThread(camera_thread, std::ref(photoCounter));
+    std::thread camThread(camera_thread);
 
     UltrasonicSensor frontSensorL("Front-left", 26, 24);
     UltrasonicSensor frontSensorR("Front-right", 20, 21);
@@ -249,7 +245,7 @@ int main()
                 MotorControl::stop();
                 std::cout << "Picking up trash..." << std::endl;
                 sleep(1); // Simulate pick-up delay
-                sendCommandToArduino(serialPort, 'P'); // Send pick command to Arduino
+                //sendCommandToArduino(serialPort, 'P'); // Send pick command to Arduino
             }
 
             std::cout << "Resuming movement..." << std::endl;
