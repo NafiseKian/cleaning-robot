@@ -69,8 +69,10 @@ void gps_wifi_thread() {
     }
 }
 
-void camera_thread(int &photoCounter) {
-    while (true) {
+void camera_thread(int &photoCounter) 
+{
+    while (true)
+    {
         std::unique_lock<std::mutex> lock(mtx);
         cv.wait(lock, [] { return stopMovement; });
 
@@ -157,8 +159,6 @@ int main() {
 
         usleep(500000); // 0.5 second delay for general loop control
     }
-
-    camThread.join();
 
     return 0;
 }
