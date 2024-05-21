@@ -1,3 +1,4 @@
+#include <Python.h>
 #include <iostream>
 #include <thread>
 #include <mutex>
@@ -104,6 +105,31 @@ void gps_wifi_thread() {
 
 void camera_thread(int &photoCounter) 
 {
+    // Initialize Python interpreter
+    Py_Initialize();
+
+    // Import the Python module
+    PyObject* pName = PyUnicode_DecodeFSDefault("trial");  // Module name is "trial" without ".py"
+    PyObject* pModule = PyImport_Import(pName);
+    Py_DECREF(pName);
+
+    if (pModule == nullptr) {
+        PyErr_Print();
+        std::cerr << "Failed to load Python module" << std::endl;
+        return;
+    }
+
+    // Get the detect_objects function
+    PyObject* pFunc = PyObject_GetAttrString(pModule, "detect_objects");
+
+    if (pFunc == nullptr || !PyCallable_Check(pFunc)) {
+        PyErr_Print();
+        std::cerr << "Cannot find function 'detect_objects'" << std::endl;
+        Py_XDECREF(pFunc);
+        Py_DECREF(pModule);
+        return;
+    }
+
     while (true) {
         std::unique_lock<std::mutex> lock(mtx);
         cv.wait(lock, [] { return stopMovement; });
@@ -115,15 +141,38 @@ void camera_thread(int &photoCounter)
         std::cout << "Processing image " << photoCounter << "..." << std::endl;
         sleep(1); // Simulate processing delay
 
+        // Call the Python function to detect trash
+        PyObject* pArgs = PyTuple_New(3);
+        PyObject* pValue;
 
-        //TODO : call the model and wait for true or false and set the trashDetected flag to true or false 
-    
-            trashDetected = true;
+        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\images");
+        PyTuple_SetItem(pArgs, 0, pValue);
+        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\output");
+        PyTuple_SetItem(pArgs, 1, pValue);
+        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\epoch_054.pt");
+        PyTuple_SetItem(pArgs, 2, pValue);
+
+        PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
+        Py_DECREF(pArgs);
+
+        if (pResult != nullptr) {
+            if (PyBool_Check(pResult)) {
+                trashDetected = (pResult == Py_True);
+            } else {
+                std::cerr << "Unexpected return type" << std::endl;
+            }
+            Py_DECREF(pResult);
+        } else {
+            PyErr_Print();
+            std::cerr << "Call to detect_objects failed" << std::endl;
+        }
+
+        // Print the detection result
+        if (trashDetected) {
             std::cout << "Trash detected in photo " << photoCounter << "!" << std::endl;
-      
-            trashDetected = false;
+        } else {
             std::cout << "No trash detected in photo " << photoCounter << "." << std::endl;
-
+        }
 
         photoCounter++;
 
@@ -134,6 +183,13 @@ void camera_thread(int &photoCounter)
 
         if (photoCounter == 10) break;
     }
+
+    // Clean up Python objects
+    Py_XDECREF(pFunc);
+    Py_DECREF(pModule);
+
+    // Finalize Python interpreter
+    Py_Finalize();
 }
 
 int main() 
@@ -151,7 +207,7 @@ int main()
     }
 
     int photoCounter = 0;
-    std::thread camThread(camera_thread, std::ref(photoCounter), serialPort);
+    std::thread camThread(camera_thread, std::ref(photoCounter));
 
     UltrasonicSensor frontSensorL("Front-left", 26, 24);
     UltrasonicSensor frontSensorR("Front-right", 20, 21);
@@ -175,7 +231,7 @@ int main()
         bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
         bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 20);
         bool validRight = (distanceRight != -1 && distanceRight < 20);
-        bool validLeft = (distanceLeft != -1 && distanceLeft < 20);
+        bool validLeft = (distanceLeft != -1 && distanceLeft < 20
 
         if (validFrontL || validFrontR) {
             MotorControl::stop();
