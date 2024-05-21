@@ -8,7 +8,7 @@ from models.experimental import attempt_load
 from utils.general import non_max_suppression, scale_coords
 
 def detect_objects(image_dir, output_dir, weights_path):
-    trash_detected = False
+    results = []
 
     # Load the YOLOv7 model with the specified weights file
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -64,18 +64,26 @@ def detect_objects(image_dir, output_dir, weights_path):
                         print(f"Image: {filename}, Class: {classNames[int(cls)]}, Confidence: {conf}, Bounding Box: {x1, y1, x2, y2}")
 
                         # Determine if it's trash or not
-                        if classNames[int(cls)] == "trash":
-                            trash_detected = True
+                        is_trash = 1 if classNames[int(cls)] == "trash" else 0
+
+                        # Append result to the list
+                        results.append((filename, classNames[int(cls)], conf, (x1, y1, x2, y2), is_trash))
 
             # Save the output image
             output_path = os.path.join(output_dir, filename)
             cv2.imwrite(output_path, img0)
 
-    # Return whether trash was detected or not
-    return trash_detected
+            # Display the output image
+            cv2.imshow("Image", img0)
+            cv2.waitKey(1000)  # Display each image for 1 second
 
-# Example usage (comment out or remove this part in the actual module)
-# image_dir = r"C:\Users\CIU\Desktop\trash\images"
-# output_dir = r"C:\Users\CIU\Desktop\trash\output"
-# weights_path = r"C:\Users\CIU\Desktop\trash\epoch_054.pt"
-# detection_results = detect_objects(image_dir, output_dir, weights_path)
+    # Close all OpenCV windows
+    cv2.destroyAllWindows()
+
+    return results
+
+# Call the function with your desired parameters
+image_dir = r"C:\Users\CIU\Desktop\trash\images"
+output_dir = r"C:\Users\CIU\Desktop\trash\output"
+weights_path = r"C:\Users\CIU\Desktop\trash\epoch_054.pt"
+detection_results = detect_objects(image_dir, output_dir, weights_path)
