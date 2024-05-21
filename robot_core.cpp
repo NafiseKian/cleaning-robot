@@ -104,7 +104,7 @@ void gps_wifi_thread() {
     }
 }
 
-void camera_thread(int &photoCounter) 
+void camera_thread(int &photoCounter)
 {
     // Initialize Python interpreter
     Py_Initialize();
@@ -203,7 +203,7 @@ int main()
 
 
     int photoCounter = 0;
-    std::thread camThread(camera_thread);
+    std::thread camThread(camera_thread, std::ref(photoCounter));
 
     UltrasonicSensor frontSensorL("Front-left", 26, 24);
     UltrasonicSensor frontSensorR("Front-right", 20, 21);
@@ -227,7 +227,7 @@ int main()
         bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
         bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 20);
         bool validRight = (distanceRight != -1 && distanceRight < 20);
-        bool validLeft = (distanceLeft != -1 && distanceLeft < 20
+        bool validLeft = (distanceLeft != -1 && distanceLeft < 20);
 
         if (validFrontL || validFrontR) {
             MotorControl::stop();
