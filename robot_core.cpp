@@ -58,12 +58,15 @@ void gps_wifi_thread() {
         std::cout << "Estimated location using KNN: X = " << std::get<0>(estimatedLocation)
                   << ", Y = " << std::get<1>(estimatedLocation) << std::endl;
 
+
         if (network.connectToServer()) {
             std::cout << "Connected to server successfully." << std::endl;
             network.sendData("ROBOT," + std::to_string(std::get<0>(estimatedLocation)) + "," + std::to_string(std::get<1>(estimatedLocation)));
         } else {
             std::cout << "Failed to connect to server." << std::endl;
         }
+
+        //TODO : if out of that boundary notify movement thread to turn
 
         sleep(5);
     }
@@ -99,7 +102,7 @@ void camera_thread(int &photoCounter)
         stopMovement = false;
         cv.notify_all();
 
-        if (photoCounter == 20) break;
+        
     }
 }
 
@@ -124,6 +127,8 @@ int main() {
 
         int distanceFrontL = frontSensorL.getDistanceCm();
         int distanceFrontR = frontSensorR.getDistanceCm();
+        int distanceRight = rightSensor.getDistanceCm();
+        int distanceLeft = leftSensor.getDistanceCm();
 
         // Output the distances to help with debugging
         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
@@ -132,6 +137,8 @@ int main() {
         // Handle -1 sensor errors
         bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
         bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 20);
+        bool validRight = (distanceRight != -1 && distanceRight < 20);
+        bool validLeft = (distanceLeft != -1 && distanceLeft < 20);
 
         if (validFrontL || validFrontR) {
             // Stop the robot and notify the camera thread
@@ -151,7 +158,27 @@ int main() {
 
             // Continue moving after handling the detected trash
             std::cout << "Resuming movement..." << std::endl;
-        } else {
+        }
+        else if(validRight)
+        {
+            MotorControl::turnLeft();
+            usleep(500000);
+            MotorControl::forward();
+        }
+        else if(validLeft)
+        {
+            MotorControl::turnRight();
+            usleep(500000);
+            MotorControl::forward();
+        }
+        else if ((validFrontL || validFrontR) && validLeft && validRight )
+        {
+            MotorControl::backward();
+            usleep(500000);
+            MotorControl::turnRight();
+            usleep(500000);
+        }
+        else {
             // If no valid obstacle is directly in front, move forward
             MotorControl::forward();
             std::cout << "Path is clear. Moving forward..." << std::endl;
