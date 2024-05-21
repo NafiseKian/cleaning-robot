@@ -1,17 +1,11 @@
-/**
-** robot_core.cpp
-** author : Nafise Kian 
-** date : 01/04/2024
-** this code is the main core of the project and it should call all modules through headers 
-*/
-
 #include <iostream>
-#include <thread> 
-#include <mutex> 
-#include <condition_variable> 
-#include <chrono> 
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <chrono>
 #include <cmath>
-#include <unistd.h> 
+#include <unistd.h>
+#include <libserialport.h>
 #include <string>
 #include "gps_module.h"
 #include "camera_module.h"
@@ -27,6 +21,45 @@ bool stopMovement = false;
 bool photoTaken = false;
 bool trashDetected = false;
 
+const double X_MIN = 0.0;
+const double X_MAX = 100.0;
+const double Y_MIN = 0.0;
+const double Y_MAX = 100.0;
+
+// Function to initialize serial communication with Arduino
+sp_port* initSerial(const char* portName) {
+    sp_port* serialPort;
+    sp_return result = sp_get_port_by_name(portName, &serialPort);
+
+    if (result != SP_OK) {
+        std::cerr << "Error getting port by name: " << result << std::endl;
+        return nullptr;
+    }
+
+    result = sp_open(serialPort, SP_MODE_READ_WRITE);
+    if (result != SP_OK) {
+        std::cerr << "Error opening port: " << result << std::endl;
+        return nullptr;
+    }
+
+    result = sp_set_baudrate(serialPort, 9600);
+    if (result != SP_OK) {
+        std::cerr << "Error setting baud rate: " << result << std::endl;
+        return nullptr;
+    }
+
+    return serialPort;
+}
+
+// Function to send a command to the Arduino
+void sendCommandToArduino(sp_port* serialPort, char command) {
+    sp_nonblocking_write(serialPort, &command, 1);
+}
+
+bool isWithinBoundaries(double x, double y) {
+    return (x >= X_MIN && x <= X_MAX && y >= Y_MIN && y <= Y_MAX);
+}
+
 void gps_wifi_thread() {
     NetworkModule network("34.165.89.174", 3389);
 
@@ -41,11 +74,8 @@ void gps_wifi_thread() {
 
         std::string gpsData;
         if (gps.readData(gpsData)) {
-            // Process the received GPS data in gpsData
             std::cout << "Received GPS data: " << gpsData << std::endl;
-            // ... (parse and extract relevant information)
         } else {
-            // Handle the case where no data is available
             std::cout << "No GPS data available yet." << std::endl;
         }
 
@@ -55,45 +85,43 @@ void gps_wifi_thread() {
         std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(ret);
 
         std::tuple<double, double> estimatedLocation = wifi.knnLocation(fingerprintData, observedRSSI, k);
-        std::cout << "Estimated location using KNN: X = " << std::get<0>(estimatedLocation)
-                  << ", Y = " << std::get<1>(estimatedLocation) << std::endl;
+        double currentX = std::get<0>(estimatedLocation);
+        double currentY = std::get<1>(estimatedLocation);
+        std::cout << "Estimated location using KNN: X = " << currentX
+                  << ", Y = " << currentY << std::endl;
 
 
         if (network.connectToServer()) {
             std::cout << "Connected to server successfully." << std::endl;
-            network.sendData("ROBOT," + std::to_string(std::get<0>(estimatedLocation)) + "," + std::to_string(std::get<1>(estimatedLocation)));
+            network.sendData("ROBOT," + std::to_string(currentX) + "," + std::to_string(currentY));
         } else {
             std::cout << "Failed to connect to server." << std::endl;
         }
-
-        //TODO : if out of that boundary notify movement thread to turn
 
         sleep(5);
     }
 }
 
-void camera_thread(int &photoCounter) 
-{
-    while (true)
-    {
+void camera_thread(int &photoCounter) {
+    while (true) {
         std::unique_lock<std::mutex> lock(mtx);
         cv.wait(lock, [] { return stopMovement; });
 
         CameraModule::capturePhoto(photoCounter);
         std::cout << "Photo " << photoCounter << " taken." << std::endl;
 
-        //TODO : pass image to pythin side to process it 
+        // Simulate image processing (replace with actual processing logic)
         std::cout << "Processing image " << photoCounter << "..." << std::endl;
+        sleep(1); // Simulate processing delay
 
-        /*TODO :get the response from ai and set the condition
-        if (trash == 0) { 
+        // Simulate trash detection (replace with actual detection logic)
+        if (photoCounter % 5 == 0) { // Assume every 5th photo detects trash
             trashDetected = true;
             std::cout << "Trash detected in photo " << photoCounter << "!" << std::endl;
         } else {
             trashDetected = false;
             std::cout << "No trash detected in photo " << photoCounter << "." << std::endl;
         }
-        */
 
         photoCounter++;
 
@@ -102,7 +130,7 @@ void camera_thread(int &photoCounter)
         stopMovement = false;
         cv.notify_all();
 
-        
+        if (photoCounter == 20) break;
     }
 }
 
@@ -113,8 +141,14 @@ int main() {
     MotorControl::setup();
     std::cout << "Motor controller set up done" << std::endl;
 
+    // Initialize serial communication with Arduino
+    sp_port* serialPort = initSerial("/dev/ttyUSB0"); // Replace with the actual port
+    if (serialPort == nullptr) {
+        return 1; // Exit if serial initialization fails
+    }
+
     int photoCounter = 0;
-    std::thread camThread(camera_thread, std::ref(photoCounter));
+    std::thread camThread(camera_thread, std::ref(photoCounter), serialPort);
 
     UltrasonicSensor frontSensorL("Front-left", 26, 24);
     UltrasonicSensor frontSensorR("Front-right", 20, 21);
@@ -130,35 +164,37 @@ int main() {
         int distanceRight = rightSensor.getDistanceCm();
         int distanceLeft = leftSensor.getDistanceCm();
 
-        // Output the distances to help with debugging
         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
         std::cout << "Front Distance sensor right: " << distanceFrontR << " cm" << std::endl;
+        std::cout << "Right Distance : " << distanceRight << " cm" << std::endl;
+        std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
 
-        // Handle -1 sensor errors
         bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
         bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 20);
         bool validRight = (distanceRight != -1 && distanceRight < 20);
         bool validLeft = (distanceLeft != -1 && distanceLeft < 20);
 
         if (validFrontL || validFrontR) {
-            // Stop the robot and notify the camera thread
             MotorControl::stop();
             std::cout << "Obstacle detected. Stopping and taking a photo..." << std::endl;
             stopMovement = true;
             photoTaken = false;
             cv.notify_all();
 
-            // Wait for the camera thread to finish taking the photo and processing it
             cv.wait(lock, [] { return photoTaken; });
 
             if (trashDetected) {
                 std::cout << "Trash detected. Moving closer to pick it up..." << std::endl;
-                // TODO : Add code to move closer to the trash and pick it up
+                MotorControl::forward();
+                usleep(500000); // Move forward for half second to get closer to the trash
+                MotorControl::stop();
+                std::cout << "Picking up trash..." << std::endl;
+                sleep(1); // Simulate pick-up delay
+                sendCommandToArduino(serialPort, 'P'); // Send pick command to Arduino
             }
 
-            // Continue moving after handling the detected trash
             std::cout << "Resuming movement..." << std::endl;
-        }
+        } 
         else if(validRight)
         {
             MotorControl::turnLeft();
@@ -186,6 +222,7 @@ int main() {
 
         usleep(500000); // 0.5 second delay for general loop control
     }
+
 
     return 0;
 }
