@@ -233,6 +233,12 @@ int main()
         if (validFrontL || validFrontR) {
             MotorControl::stop();
             std::cout << "Obstacle detected. Stopping and taking a photo..." << std::endl;
+            usleep(500000);
+            MotorControl::backward();
+            usleep(500000);
+            MotorControl::turnRight();
+            usleep(500000);
+            /*
             stopMovement = true;
             photoTaken = false;
             cv.notify_all();
@@ -248,7 +254,7 @@ int main()
                 sleep(1); // Simulate pick-up delay
                 //sendCommandToArduino(serialPort, 'P'); // Send pick command to Arduino
             }
-
+            */
             std::cout << "Resuming movement..." << std::endl;
         } 
         else if(validRight)
