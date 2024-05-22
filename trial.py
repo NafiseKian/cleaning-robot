@@ -89,4 +89,4 @@ classNames = ["not trash", "trash"]
 image_dir = r"/home/ciuteam/cleaningrobot/cleaning-robot/images"
 output_dir = r"/home/ciuteam/cleaningrobot/cleaning-robot/output"
 weights_path = r"/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt"
-detection_results = detect_objects(image_dir, output_dir, weights_path)
+detection_results = detect_objects(image_dir, output_dir, weights_path, classNames)
