@@ -10,7 +10,7 @@
 #include <iomanip>
 
 void CameraModule::capturePhoto(int& photoCounter) {
-    const std::string folderPath = "/home/ciuteam/cleaning-robot/photos/";
+    const std::string folderPath = "/home/ciuteam/cleaningrobot/cleaning-robot/photos/";
 
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);

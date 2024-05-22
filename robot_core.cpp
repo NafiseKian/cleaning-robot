@@ -27,41 +27,59 @@ const double X_MAX = 100.0;
 const double Y_MIN = 0.0;
 const double Y_MAX = 100.0;
 
-/*
-// Function to initialize serial communication with Arduino
-sp_port* initSerial(const char* portName) {
-    sp_port* serialPort;
-    sp_return result = sp_get_port_by_name(portName, &serialPort);
+void detectObjects() {
+    // Initialize Python interpreter
+    Py_Initialize();
 
-    if (result != SP_OK) {
-        std::cerr << "Error getting port by name: " << result << std::endl;
-        return nullptr;
+    // Set PYTHONPATH to the current directory
+    PyObject* sysPath = PySys_GetObject("path");
+    PyList_Append(sysPath, PyUnicode_DecodeFSDefault("."));
+
+    // Import necessary modules
+    PyObject* pName = PyUnicode_DecodeFSDefault("trial"); // Use "trial" instead of "trial.py"
+    PyObject* pModule = PyImport_Import(pName);
+    Py_DECREF(pName);
+
+    if (pModule != NULL) {
+        // Get the function
+        PyObject* pFunc = PyObject_GetAttrString(pModule, "detect_objects");
+
+        if (pFunc && PyCallable_Check(pFunc)) {
+            // Call the Python function with arguments
+            PyObject* pArgs = PyTuple_New(3); // Provide appropriate arguments here
+            PyTuple_SetItem(pArgs, 0, PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/images")); // Image directory
+            PyTuple_SetItem(pArgs, 1, PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/output")); // Output directory
+            PyTuple_SetItem(pArgs, 2, PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt")); // Weights path
+
+            PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
+
+            // Check for errors
+            if (pResult != NULL) {
+                // Do something with the result if needed
+                Py_DECREF(pResult);
+            } else {
+                PyErr_Print();
+            }
+
+            // Clean up
+            Py_DECREF(pArgs);
+            Py_DECREF(pFunc);
+        } else {
+            if (PyErr_Occurred()) PyErr_Print();
+            std::cerr << "Cannot find function\n";
+        }
+
+        // Clean up
+        Py_DECREF(pModule);
+    } else {
+        PyErr_Print();
+        std::cerr << "Failed to load Python module\n";
     }
 
-    result = sp_open(serialPort, SP_MODE_READ_WRITE);
-    if (result != SP_OK) {
-        std::cerr << "Error opening port: " << result << std::endl;
-        return nullptr;
-    }
-
-    result = sp_set_baudrate(serialPort, 9600);
-    if (result != SP_OK) {
-        std::cerr << "Error setting baud rate: " << result << std::endl;
-        return nullptr;
-    }
-
-    return serialPort;
+    // Finalize Python interpreter
+    Py_Finalize();
 }
 
-// Function to send a command to the Arduino
-void sendCommandToArduino(sp_port* serialPort, char command) {
-    sp_nonblocking_write(serialPort, &command, 1);
-}
-
-bool isWithinBoundaries(double x, double y) {
-    return (x >= X_MIN && x <= X_MAX && y >= Y_MIN && y <= Y_MAX);
-}
-*/
 void gps_wifi_thread() {
     NetworkModule network("34.165.89.174", 3389);
 
@@ -147,11 +165,11 @@ void camera_thread(int &photoCounter)
         PyObject* pArgs = PyTuple_New(3);
         PyObject* pValue;
 
-        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\images");
+        pValue = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/images");
         PyTuple_SetItem(pArgs, 0, pValue);
-        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\output");
+        pValue = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/output");
         PyTuple_SetItem(pArgs, 1, pValue);
-        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\epoch_054.pt");
+        pValue = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt");
         PyTuple_SetItem(pArgs, 2, pValue);
 
         PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
@@ -222,7 +240,8 @@ int main()
 
         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
         std::cout << "Front Distance sensor right: " << distanceFrontR << " cm" << std::endl;
-        std::cout << "Right Distance : " << distanceRight << " cm" << std::endl;
+        std::cout << "Right Distance : " << distanceRight << " cm" << std::endl
+
         std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
 
         bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
@@ -238,7 +257,7 @@ int main()
             usleep(500000);
             MotorControl::turnRight();
             usleep(500000);
-            /*
+            
             stopMovement = true;
             photoTaken = false;
             cv.notify_all();
@@ -254,7 +273,7 @@ int main()
                 sleep(1); // Simulate pick-up delay
                 //sendCommandToArduino(serialPort, 'P'); // Send pick command to Arduino
             }
-            */
+            
             std::cout << "Resuming movement..." << std::endl;
         } 
         else if(validRight)
