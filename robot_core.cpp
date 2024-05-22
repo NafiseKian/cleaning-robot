@@ -240,8 +240,7 @@ int main()
 
         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
         std::cout << "Front Distance sensor right: " << distanceFrontR << " cm" << std::endl;
-        std::cout << "Right Distance : " << distanceRight << " cm" << std::endl
-
+        std::cout << "Right Distance : " << distanceRight << " cm" << std::endl;
         std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
 
         bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
