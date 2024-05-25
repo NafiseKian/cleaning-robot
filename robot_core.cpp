@@ -110,6 +110,10 @@ void detectObjects() {
     Py_Finalize();
 }
 
+void camera_thread(int& some_variable) {
+    detectObjects();
+}
+
 void gps_wifi_thread() {
     NetworkModule network("34.165.89.174", 3389);
 
@@ -150,10 +154,6 @@ void gps_wifi_thread() {
 
         sleep(5);
     }
-}
-
-void camera_thread(int& some_variable) {
-    detectObjects();
 }
 
 int main() 
