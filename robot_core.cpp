@@ -28,15 +28,32 @@ const double Y_MIN = 0.0;
 const double Y_MAX = 100.0;
 
 void detectObjects() {
+    // Set the PYTHONHOME and PYTHONPATH environment variables
+    setenv("PYTHONHOME", "/home/ciuteam/cleaningrobot/tf-env", 1);
+    setenv("PYTHONPATH", "/home/ciuteam/cleaningrobot/tf-env/lib/python3.11/site-packages", 1);
+
     // Initialize Python interpreter
     Py_Initialize();
+
+    // Print a message indicating Python initialization
+    std::cout << "Py Initialized is called" << std::endl;
+
+    // Print Python version and executable for debugging
+    PyObject* sys = PyImport_ImportModule("sys");
+    PyObject* version = PyObject_GetAttrString(sys, "version");
+    PyObject* executable = PyObject_GetAttrString(sys, "executable");
+    std::cout << "Python version: " << PyUnicode_AsUTF8(version) << std::endl;
+    std::cout << "Python executable: " << PyUnicode_AsUTF8(executable) << std::endl;
+    Py_DECREF(version);
+    Py_DECREF(executable);
+    Py_DECREF(sys);
 
     // Set PYTHONPATH to the current directory
     PyObject* sysPath = PySys_GetObject("path");
     PyList_Append(sysPath, PyUnicode_DecodeFSDefault("."));
 
     // Import necessary modules
-    PyObject* pName = PyUnicode_DecodeFSDefault("trial"); // Use "trial" instead of "trial.py"
+    PyObject* pName = PyUnicode_DecodeFSDefault("trial");
     PyObject* pModule = PyImport_Import(pName);
     Py_DECREF(pName);
 
@@ -45,35 +62,48 @@ void detectObjects() {
         PyObject* pFunc = PyObject_GetAttrString(pModule, "detect_objects");
 
         if (pFunc && PyCallable_Check(pFunc)) {
+            // Create a list of class names
+            PyObject* classNames = PyList_New(2);
+            PyList_SetItem(classNames, 0, PyUnicode_FromString("not trash"));
+            PyList_SetItem(classNames, 1, PyUnicode_FromString("trash"));
+
             // Call the Python function with arguments
-            PyObject* pArgs = PyTuple_New(3); // Provide appropriate arguments here
-            PyTuple_SetItem(pArgs, 0, PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/images")); // Image directory
-            PyTuple_SetItem(pArgs, 1, PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/output")); // Output directory
-            PyTuple_SetItem(pArgs, 2, PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt")); // Weights path
+            PyObject* pArgs = PyTuple_Pack(4, 
+                PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/images"),  // Image directory
+                PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/output"), // Output directory
+                PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt"), // Weights path
+                classNames // List of class names
+            );
 
-            PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
+            if (pArgs != NULL) {
+                PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
 
-            // Check for errors
-            if (pResult != NULL) {
-                // Do something with the result if needed
-                Py_DECREF(pResult);
+                // Check for errors
+                if (pResult != NULL) {
+                    // Do something with the result if needed
+                    Py_DECREF(pResult);
+                } else {
+                    PyErr_Print();
+                }
+
+                // Clean up
+                Py_DECREF(pArgs);
             } else {
                 PyErr_Print();
+                std::cerr << "Failed to create argument tuple\n";
             }
 
-            // Clean up
-            Py_DECREF(pArgs);
             Py_DECREF(pFunc);
         } else {
             if (PyErr_Occurred()) PyErr_Print();
-            std::cerr << "Cannot find function\n";
+            std::cerr << "Cannot find function 'detect_objects'\n";
         }
 
         // Clean up
         Py_DECREF(pModule);
     } else {
         PyErr_Print();
-        std::cerr << "Failed to load Python module\n";
+        std::cerr << "Failed to load Python module 'trial'\n";
     }
 
     // Finalize Python interpreter
@@ -122,94 +152,8 @@ void gps_wifi_thread() {
     }
 }
 
-void camera_thread(int &photoCounter)
-{
-    // Initialize Python interpreter
-    Py_Initialize();
-    std::cout<<"Py Initialized is called "<<std::cout ; 
-
-    // Import the Python module
-    PyObject* pName = PyUnicode_DecodeFSDefault("trial");  // Module name is "trial" without ".py"
-    PyObject* pModule = PyImport_Import(pName);
-    Py_DECREF(pName);
-
-    if (pModule == nullptr) {
-        PyErr_Print();
-        std::cerr << "Failed to load Python module" << std::endl;
-        return;
-    }
-
-    // Get the detect_objects function
-    PyObject* pFunc = PyObject_GetAttrString(pModule, "detect_objects");
-
-    if (pFunc == nullptr || !PyCallable_Check(pFunc)) {
-        PyErr_Print();
-        std::cerr << "Cannot find function 'detect_objects'" << std::endl;
-        Py_XDECREF(pFunc);
-        Py_DECREF(pModule);
-        return;
-    }
-
-    while (true) {
-        std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [] { return stopMovement; });
-
-        CameraModule::capturePhoto(photoCounter);
-        std::cout << "Photo " << photoCounter << " taken." << std::endl;
-
-        // Simulate image processing (replace with actual processing logic)
-        std::cout << "Processing image " << photoCounter << "..." << std::endl;
-        sleep(1); // Simulate processing delay
-
-        // Call the Python function to detect trash
-        PyObject* pArgs = PyTuple_New(3);
-        PyObject* pValue;
-
-        pValue = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/images");
-        PyTuple_SetItem(pArgs, 0, pValue);
-        pValue = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/output");
-        PyTuple_SetItem(pArgs, 1, pValue);
-        pValue = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt");
-        PyTuple_SetItem(pArgs, 2, pValue);
-
-        PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
-        Py_DECREF(pArgs);
-
-        if (pResult != nullptr) {
-            if (PyBool_Check(pResult)) {
-                trashDetected = (pResult == Py_True);
-            } else {
-                std::cerr << "Unexpected return type" << std::endl;
-            }
-            Py_DECREF(pResult);
-        } else {
-            PyErr_Print();
-            std::cerr << "Call to detect_objects failed" << std::endl;
-        }
-
-        // Print the detection result
-        if (trashDetected) {
-            std::cout << "Trash detected in photo " << photoCounter << "!" << std::endl;
-        } else {
-            std::cout << "No trash detected in photo " << photoCounter << "." << std::endl;
-        }
-
-        photoCounter++;
-
-        // Signal main thread to resume movement
-        photoTaken = true;
-        stopMovement = false;
-        cv.notify_all();
-
-        if (photoCounter == 10) break;
-    }
-
-    // Clean up Python objects
-    Py_XDECREF(pFunc);
-    Py_DECREF(pModule);
-
-    // Finalize Python interpreter
-    Py_Finalize();
+void camera_thread(int& some_variable) {
+    detectObjects();
 }
 
 int main() 
