@@ -22,7 +22,7 @@ OBJS = $(SRCS:.cpp=.o)
 # Define the executable file 
 MAIN = runapp
 
-.PHONY: all clean
+.PHONY: all clean run
 
 all: $(MAIN)
 	@echo Simple compiler named runapp has been compiled
@@ -35,3 +35,7 @@ $(MAIN): $(OBJS)
 
 clean:
 	$(RM) *.o *~ $(MAIN)
+
+run: $(MAIN)
+	@echo Running the application with the Python virtual environment
+	@PYTHONHOME=/home/ciuteam/cleaningrobot/tf-env PYTHONPATH=/home/ciuteam/cleaningrobot/tf-env/lib/python3.11/site-packages ./$(MAIN)

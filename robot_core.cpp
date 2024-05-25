@@ -184,7 +184,7 @@ int main()
 
         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
         std::cout << "Front Distance sensor right: " << distanceFrontR << " cm" << std::endl;
-        std::cout << "Right Distance : " << distanceRight << " cm" << std::endl;
+        std::cout << "Right Distance : " << distanceRight << " cm" <<std::endl;
         std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
 
         bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
@@ -247,6 +247,8 @@ int main()
         usleep(500000); // 0.5 second delay for general loop control
     }
 
+    gpsWifiThread.join();
+    camThread.join();
 
     return 0;
 }
