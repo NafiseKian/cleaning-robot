@@ -31,12 +31,20 @@ def detect_objects(image_dir, output_dir, weights_path, classNames):
             img = torch.from_numpy(img).to(device)
             img = img.float()  # uint8 to fp16/32
             img /= 255.0  # 0 - 255 to 0.0 - 1.0
+
+            # Ensure img has the right dimensions
             if img.ndimension() == 3:
                 img = img.unsqueeze(0)
+
+            # Print input shape
+            print(f"Input shape: {img.shape}")
 
             # Perform object detection
             with torch.no_grad():
                 pred = model(img)[0]
+
+            # Print shape after model forward pass
+            print(f"Output shape after model forward: {pred.shape}")
 
             # Apply NMS
             pred = non_max_suppression(pred, 0.25, 0.45, agnostic=False)
