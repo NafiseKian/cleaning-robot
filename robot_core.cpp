@@ -75,7 +75,7 @@ void camera_thread(int &photoCounter) {
     std::cout << "Py Initialized is called" << std::endl;
 
     // Import the Python module
-    PyObject* pName = PyUnicode_DecodeFSDefault("detect_trash");
+    PyObject* pName = PyUnicode_DecodeFSDefault("trial");  // Module name is "trial" without ".py"
     PyObject* pModule = PyImport_Import(pName);
     Py_DECREF(pName);
 
