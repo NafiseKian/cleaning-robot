@@ -1,13 +1,9 @@
 # Define compiler
 CXX = g++
 
-# Python environment path
-PYTHONHOME = /home/ciuteam/cleaningrobot/tf_env
-PYTHONPATH = /home/ciuteam/cleaningrobot/tf_env/lib/python3.11/site-packages
-
 # Python flags
-PY_CFLAGS = $(shell $(PYTHONHOME)/bin/python3.11-config --cflags)
-PY_LDFLAGS = $(shell $(PYTHONHOME)/bin/python3.11-config --ldflags)
+PY_CFLAGS = $(shell python3.11-config --cflags)
+PY_LDFLAGS = $(shell python3.11-config --ldflags)
 PY_LIBS = -lpython3.11
 
 # Combine Python flags with your flags
@@ -41,5 +37,5 @@ clean:
 	$(RM) *.o *~ $(MAIN)
 
 run: $(MAIN)
-	@echo Running the application with the Python virtual environment
-	@PYTHONHOME=$(PYTHONHOME) PYTHONPATH=$(PYTHONPATH) ./$(MAIN)
+	@echo Running the application
+	./$(MAIN)
