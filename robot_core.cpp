@@ -79,6 +79,14 @@ void camera_thread(int &photoCounter) {
     PyList_Append(sysPath, scriptDir);
     Py_DECREF(scriptDir);
 
+    // Print Python path for debugging
+    PyObject* repr = PyObject_Repr(sysPath);
+    PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
+    const char* bytes = PyBytes_AS_STRING(str);
+    std::cout << "Python Path: " << bytes << std::endl;
+    Py_XDECREF(repr);
+    Py_XDECREF(str);
+
     // Import the Python module
     PyObject* pName = PyUnicode_DecodeFSDefault("trial");  // Module name is "trial" without ".py"
     PyObject* pModule = PyImport_Import(pName);
@@ -246,8 +254,6 @@ int main() {
         usleep(500000); // 0.5 second delay for general loop control
     }
 
-    gpsWifiThread.join();
-    camThread.join();
 
     return 0;
 }
