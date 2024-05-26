@@ -57,7 +57,6 @@ void gps_wifi_thread() {
         std::cout << "Estimated location using KNN: X = " << currentX
                   << ", Y = " << currentY << std::endl;
 
-
         if (network.connectToServer()) {
             std::cout << "Connected to server successfully." << std::endl;
             network.sendData("ROBOT," + std::to_string(currentX) + "," + std::to_string(currentY));
@@ -74,11 +73,11 @@ void camera_thread(int &photoCounter) {
     Py_Initialize();
     std::cout << "Py Initialized is called" << std::endl;
 
-    // Add current directory to Python path
-    PyObject* sysPath = PySys_GetObject("/home/ciuteam/cleaningrobot/cleaning-robot");
-    PyObject* currentDir = PyUnicode_FromString(".");
-    PyList_Append(sysPath, currentDir);
-    Py_DECREF(currentDir);
+    // Add the script directory to Python path
+    PyObject* sysPath = PySys_GetObject("path");
+    PyObject* scriptDir = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot");
+    PyList_Append(sysPath, scriptDir);
+    Py_DECREF(scriptDir);
 
     // Import the Python module
     PyObject* pName = PyUnicode_DecodeFSDefault("trial");  // Module name is "trial" without ".py"
@@ -88,6 +87,7 @@ void camera_thread(int &photoCounter) {
     if (pModule == nullptr) {
         PyErr_Print();
         std::cerr << "Failed to load Python module" << std::endl;
+        Py_Finalize();
         return;
     }
 
@@ -99,6 +99,7 @@ void camera_thread(int &photoCounter) {
         std::cerr << "Cannot find function 'detect_trash'" << std::endl;
         Py_XDECREF(pFunc);
         Py_DECREF(pModule);
+        Py_Finalize();
         return;
     }
 
@@ -244,6 +245,9 @@ int main() {
 
         usleep(500000); // 0.5 second delay for general loop control
     }
+
+    gpsWifiThread.join();
+    camThread.join();
 
     return 0;
 }
