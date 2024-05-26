@@ -27,93 +27,41 @@ const double X_MAX = 100.0;
 const double Y_MIN = 0.0;
 const double Y_MAX = 100.0;
 
-void detectObjects() {
-    // Set the PYTHONHOME and PYTHONPATH environment variables
-    setenv("PYTHONHOME", "/home/ciuteam/cleaningrobot/tf-env", 1);
-    setenv("PYTHONPATH", "/home/ciuteam/cleaningrobot/tf-env/lib/python3.11/site-packages", 1);
+/*
+// Function to initialize serial communication with Arduino
+sp_port* initSerial(const char* portName) {
+    sp_port* serialPort;
+    sp_return result = sp_get_port_by_name(portName, &serialPort);
 
-    // Initialize Python interpreter
-    Py_Initialize();
-
-    // Print a message indicating Python initialization
-    std::cout << "Py Initialized is called" << std::endl;
-
-    // Print Python version and executable for debugging
-    PyObject* sys = PyImport_ImportModule("sys");
-    PyObject* version = PyObject_GetAttrString(sys, "version");
-    PyObject* executable = PyObject_GetAttrString(sys, "executable");
-    std::cout << "Python version: " << PyUnicode_AsUTF8(version) << std::endl;
-    std::cout << "Python executable: " << PyUnicode_AsUTF8(executable) << std::endl;
-    Py_DECREF(version);
-    Py_DECREF(executable);
-    Py_DECREF(sys);
-
-    // Set PYTHONPATH to the current directory
-    PyObject* sysPath = PySys_GetObject("path");
-    PyList_Append(sysPath, PyUnicode_DecodeFSDefault("."));
-
-    // Import necessary modules
-    PyObject* pName = PyUnicode_DecodeFSDefault("trial");
-    PyObject* pModule = PyImport_Import(pName);
-    Py_DECREF(pName);
-
-    if (pModule != NULL) {
-        // Get the function
-        PyObject* pFunc = PyObject_GetAttrString(pModule, "detect_objects");
-
-        if (pFunc && PyCallable_Check(pFunc)) {
-            // Create a list of class names
-            PyObject* classNames = PyList_New(2);
-            PyList_SetItem(classNames, 0, PyUnicode_FromString("not trash"));
-            PyList_SetItem(classNames, 1, PyUnicode_FromString("trash"));
-
-            // Call the Python function with arguments
-            PyObject* pArgs = PyTuple_Pack(4, 
-                PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/images"),  // Image directory
-                PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/output"), // Output directory
-                PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt"), // Weights path
-                classNames // List of class names
-            );
-
-            if (pArgs != NULL) {
-                PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
-
-                // Check for errors
-                if (pResult != NULL) {
-                    // Do something with the result if needed
-                    Py_DECREF(pResult);
-                } else {
-                    PyErr_Print();
-                }
-
-                // Clean up
-                Py_DECREF(pArgs);
-            } else {
-                PyErr_Print();
-                std::cerr << "Failed to create argument tuple\n";
-            }
-
-            Py_DECREF(pFunc);
-        } else {
-            if (PyErr_Occurred()) PyErr_Print();
-            std::cerr << "Cannot find function 'detect_objects'\n";
-        }
-
-        // Clean up
-        Py_DECREF(pModule);
-    } else {
-        PyErr_Print();
-        std::cerr << "Failed to load Python module 'trial'\n";
+    if (result != SP_OK) {
+        std::cerr << "Error getting port by name: " << result << std::endl;
+        return nullptr;
     }
 
-    // Finalize Python interpreter
-    Py_Finalize();
+    result = sp_open(serialPort, SP_MODE_READ_WRITE);
+    if (result != SP_OK) {
+        std::cerr << "Error opening port: " << result << std::endl;
+        return nullptr;
+    }
+
+    result = sp_set_baudrate(serialPort, 9600);
+    if (result != SP_OK) {
+        std::cerr << "Error setting baud rate: " << result << std::endl;
+        return nullptr;
+    }
+
+    return serialPort;
 }
 
-void camera_thread(int& some_variable) {
-    detectObjects();
+// Function to send a command to the Arduino
+void sendCommandToArduino(sp_port* serialPort, char command) {
+    sp_nonblocking_write(serialPort, &command, 1);
 }
 
+bool isWithinBoundaries(double x, double y) {
+    return (x >= X_MIN && x <= X_MAX && y >= Y_MIN && y <= Y_MAX);
+}
+*/
 void gps_wifi_thread() {
     NetworkModule network("34.165.89.174", 3389);
 
@@ -156,6 +104,96 @@ void gps_wifi_thread() {
     }
 }
 
+void camera_thread(int &photoCounter)
+{
+    // Initialize Python interpreter
+    Py_Initialize();
+    std::cout<<"Py Initialized is called "<<std::cout ; 
+
+    // Import the Python module
+    PyObject* pName = PyUnicode_DecodeFSDefault("trial");  // Module name is "trial" without ".py"
+    PyObject* pModule = PyImport_Import(pName);
+    Py_DECREF(pName);
+
+    if (pModule == nullptr) {
+        PyErr_Print();
+        std::cerr << "Failed to load Python module" << std::endl;
+        return;
+    }
+
+    // Get the detect_objects function
+    PyObject* pFunc = PyObject_GetAttrString(pModule, "detect_objects");
+
+    if (pFunc == nullptr || !PyCallable_Check(pFunc)) {
+        PyErr_Print();
+        std::cerr << "Cannot find function 'detect_objects'" << std::endl;
+        Py_XDECREF(pFunc);
+        Py_DECREF(pModule);
+        return;
+    }
+
+    while (true) {
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [] { return stopMovement; });
+
+        CameraModule::capturePhoto(photoCounter);
+        std::cout << "Photo " << photoCounter << " taken." << std::endl;
+
+        // Simulate image processing (replace with actual processing logic)
+        std::cout << "Processing image " << photoCounter << "..." << std::endl;
+        sleep(1); // Simulate processing delay
+
+        // Call the Python function to detect trash
+        PyObject* pArgs = PyTuple_New(3);
+        PyObject* pValue;
+
+        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\images");
+        PyTuple_SetItem(pArgs, 0, pValue);
+        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\output");
+        PyTuple_SetItem(pArgs, 1, pValue);
+        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\epoch_054.pt");
+        PyTuple_SetItem(pArgs, 2, pValue);
+
+        PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
+        Py_DECREF(pArgs);
+
+        if (pResult != nullptr) {
+            if (PyBool_Check(pResult)) {
+                trashDetected = (pResult == Py_True);
+            } else {
+                std::cerr << "Unexpected return type" << std::endl;
+            }
+            Py_DECREF(pResult);
+        } else {
+            PyErr_Print();
+            std::cerr << "Call to detect_objects failed" << std::endl;
+        }
+
+        // Print the detection result
+        if (trashDetected) {
+            std::cout << "Trash detected in photo " << photoCounter << "!" << std::endl;
+        } else {
+            std::cout << "No trash detected in photo " << photoCounter << "." << std::endl;
+        }
+
+        photoCounter++;
+
+        // Signal main thread to resume movement
+        photoTaken = true;
+        stopMovement = false;
+        cv.notify_all();
+
+        if (photoCounter == 10) break;
+    }
+
+    // Clean up Python objects
+    Py_XDECREF(pFunc);
+    Py_DECREF(pModule);
+
+    // Finalize Python interpreter
+    Py_Finalize();
+}
+
 int main() 
 {
     std::thread gpsWifiThread(gps_wifi_thread);
@@ -184,7 +222,7 @@ int main()
 
         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
         std::cout << "Front Distance sensor right: " << distanceFrontR << " cm" << std::endl;
-        std::cout << "Right Distance : " << distanceRight << " cm" <<std::endl;
+        std::cout << "Right Distance : " << distanceRight << " cm" << std::endl;
         std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
 
         bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
@@ -200,7 +238,7 @@ int main()
             usleep(500000);
             MotorControl::turnRight();
             usleep(500000);
-            
+            /*
             stopMovement = true;
             photoTaken = false;
             cv.notify_all();
@@ -216,7 +254,7 @@ int main()
                 sleep(1); // Simulate pick-up delay
                 //sendCommandToArduino(serialPort, 'P'); // Send pick command to Arduino
             }
-            
+            */
             std::cout << "Resuming movement..." << std::endl;
         } 
         else if(validRight)
@@ -247,8 +285,6 @@ int main()
         usleep(500000); // 0.5 second delay for general loop control
     }
 
-    gpsWifiThread.join();
-    camThread.join();
 
     return 0;
 }
