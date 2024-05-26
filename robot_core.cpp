@@ -27,41 +27,6 @@ const double X_MAX = 100.0;
 const double Y_MIN = 0.0;
 const double Y_MAX = 100.0;
 
-/*
-// Function to initialize serial communication with Arduino
-sp_port* initSerial(const char* portName) {
-    sp_port* serialPort;
-    sp_return result = sp_get_port_by_name(portName, &serialPort);
-
-    if (result != SP_OK) {
-        std::cerr << "Error getting port by name: " << result << std::endl;
-        return nullptr;
-    }
-
-    result = sp_open(serialPort, SP_MODE_READ_WRITE);
-    if (result != SP_OK) {
-        std::cerr << "Error opening port: " << result << std::endl;
-        return nullptr;
-    }
-
-    result = sp_set_baudrate(serialPort, 9600);
-    if (result != SP_OK) {
-        std::cerr << "Error setting baud rate: " << result << std::endl;
-        return nullptr;
-    }
-
-    return serialPort;
-}
-
-// Function to send a command to the Arduino
-void sendCommandToArduino(sp_port* serialPort, char command) {
-    sp_nonblocking_write(serialPort, &command, 1);
-}
-
-bool isWithinBoundaries(double x, double y) {
-    return (x >= X_MIN && x <= X_MAX && y >= Y_MIN && y <= Y_MAX);
-}
-*/
 void gps_wifi_thread() {
     NetworkModule network("34.165.89.174", 3389);
 
@@ -104,14 +69,13 @@ void gps_wifi_thread() {
     }
 }
 
-void camera_thread(int &photoCounter)
-{
+void camera_thread(int &photoCounter) {
     // Initialize Python interpreter
     Py_Initialize();
-    std::cout<<"Py Initialized is called "<<std::cout ; 
+    std::cout << "Py Initialized is called" << std::endl;
 
     // Import the Python module
-    PyObject* pName = PyUnicode_DecodeFSDefault("trial");  // Module name is "trial" without ".py"
+    PyObject* pName = PyUnicode_DecodeFSDefault("detect_trash");
     PyObject* pModule = PyImport_Import(pName);
     Py_DECREF(pName);
 
@@ -121,12 +85,12 @@ void camera_thread(int &photoCounter)
         return;
     }
 
-    // Get the detect_objects function
-    PyObject* pFunc = PyObject_GetAttrString(pModule, "detect_objects");
+    // Get the detect_trash function
+    PyObject* pFunc = PyObject_GetAttrString(pModule, "detect_trash");
 
     if (pFunc == nullptr || !PyCallable_Check(pFunc)) {
         PyErr_Print();
-        std::cerr << "Cannot find function 'detect_objects'" << std::endl;
+        std::cerr << "Cannot find function 'detect_trash'" << std::endl;
         Py_XDECREF(pFunc);
         Py_DECREF(pModule);
         return;
@@ -139,34 +103,33 @@ void camera_thread(int &photoCounter)
         CameraModule::capturePhoto(photoCounter);
         std::cout << "Photo " << photoCounter << " taken." << std::endl;
 
-        // Simulate image processing (replace with actual processing logic)
-        std::cout << "Processing image " << photoCounter << "..." << std::endl;
-        sleep(1); // Simulate processing delay
-
         // Call the Python function to detect trash
         PyObject* pArgs = PyTuple_New(3);
         PyObject* pValue;
 
-        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\images");
+        pValue = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/images");
         PyTuple_SetItem(pArgs, 0, pValue);
-        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\output");
+        pValue = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt");
         PyTuple_SetItem(pArgs, 1, pValue);
-        pValue = PyUnicode_FromString("C:\\Users\\CIU\\Desktop\\trash\\epoch_054.pt");
+        pValue = PyList_New(2);
+        PyList_SetItem(pValue, 0, PyUnicode_FromString("not trash"));
+        PyList_SetItem(pValue, 1, PyUnicode_FromString("trash"));
         PyTuple_SetItem(pArgs, 2, pValue);
 
         PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
         Py_DECREF(pArgs);
 
         if (pResult != nullptr) {
-            if (PyBool_Check(pResult)) {
-                trashDetected = (pResult == Py_True);
+            if (PyTuple_Check(pResult)) {
+                PyObject* pTrashDetected = PyTuple_GetItem(pResult, 0);
+                trashDetected = PyObject_IsTrue(pTrashDetected);
             } else {
                 std::cerr << "Unexpected return type" << std::endl;
             }
             Py_DECREF(pResult);
         } else {
             PyErr_Print();
-            std::cerr << "Call to detect_objects failed" << std::endl;
+            std::cerr << "Call to detect_trash failed" << std::endl;
         }
 
         // Print the detection result
@@ -194,14 +157,12 @@ void camera_thread(int &photoCounter)
     Py_Finalize();
 }
 
-int main() 
-{
+int main() {
     std::thread gpsWifiThread(gps_wifi_thread);
 
     // Initialize motor control
     MotorControl::setup();
     std::cout << "Motor controller set up done" << std::endl;
-
 
     int photoCounter = 0;
     std::thread camThread(camera_thread, std::ref(photoCounter));
@@ -238,7 +199,7 @@ int main()
             usleep(500000);
             MotorControl::turnRight();
             usleep(500000);
-            /*
+
             stopMovement = true;
             photoTaken = false;
             cv.notify_all();
@@ -254,29 +215,22 @@ int main()
                 sleep(1); // Simulate pick-up delay
                 //sendCommandToArduino(serialPort, 'P'); // Send pick command to Arduino
             }
-            */
+
             std::cout << "Resuming movement..." << std::endl;
-        } 
-        else if(validRight)
-        {
+        } else if (validRight) {
             MotorControl::turnLeft();
             usleep(500000);
             MotorControl::forward();
-        }
-        else if(validLeft)
-        {
+        } else if (validLeft) {
             MotorControl::turnRight();
             usleep(500000);
             MotorControl::forward();
-        }
-        else if ((validFrontL || validFrontR) && validLeft && validRight )
-        {
+        } else if ((validFrontL || validFrontR) && validLeft && validRight) {
             MotorControl::backward();
             usleep(500000);
             MotorControl::turnRight();
             usleep(500000);
-        }
-        else {
+        } else {
             // If no valid obstacle is directly in front, move forward
             MotorControl::forward();
             std::cout << "Path is clear. Moving forward..." << std::endl;
@@ -285,6 +239,8 @@ int main()
         usleep(500000); // 0.5 second delay for general loop control
     }
 
+    gpsWifiThread.join();
+    camThread.join();
 
     return 0;
 }
