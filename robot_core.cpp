@@ -74,6 +74,12 @@ void camera_thread(int &photoCounter) {
     Py_Initialize();
     std::cout << "Py Initialized is called" << std::endl;
 
+    // Add current directory to Python path
+    PyObject* sysPath = PySys_GetObject("/home/ciuteam/cleaningrobot/cleaning-robot");
+    PyObject* currentDir = PyUnicode_FromString(".");
+    PyList_Append(sysPath, currentDir);
+    Py_DECREF(currentDir);
+
     // Import the Python module
     PyObject* pName = PyUnicode_DecodeFSDefault("trial");  // Module name is "trial" without ".py"
     PyObject* pModule = PyImport_Import(pName);
@@ -238,9 +244,6 @@ int main() {
 
         usleep(500000); // 0.5 second delay for general loop control
     }
-
-    gpsWifiThread.join();
-    camThread.join();
 
     return 0;
 }
