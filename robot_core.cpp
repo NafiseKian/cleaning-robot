@@ -67,8 +67,11 @@ void gps_wifi_thread() {
         sleep(5);
     }
 }
-
 void camera_thread(int &photoCounter) {
+    // Set the PYTHONHOME and PYTHONPATH environment variables
+    setenv("PYTHONHOME", "/home/ciuteam/cleaningrobot/tf-env", 1);
+    setenv("PYTHONPATH", "/home/ciuteam/cleaningrobot/tf-env/lib/python3.11/site-packages:/home/ciuteam/cleaningrobot/tf-env/lib/python3.11", 1);
+
     // Initialize Python interpreter
     Py_Initialize();
     std::cout << "Py Initialized is called" << std::endl;
@@ -80,12 +83,7 @@ void camera_thread(int &photoCounter) {
     Py_DECREF(scriptDir);
 
     // Print Python path for debugging
-    PyObject* repr = PyObject_Repr(sysPath);
-    PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
-    const char* bytes = PyBytes_AS_STRING(str);
-    std::cout << "Python Path: " << bytes << std::endl;
-    Py_XDECREF(repr);
-    Py_XDECREF(str);
+    print_python_path();
 
     // Import the Python module
     PyObject* pName = PyUnicode_DecodeFSDefault("trial");  // Module name is "trial" without ".py"

@@ -37,5 +37,5 @@ clean:
 	$(RM) *.o *~ $(MAIN)
 
 run: $(MAIN)
-	@echo Running the application
-	./$(MAIN)
+	@echo Running the application with the Python virtual environment
+	PYTHONHOME=/home/ciuteam/cleaningrobot/tf-env PYTHONPATH=/home/ciuteam/cleaningrobot/tf-env/lib/python3.11/site-packages:/home/ciuteam/cleaningrobot/tf-env/lib/python3.11 ./$(MAIN)
