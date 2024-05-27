@@ -82,8 +82,6 @@ void camera_thread(int &photoCounter) {
     PyList_Append(sysPath, scriptDir);
     Py_DECREF(scriptDir);
 
-    // Print Python path for debugging
-    print_python_path();
 
     // Import the Python module
     PyObject* pName = PyUnicode_DecodeFSDefault("trial");  // Module name is "trial" without ".py"
