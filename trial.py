@@ -95,6 +95,7 @@ def main():
 
             # Send the result back to C++ process
             result = "1" if trash_detected else "0"
+            print("the value of result is "+result)
             connection.sendall(result.encode('utf-8'))
 
     finally:
