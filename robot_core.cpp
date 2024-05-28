@@ -120,7 +120,7 @@ void camera_thread(int &photoCounter) {
             exit(EXIT_FAILURE);
         }
         buffer[n] = '\0';
-        printf(buffer);
+        std::cout << "Received from Python: " << buffer << std::endl;  // Debug print
         trashDetected = std::string(buffer) == "1";
 
         // Print the detection result
