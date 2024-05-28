@@ -2,70 +2,101 @@ import cv2
 import os
 import torch
 import numpy as np
+import socket
 from models.experimental import attempt_load
 from utils.general import non_max_suppression
 
-def detect_trash(image_dir, weights_path, classNames):
+SOCKET_PATH = "/tmp/unix_socket_example"
+
+def detect_trash(image_path, model, classNames):
     trash_detected = False
 
+    # Load the image
+    img = cv2.imread(image_path)
+
+    # Prepare image for inference
+    img = cv2.resize(img, (640, 640))
+    img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x640x640
+    img = np.ascontiguousarray(img)
+
+    img = torch.from_numpy(img).to(device)
+    img = img.float()  # uint8 to fp16/32
+    img /= 255.0  # 0 - 255 to 0.0 - 1.0
+
+    # Ensure img has the right dimensions
+    if img.ndimension() == 3:
+        img = img.unsqueeze(0)
+
+    # Perform object detection
+    with torch.no_grad():
+        pred = model(img)[0]
+
+    # Apply NMS
+    pred = non_max_suppression(pred, 0.25, 0.45, agnostic=False)
+
+    # Process detections
+    for det in pred:
+        if len(det):
+            # Process each detected object
+            for *xyxy, _, cls in det:
+                # Determine if it's trash or not
+                if classNames[int(cls)] == "trash":
+                    trash_detected = True
+                    break
+
+    return trash_detected
+
+def main():
     # Load the YOLOv7 model with the specified weights file
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    weights_path = r"/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt"
     model = attempt_load(weights_path, map_location=device)  # Load the model
     model.eval()
 
-    # Initialize a list to store detection results for all images
-    all_results = []
+    classNames = ["not trash", "trash"]
 
-    # Recursively process each image in the directory and its subdirectories
-    for root, dirs, files in os.walk(image_dir):
-        for filename in files:
-            if filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-                # Read the image
-                img_path = os.path.join(root, filename)
-                img = cv2.imread(img_path)
+    # Create a Unix domain socket
+    server_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
-                # Prepare image for inference
-                img = cv2.resize(img, (640, 640))
-                img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x640x640
-                img = np.ascontiguousarray(img)
+    # Ensure the socket does not already exist
+    try:
+        os.unlink(SOCKET_PATH)
+    except OSError:
+        if os.path.exists(SOCKET_PATH):
+            raise
 
-                img = torch.from_numpy(img).to(device)
-                img = img.float()  # uint8 to fp16/32
-                img /= 255.0  # 0 - 255 to 0.0 - 1.0
+    # Bind the socket to the address
+    server_socket.bind(SOCKET_PATH)
 
-                # Ensure img has the right dimensions
-                if img.ndimension() == 3:
-                    img = img.unsqueeze(0)
+    # Listen for incoming connections
+    server_socket.listen(1)
 
-                # Perform object detection
-                with torch.no_grad():
-                    pred = model(img)[0]
+    print("Waiting for a connection...")
+    connection, client_address = server_socket.accept()
 
-                # Apply NMS
-                pred = non_max_suppression(pred, 0.25, 0.45, agnostic=False)
+    try:
+        print("Connection established")
 
-                # Process detections
-                for det in pred:
-                    if len(det):
-                        # Process each detected object
-                        for *xyxy, _, cls in det:
-                            # Determine if it's trash or not
-                            is_trash = classNames[int(cls)] == "trash"
+        while True:
+            # Receive the data
+            data = connection.recv(1024)
+            if not data:
+                break
 
-                            # Append result to the list
-                            all_results.append((filename, is_trash))
-                            if is_trash:
-                                trash_detected = True
+            image_path = data.decode('utf-8')
 
-    return trash_detected, all_results
+            # Run the detection
+            trash_detected = detect_trash(image_path, model, classNames)
 
-# List of class names, assuming two classes: "not trash" and "trash"
-classNames = ["not trash", "trash"]
+            # Send the result back to C++ process
+            result = "1" if trash_detected else "0"
+            connection.sendall(result.encode('utf-8'))
 
-# Call the function with your desired parameters
-image_dir = r"/home/ciuteam/cleaningrobot/cleaning-robot/images"
-weights_path = r"/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt"
-trash_detected, detection_results = detect_trash(image_dir, weights_path, classNames)
+    finally:
+        # Clean up the connection
+        connection.close()
+        server_socket.close()
+        os.unlink(SOCKET_PATH)
 
-print("Trash Detected:", trash_detected)
-print("Detection Results:", detection_results)
+if __name__ == "__main__":
+    main()

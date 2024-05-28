@@ -6,6 +6,9 @@
 #include <chrono>
 #include <cmath>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <cstring>
 #include <libserialport.h>
 #include <string>
 #include "gps_module.h"
@@ -26,6 +29,8 @@ const double X_MIN = 0.0;
 const double X_MAX = 100.0;
 const double Y_MIN = 0.0;
 const double Y_MAX = 100.0;
+
+#define SOCKET_PATH "/tmp/unix_socket_example"
 
 void gps_wifi_thread() {
     NetworkModule network("34.165.89.174", 3389);
@@ -67,88 +72,50 @@ void gps_wifi_thread() {
         sleep(5);
     }
 }
+
 void camera_thread(int &photoCounter) {
-    // Set the PYTHONHOME and PYTHONPATH environment variables
-    setenv("PYTHONHOME", "/home/ciuteam/cleaningrobot/tf-env", 1);
-    setenv("PYTHONPATH", "/home/ciuteam/cleaningrobot/tf-env/lib/python3.11/site-packages:/home/ciuteam/cleaningrobot/tf-env/lib/python3.11", 1);
-
-    // Initialize Python interpreter
-    Py_Initialize();
-    std::cout << "Py Initialized is called" << std::endl;
-
-    // Add the script directory to Python path
-    PyObject* sysPath = PySys_GetObject("path");
-    PyObject* scriptDir = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot");
-    PyList_Append(sysPath, scriptDir);
-    Py_DECREF(scriptDir);
-
-    // Print Python path for debugging
-    PyObject* repr = PyObject_Repr(sysPath);
-    PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
-    const char* bytes = PyBytes_AS_STRING(str);
-    std::cout << "Python Path: " << bytes << std::endl;
-    Py_XDECREF(repr);
-    Py_XDECREF(str);
-
-    // Import the Python module
-    PyObject* pName = PyUnicode_DecodeFSDefault("trial");  // Module name is "trial" without ".py"
-    PyObject* pModule = PyImport_Import(pName);
-    Py_DECREF(pName);
-
-    if (pModule == nullptr) {
-        PyErr_Print();
-        std::cerr << "Failed to load Python module" << std::endl;
-        Py_Finalize();
-        return;
+    int sockfd;
+    struct sockaddr_un addr;
+    
+    // Create socket
+    sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        perror("socket error");
+        exit(EXIT_FAILURE);
     }
 
-    // Get the detect_trash function
-    PyObject* pFunc = PyObject_GetAttrString(pModule, "detect_trash");
+    // Set socket address
+    memset(&addr, 0, sizeof(addr));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, SOCKET_PATH, sizeof(addr.sun_path) - 1);
 
-    if (pFunc == nullptr || !PyCallable_Check(pFunc)) {
-        PyErr_Print();
-        std::cerr << "Cannot find function 'detect_trash'" << std::endl;
-        Py_XDECREF(pFunc);
-        Py_DECREF(pModule);
-        Py_Finalize();
-        return;
+    // Connect to the server
+    if (connect(sockfd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
+        perror("connect error");
+        close(sockfd);
+        exit(EXIT_FAILURE);
     }
 
     while (true) {
-        std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [] { return stopMovement; });
+        std::string imagePath = "/path/to/photo" + std::to_string(photoCounter) + ".jpg"; // Update with actual photo path
 
-        CameraModule::capturePhoto(photoCounter);
-        std::cout << "Photo " << photoCounter << " taken." << std::endl;
-
-        // Call the Python function to detect trash
-        PyObject* pArgs = PyTuple_New(3);
-        PyObject* pValue;
-
-        pValue = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/images");
-        PyTuple_SetItem(pArgs, 0, pValue);
-        pValue = PyUnicode_FromString("/home/ciuteam/cleaningrobot/cleaning-robot/epoch_054.pt");
-        PyTuple_SetItem(pArgs, 1, pValue);
-        pValue = PyList_New(2);
-        PyList_SetItem(pValue, 0, PyUnicode_FromString("not trash"));
-        PyList_SetItem(pValue, 1, PyUnicode_FromString("trash"));
-        PyTuple_SetItem(pArgs, 2, pValue);
-
-        PyObject* pResult = PyObject_CallObject(pFunc, pArgs);
-        Py_DECREF(pArgs);
-
-        if (pResult != nullptr) {
-            if (PyTuple_Check(pResult)) {
-                PyObject* pTrashDetected = PyTuple_GetItem(pResult, 0);
-                trashDetected = PyObject_IsTrue(pTrashDetected);
-            } else {
-                std::cerr << "Unexpected return type" << std::endl;
-            }
-            Py_DECREF(pResult);
-        } else {
-            PyErr_Print();
-            std::cerr << "Call to detect_trash failed" << std::endl;
+        // Send the image path to Python process
+        if (send(sockfd, imagePath.c_str(), imagePath.length(), 0) == -1) {
+            perror("send error");
+            close(sockfd);
+            exit(EXIT_FAILURE);
         }
+
+        // Receive the detection result from Python process
+        char buffer[256];
+        int n = recv(sockfd, buffer, sizeof(buffer) - 1, 0);
+        if (n == -1) {
+            perror("recv error");
+            close(sockfd);
+            exit(EXIT_FAILURE);
+        }
+        buffer[n] = '\0';
+        trashDetected = std::string(buffer) == "1";
 
         // Print the detection result
         if (trashDetected) {
@@ -167,12 +134,8 @@ void camera_thread(int &photoCounter) {
         if (photoCounter == 10) break;
     }
 
-    // Clean up Python objects
-    Py_XDECREF(pFunc);
-    Py_DECREF(pModule);
-
-    // Finalize Python interpreter
-    Py_Finalize();
+    // Close socket
+    close(sockfd);
 }
 
 int main() {
@@ -256,7 +219,6 @@ int main() {
 
         usleep(500000); // 0.5 second delay for general loop control
     }
-
 
     return 0;
 }
