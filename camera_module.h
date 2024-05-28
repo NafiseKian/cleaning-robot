@@ -6,7 +6,7 @@
 
 class CameraModule {
 public:
-    static void capturePhoto(int& photoCounter);
+    static std::string capturePhoto(int& photoCounter);
 };
 
 #endif // CAMERAMODULE_H
