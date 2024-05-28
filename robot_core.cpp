@@ -221,16 +221,10 @@ int main() {
             }
             else
             {
-                if (validRight)
-                {
-                    MotorControl::turnLeft();
-                    usleep(500000);
-                }
-                if(validLeft)
-                {
-                    MotorControl::turnRight();
-                    usleep(500000);
-                }
+                MotorControl::backward();
+                usleep(500000);
+                MotorControl::turnLeft();
+                usleep(500000);
             }
             std::cout << "Resuming movement..." << std::endl;
         } else if (validRight) {
