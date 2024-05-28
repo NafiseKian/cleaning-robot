@@ -9,7 +9,7 @@
 #include <ctime>
 #include <iomanip>
 
-void CameraModule::capturePhoto(int& photoCounter) {
+std::string CameraModule::capturePhoto(int& photoCounter) {
     const std::string folderPath = "/home/ciuteam/cleaningrobot/cleaning-robot/photos/";
 
     auto t = std::time(nullptr);
@@ -28,4 +28,5 @@ void CameraModule::capturePhoto(int& photoCounter) {
 
     // Increment the counter for the next filename
     photoCounter++;
+    return filePath ;
 }

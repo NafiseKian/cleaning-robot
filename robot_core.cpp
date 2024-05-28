@@ -97,10 +97,17 @@ void camera_thread(int &photoCounter) {
     }
 
     while (true) {
-        std::string imagePath = "/home/ciuteam/cleaningrobot/cleaning-robot/photos/" + std::to_string(photoCounter) + ".jpg"; // Update with actual photo path
+
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [] { return stopMovement; });
+
+        std::strin path = CameraModule::capturePhoto(photoCounter);
+        std::cout << "Photo " << photoCounter << " taken." << std::endl;
+
+       // std::string imagePath = "/home/ciuteam/cleaningrobot/cleaning-robot/photos/" + "" + ".jpg"; // Update with actual photo path
 
         // Send the image path to Python process
-        if (send(sockfd, imagePath.c_str(), imagePath.length(), 0) == -1) {
+        if (send(sockfd, path.c_str(), path.length(), 0) == -1) {
             perror("send error");
             close(sockfd);
             exit(EXIT_FAILURE);
