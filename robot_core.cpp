@@ -97,7 +97,7 @@ void camera_thread(int &photoCounter) {
     }
 
     while (true) {
-        std::string imagePath = "/path/to/photo" + std::to_string(photoCounter) + ".jpg"; // Update with actual photo path
+        std::string imagePath = "/home/ciuteam/cleaningrobot/cleaning-robot/photos/" + std::to_string(photoCounter) + ".jpg"; // Update with actual photo path
 
         // Send the image path to Python process
         if (send(sockfd, imagePath.c_str(), imagePath.length(), 0) == -1) {
