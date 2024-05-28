@@ -101,7 +101,7 @@ void camera_thread(int &photoCounter) {
         std::unique_lock<std::mutex> lock(mtx);
         cv.wait(lock, [] { return stopMovement; });
 
-        std::strin path = CameraModule::capturePhoto(photoCounter);
+        std::string path = CameraModule::capturePhoto(photoCounter);
         std::cout << "Photo " << photoCounter << " taken." << std::endl;
 
        // std::string imagePath = "/home/ciuteam/cleaningrobot/cleaning-robot/photos/" + "" + ".jpg"; // Update with actual photo path
