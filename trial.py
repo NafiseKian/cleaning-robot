@@ -8,11 +8,15 @@ from utils.general import non_max_suppression
 
 SOCKET_PATH = "/tmp/unix_socket_example"
 
-def detect_trash(image_path, model, classNames):
+def detect_trash(image_path, model, classNames, device):
     trash_detected = False
 
     # Load the image
+    print(f"Loading image: {image_path}")
     img = cv2.imread(image_path)
+    if img is None:
+        print(f"Error: Unable to load image at {image_path}")
+        return False
 
     # Prepare image for inference
     img = cv2.resize(img, (640, 640))
@@ -84,9 +88,10 @@ def main():
                 break
 
             image_path = data.decode('utf-8')
+            print(f"Received image path: {image_path}")
 
             # Run the detection
-            trash_detected = detect_trash(image_path, model, classNames)
+            trash_detected = detect_trash(image_path, model, classNames, device)
 
             # Send the result back to C++ process
             result = "1" if trash_detected else "0"

@@ -104,8 +104,6 @@ void camera_thread(int &photoCounter) {
         std::string path = CameraModule::capturePhoto(photoCounter);
         std::cout << "Photo " << photoCounter << " taken." << std::endl;
 
-       // std::string imagePath = "/home/ciuteam/cleaningrobot/cleaning-robot/photos/" + "" + ".jpg"; // Update with actual photo path
-
         // Send the image path to Python process
         if (send(sockfd, path.c_str(), path.length(), 0) == -1) {
             perror("send error");
