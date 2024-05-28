@@ -120,6 +120,7 @@ void camera_thread(int &photoCounter) {
             exit(EXIT_FAILURE);
         }
         buffer[n] = '\0';
+        printf(buffer);
         trashDetected = std::string(buffer) == "1";
 
         // Print the detection result
