@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <cstring>
+#include <csignal>
 #include <libserialport.h>
 #include <string>
 #include "gps_module.h"
@@ -24,6 +25,7 @@ std::condition_variable cv;
 bool stopMovement = false;
 bool photoTaken = false;
 bool trashDetected = false;
+bool stopProgram = false;
 
 const double X_MIN = 0.0;
 const double X_MAX = 100.0;
@@ -31,6 +33,17 @@ const double Y_MIN = 0.0;
 const double Y_MAX = 100.0;
 
 #define SOCKET_PATH "/tmp/unix_socket_example"
+
+// Signal handler to stop the motors and exit the program
+void signalHandler(int signum) {
+    std::cout << "Interrupt signal (" << signum << ") received.\n";
+    // Stop the motors
+    MotorControl::stop();
+    // Signal the program to stop
+    stopProgram = true;
+    // Notify all threads to exit
+    cv.notify_all();
+}
 
 void gps_wifi_thread() {
     NetworkModule network("34.165.89.174", 3389);
@@ -41,7 +54,7 @@ void gps_wifi_thread() {
     Localization wifi;
     std::vector<std::tuple<std::string, double, double, double>> fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
 
-    while (true) {
+    while (!stopProgram) {
         std::cout << "worker thread loop" << std::endl;
 
         std::string gpsData;
@@ -96,10 +109,12 @@ void camera_thread(int &photoCounter) {
         exit(EXIT_FAILURE);
     }
 
-    while (true) {
+    while (!stopProgram) {
 
         std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [] { return stopMovement; });
+        cv.wait(lock, [] { return stopMovement || stopProgram; });
+
+        if (stopProgram) break;
 
         std::string path = CameraModule::capturePhoto(photoCounter);
         std::cout << "Photo " << photoCounter << " taken." << std::endl;
@@ -136,8 +151,6 @@ void camera_thread(int &photoCounter) {
         photoTaken = true;
         stopMovement = false;
         cv.notify_all();
-
-       
     }
 
     // Close socket
@@ -145,6 +158,9 @@ void camera_thread(int &photoCounter) {
 }
 
 int main() {
+    // Register signal handler
+    signal(SIGINT, signalHandler);
+
     std::thread gpsWifiThread(gps_wifi_thread);
 
     // Initialize motor control
@@ -159,9 +175,11 @@ int main() {
     UltrasonicSensor rightSensor("Right", 22, 27);
     UltrasonicSensor leftSensor("Left", 18, 17);
 
-    while (true) {
+    while (!stopProgram) {
         std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [] { return !stopMovement; });
+        cv.wait(lock, [] { return !stopMovement || stopProgram; });
+
+        if (stopProgram) break;
 
         int distanceFrontL = frontSensorL.getDistanceCm();
         int distanceFrontR = frontSensorR.getDistanceCm();
@@ -184,14 +202,14 @@ int main() {
             usleep(500000);
             MotorControl::backward();
             usleep(500000);
-            MotorControl::turnRight();
-            usleep(500000);
 
             stopMovement = true;
             photoTaken = false;
             cv.notify_all();
 
-            cv.wait(lock, [] { return photoTaken; });
+            cv.wait(lock, [] { return photoTaken || stopProgram; });
+
+            if (stopProgram) break;
 
             if (trashDetected) {
                 std::cout << "Trash detected. Moving closer to pick it up..." << std::endl;
@@ -201,8 +219,18 @@ int main() {
                 std::cout << "Picking up trash..." << std::endl;
                 sleep(1); // Simulate pick-up delay
                 //sendCommandToArduino(serialPort, 'P'); // Send pick command to Arduino
+            }else{
+                if (validRight)
+                {
+                    MotorControl::turnLeft();
+                    usleep(500000);
+                }
+                if(validLeft)
+                {
+                    MotorControl::turnRight();
+                    usleep(500000);
+                }
             }
-
             std::cout << "Resuming movement..." << std::endl;
         } else if (validRight) {
             MotorControl::turnLeft();
@@ -225,6 +253,12 @@ int main() {
 
         usleep(500000); // 0.5 second delay for general loop control
     }
+
+    // Wait for threads to finish
+    gpsWifiThread.join();
+    camThread.join();
+
+    std::cout << "Program terminated gracefully." << std::endl;
 
     return 0;
 }
