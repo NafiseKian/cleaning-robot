@@ -137,7 +137,7 @@ void camera_thread(int &photoCounter) {
         stopMovement = false;
         cv.notify_all();
 
-        if (photoCounter == 10) break;
+       
     }
 
     // Close socket
