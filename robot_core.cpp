@@ -200,8 +200,7 @@ int main() {
             MotorControl::stop();
             std::cout << "Obstacle detected. Stopping and taking a photo..." << std::endl;
             usleep(500000);
-            MotorControl::backward();
-            usleep(500000);
+        
 
             stopMovement = true;
             photoTaken = false;
@@ -219,7 +218,9 @@ int main() {
                 std::cout << "Picking up trash..." << std::endl;
                 sleep(1); // Simulate pick-up delay
                 //sendCommandToArduino(serialPort, 'P'); // Send pick command to Arduino
-            }else{
+            }
+            else
+            {
                 if (validRight)
                 {
                     MotorControl::turnLeft();
