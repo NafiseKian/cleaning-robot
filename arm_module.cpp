@@ -24,11 +24,11 @@ void ServoControl::close() {
 }
 
 void ServoControl::down() {
-    gpioServo(servo3_pin, 1000); // Adjust to appropriate pulse width
+    gpioServo(servo3_pin, 1600); // Adjust to appropriate pulse width
 }
 
 void ServoControl::up() {
-    gpioServo(servo3_pin, 2000); // Adjust to appropriate pulse width
+    gpioServo(servo3_pin, 500); // Adjust to appropriate pulse width
 }
 
 int main()
