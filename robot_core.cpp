@@ -176,8 +176,8 @@ int main() {
     UltrasonicSensor rightSensor("Right", 22, 27);
     UltrasonicSensor leftSensor("Left", 18, 17);
 
-    ArmControl arm;
-    ArmControl.setup();
+    ServoControl arm;
+    arm.setup();
     std::cout << "arm set up done" << std::endl;
 
     while (!stopProgram) {
