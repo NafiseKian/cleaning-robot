@@ -36,6 +36,6 @@ int main()
     arm.setup();
     std::cout << "arm set up done" << std::endl;
     arm.down();
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    sleep(1);
     arm.up();
 }
