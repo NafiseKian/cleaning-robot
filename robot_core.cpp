@@ -184,7 +184,7 @@ int main() {
         std::unique_lock<std::mutex> lock(mtx);
         cv.wait(lock, [] { return !stopMovement || stopProgram; });
 
-        if (stopProgram) break;
+        if (stopProgram) MotorControl::stop();
 
         int distanceFrontL = frontSensorL.getDistanceCm();
         int distanceFrontR = frontSensorR.getDistanceCm();
@@ -209,7 +209,7 @@ int main() {
             cv.notify_all();
             cv.wait(lock, [] { return photoTaken || stopProgram; });
 
-            if (stopProgram) break;
+             if (stopProgram) MotorControl::stop();
 
             if (trashDetected) {
                 std::cout << "Trash detected. Moving closer to pick it up..." << std::endl;
@@ -231,22 +231,22 @@ int main() {
                 MotorControl::backward();
                 usleep(1500000);
                 MotorControl::turnLeft();
-                usleep(2000000);
+                usleep(4000000);
             }
             std::cout << "Resuming movement..." << std::endl;
         } else if (validRight) {
             MotorControl::turnLeft();
-            usleep(2000000);
+            usleep(4000000);
             MotorControl::forward();
         } else if (validLeft) {
             MotorControl::turnRight();
-            usleep(2000000);
+            usleep(4000000);
             MotorControl::forward();
         } else if ((validFrontL || validFrontR) && validLeft && validRight) {
             MotorControl::backward();
             usleep(2000000);
             MotorControl::turnRight();
-            usleep(2000000);
+            usleep(4000000);
         } else {
             // If no valid obstacle is directly in front, move forward
             MotorControl::forward();
