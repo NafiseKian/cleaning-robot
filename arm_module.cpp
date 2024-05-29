@@ -14,8 +14,8 @@ void ServoControl::setup() {
 }
 
 void ServoControl::open() {
-    gpioServo(servo1_pin, 1000); // Adjust these values as per your servo specifications
-    gpioServo(servo2_pin, 1000);
+    gpioServo(servo1_pin, 900); // Adjust these values as per your servo specifications
+    gpioServo(servo2_pin, 1200);
 }
 
 void ServoControl::close() {
@@ -24,7 +24,7 @@ void ServoControl::close() {
 }
 
 void ServoControl::down() {
-    gpioServo(servo3_pin, 1600); // Adjust to appropriate pulse width
+    gpioServo(servo3_pin, 1700); // Adjust to appropriate pulse width
 }
 
 void ServoControl::up() {
