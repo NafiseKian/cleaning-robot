@@ -217,14 +217,10 @@ int main() {
                 usleep(500000); // Move forward for half second to get closer to the trash
                 MotorControl::stop();
                 std::cout << "Picking up trash..." << std::endl;
-                sleep(1); // Simulate pick-up delay
                 arm.down();
-                sleep(1); // Simulate pick-up delay
-                arm.close();
-                sleep(1); // Simulate pick-up delay
+                sleep(1); 
                 arm.up();
-                sleep(1); // Simulate pick-up delay
-                arm.open();
+                sleep(1);
             }
             else
             {
