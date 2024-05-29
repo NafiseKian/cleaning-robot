@@ -1,5 +1,4 @@
 #include "arm_module.h"
-
 #include <iostream>
 
 void ServoControl::setup() {
@@ -20,17 +19,16 @@ void ServoControl::open() {
 
 void ServoControl::close() {
     gpioServo(servo1_pin, 1600);
-    gpioServo(servo2_pin, 0);
+    gpioServo(servo2_pin, 500); // Min pulse width
 }
 
 void ServoControl::down() {
-    gpioServo(servo3_pin, 100);
+    gpioServo(servo3_pin, 1000); // Adjust to appropriate pulse width
 }
 
 void ServoControl::up() {
-    gpioServo(servo3_pin, 100);
+    gpioServo(servo3_pin, 2000); // Adjust to appropriate pulse width
 }
-
 
 int main()
 {
@@ -38,4 +36,6 @@ int main()
     arm.setup();
     std::cout << "arm set up done" << std::endl;
     arm.down();
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    arm.up();
 }
