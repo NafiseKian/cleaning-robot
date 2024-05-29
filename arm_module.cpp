@@ -40,6 +40,8 @@ int main()
     sleep(1);
     arm.open();
     sleep(1);
-    arm.up();
+    arm.close();
     sleep(1);
+    arm.up();
+    sleep(2);
 }
