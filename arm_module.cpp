@@ -1,5 +1,6 @@
 #include "arm_module.h"
 #include <iostream>
+#include <unistd.h> 
 
 void ServoControl::setup() {
     if (gpioInitialise() < 0) {
