@@ -30,3 +30,12 @@ void ServoControl::down() {
 void ServoControl::up() {
     gpioServo(servo3_pin, 600);
 }
+
+
+int main()
+{
+    ServoControl arm;
+    arm.setup();
+    std::cout << "arm set up done" << std::endl;
+    arm.down();
+}
