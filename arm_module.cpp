@@ -24,11 +24,11 @@ void ServoControl::close() {
 }
 
 void ServoControl::down() {
-    gpioServo(servo3_pin, 400);
+    gpioServo(servo3_pin, 100);
 }
 
 void ServoControl::up() {
-    gpioServo(servo3_pin, 600);
+    gpioServo(servo3_pin, 100);
 }
 
 
