@@ -18,6 +18,7 @@
 #include "ultra_sensor.h"
 #include "wifi_module.h"
 #include "network_module.h"
+#include "arm_module.h"
 
 // Global variables for synchronization
 std::mutex mtx;
@@ -175,6 +176,10 @@ int main() {
     UltrasonicSensor rightSensor("Right", 22, 27);
     UltrasonicSensor leftSensor("Left", 18, 17);
 
+    ArmControl arm;
+    ArmControl.setup();
+    std::cout << "arm set up done" << std::endl;
+
     while (!stopProgram) {
         std::unique_lock<std::mutex> lock(mtx);
         cv.wait(lock, [] { return !stopMovement || stopProgram; });
@@ -213,7 +218,13 @@ int main() {
                 MotorControl::stop();
                 std::cout << "Picking up trash..." << std::endl;
                 sleep(1); // Simulate pick-up delay
-                //sendCommandToArduino(serialPort, 'P'); // Send pick command to Arduino
+                arm.down();
+                sleep(1); // Simulate pick-up delay
+                arm.close();
+                sleep(1); // Simulate pick-up delay
+                arm.up();
+                sleep(1); // Simulate pick-up delay
+                arm.open();
             }
             else
             {
