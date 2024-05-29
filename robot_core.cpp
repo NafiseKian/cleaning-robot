@@ -199,13 +199,9 @@ int main() {
         if (validFrontL || validFrontR) {
             MotorControl::stop();
             std::cout << "Obstacle detected. Stopping and taking a photo..." << std::endl;
-            usleep(500000);
-        
-
             stopMovement = true;
             photoTaken = false;
             cv.notify_all();
-
             cv.wait(lock, [] { return photoTaken || stopProgram; });
 
             if (stopProgram) break;
@@ -222,24 +218,24 @@ int main() {
             else
             {
                 MotorControl::backward();
-                usleep(1000000);
+                usleep(1500000);
                 MotorControl::turnLeft();
-                usleep(1000000);
+                usleep(2000000);
             }
             std::cout << "Resuming movement..." << std::endl;
         } else if (validRight) {
             MotorControl::turnLeft();
-            usleep(1000000);
+            usleep(2000000);
             MotorControl::forward();
         } else if (validLeft) {
             MotorControl::turnRight();
-            usleep(1000000);
+            usleep(2000000);
             MotorControl::forward();
         } else if ((validFrontL || validFrontR) && validLeft && validRight) {
             MotorControl::backward();
-            usleep(1000000);
+            usleep(2000000);
             MotorControl::turnRight();
-            usleep(1000000);
+            usleep(2000000);
         } else {
             // If no valid obstacle is directly in front, move forward
             MotorControl::forward();

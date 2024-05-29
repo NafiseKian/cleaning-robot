@@ -33,7 +33,7 @@ void setup() {
 
 void forward() 
 {
-    if (gpioPWM(enA, 120) != 0 || gpioPWM(enB, 120) != 0) {
+    if (gpioPWM(enA, 100) != 0 || gpioPWM(enB, 100) != 0) {
         printf( "Failed to set PWM on Enable pins." );
         return;
     }
@@ -51,7 +51,7 @@ void forward()
 
 void backward() 
 {
-    if (gpioPWM(enA, 120) != 0 || gpioPWM(enB, 120) != 0) {
+    if (gpioPWM(enA, 100) != 0 || gpioPWM(enB, 100) != 0) {
         printf( "Failed to set PWM on Enable pins." );
         return;
     }
