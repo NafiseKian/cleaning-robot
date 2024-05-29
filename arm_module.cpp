@@ -19,7 +19,7 @@ void ServoControl::open() {
 }
 
 void ServoControl::close() {
-    gpioServo(servo1_pin, 500);
+    gpioServo(servo1_pin, 1500);
     gpioServo(servo2_pin, 500); // Min pulse width
 }
 
