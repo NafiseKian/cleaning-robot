@@ -36,9 +36,9 @@ int main()
     ServoControl arm;
     arm.setup();
     std::cout << "arm set up done" << std::endl;
-    arm.down();
-    sleep(1);
     arm.open();
+    sleep(1);
+    arm.down();
     sleep(1);
     arm.close();
     sleep(1);
