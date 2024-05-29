@@ -31,17 +31,4 @@ void ServoControl::up() {
     gpioServo(servo3_pin, 500); // Adjust to appropriate pulse width
 }
 
-int main()
-{
-    ServoControl arm;
-    arm.setup();
-    std::cout << "arm set up done" << std::endl;
-    arm.open();
-    sleep(1);
-    arm.down();
-    sleep(1);
-    arm.close();
-    sleep(1);
-    arm.up();
-    sleep(2);
-}
+

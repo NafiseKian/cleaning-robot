@@ -217,10 +217,14 @@ int main() {
                 usleep(500000); // Move forward for half second to get closer to the trash
                 MotorControl::stop();
                 std::cout << "Picking up trash..." << std::endl;
-                arm.down();
-                sleep(1); 
-                arm.up();
+                arm.open();
                 sleep(1);
+                arm.down();
+                sleep(1);
+                arm.close();
+                sleep(1);
+                arm.up();
+                sleep(2);
             }
             else
             {
