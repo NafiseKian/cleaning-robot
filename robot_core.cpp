@@ -258,24 +258,24 @@ int main() {
             else
             {
                 MotorControl::backward();
-                usleep(1500000);
+                usleep(1000000);
                 MotorControl::turnLeft();
-                usleep(4000000);
+                usleep(500000);
             }
             std::cout << "Resuming movement..." << std::endl;
         } else if (validRight) {
             MotorControl::turnLeft();
-            usleep(4000000);
+            usleep(500000);
             MotorControl::forward();
         } else if (validLeft) {
             MotorControl::turnRight();
-            usleep(4000000);
+            usleep5(500000);
             MotorControl::forward();
         } else if ((validFrontL || validFrontR) && validLeft && validRight) {
             MotorControl::backward();
-            usleep(2000000);
+            usleep(1000000);
             MotorControl::turnRight();
-            usleep(4000000);
+            usleep(500000);
         } else {
             // If no valid obstacle is directly in front, move forward
             MotorControl::forward();
