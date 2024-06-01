@@ -222,20 +222,20 @@ int main() {
              if (stopProgram) MotorControl::stop();
 
             if (trashDetected) {
-                if(trashLocation=='center')
+                if(strcmp(trashLocation , 'center')==0)
                 {
                     std::cout << "Trash detected in center. Moving closer to pick it up..." << std::endl;
                     MotorControl::forward();
                     usleep(500000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
-                }else if (trashLocation == 'left')
+                }else if (strcmp(trashLocation ,'left')==0)
                 {
                     std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnLeft();
                     usleep(1000000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
-                }else if(trashLocation == 'right')
+                }else if(strcmp(trashLocation , 'right')==0)
                 {
                     std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnRight();
