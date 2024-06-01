@@ -12,6 +12,8 @@
 #include <csignal>
 #include <libserialport.h>
 #include <string>
+#include <sstream>
+
 #include "gps_module.h"
 #include "camera_module.h"
 #include "drive_module.h"
@@ -222,20 +224,20 @@ int main() {
              if (stopProgram) MotorControl::stop();
 
             if (trashDetected) {
-                if(trashLocation=='center')
+                if(trashLocation=="center")
                 {
                     std::cout << "Trash detected in center. Moving closer to pick it up..." << std::endl;
                     MotorControl::forward();
                     usleep(500000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
-                }else if (trashLocation == 'left')
+                }else if (trashLocation == "left")
                 {
                     std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnLeft();
                     usleep(1000000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
-                }else if(trashLocation == 'right')
+                }else if(trashLocation == "right")
                 {
                     std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnRight();
