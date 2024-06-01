@@ -27,6 +27,7 @@ bool stopMovement = false;
 bool photoTaken = false;
 bool trashDetected = false;
 bool stopProgram = false;
+std::string trashLocation = "center";
 
 const double X_MIN = 0.0;
 const double X_MAX = 100.0;
@@ -137,11 +138,20 @@ void camera_thread(int &photoCounter) {
         }
         buffer[n] = '\0';
         std::cout << "Received from Python: " << buffer << std::endl;  // Debug print
-        trashDetected = std::string(buffer) == "1";
+        
+        // Parse the buffer
+        std::string trashDetectedFlag, placeOfTrash, angle;
+        std::istringstream ss(buffer);
+        std::getline(ss, trashDetectedFlag, '|');
+        std::getline(ss, placeOfTrash, '|');
+        std::getline(ss, angle, '|');
+
+        bool trashDetected = trashDetectedFlag == "1";
 
         // Print the detection result
         if (trashDetected) {
             std::cout << "Trash detected in photo " << photoCounter << "!" << std::endl;
+            trashLocation = placeOfTrash ; 
         } else {
             std::cout << "No trash detected in photo " << photoCounter << "." << std::endl;
         }
@@ -212,10 +222,27 @@ int main() {
              if (stopProgram) MotorControl::stop();
 
             if (trashDetected) {
-                std::cout << "Trash detected. Moving closer to pick it up..." << std::endl;
-                MotorControl::forward();
-                usleep(500000); // Move forward for half second to get closer to the trash
-                MotorControl::stop();
+                if(trashLocation=='center')
+                {
+                    std::cout << "Trash detected in center. Moving closer to pick it up..." << std::endl;
+                    MotorControl::forward();
+                    usleep(500000); // Move forward for half second to get closer to the trash
+                    MotorControl::stop();
+                }else if (trashLocation == 'left')
+                {
+                    std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
+                    MotorControl::turnLeft();
+                    usleep(1000000); // Move forward for half second to get closer to the trash
+                    MotorControl::stop();
+
+                }else if(trashLocation == 'right')
+                {
+                    std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
+                    MotorControl::turnRight();
+                    usleep(1000000); // Move forward for half second to get closer to the trash
+                    MotorControl::stop();
+
+                }
                 std::cout << "Picking up trash..." << std::endl;
                 arm.open();
                 sleep(1);
