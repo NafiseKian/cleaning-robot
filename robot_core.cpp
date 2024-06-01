@@ -222,20 +222,20 @@ int main() {
              if (stopProgram) MotorControl::stop();
 
             if (trashDetected) {
-                if(strcmp(trashLocation , 'center')==0)
+                if(trashLocation=='center')
                 {
                     std::cout << "Trash detected in center. Moving closer to pick it up..." << std::endl;
                     MotorControl::forward();
                     usleep(500000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
-                }else if (strcmp(trashLocation ,'left')==0)
+                }else if (trashLocation == 'left')
                 {
                     std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnLeft();
                     usleep(1000000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
-                }else if(strcmp(trashLocation , 'right')==0)
+                }else if(trashLocation == 'right')
                 {
                     std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnRight();
@@ -282,10 +282,6 @@ int main() {
 
         usleep(500000); // 0.5 second delay for general loop control
     }
-
-    // Wait for threads to finish
-    gpsWifiThread.join();
-    camThread.join();
 
     std::cout << "Program terminated gracefully." << std::endl;
 
