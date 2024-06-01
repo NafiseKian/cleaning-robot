@@ -3,20 +3,26 @@ import os
 import torch
 import numpy as np
 import socket
+import math
+import cvzone
 from models.experimental import attempt_load
-from utils.general import non_max_suppression
+from utils.general import non_max_suppression, scale_coords
 
 SOCKET_PATH = "/tmp/unix_socket_example"
 
 def detect_trash(image_path, model, classNames, device):
     trash_detected = False
+    direction = "center"
+    angle = 0
 
     # Load the image
     print(f"Loading image: {image_path}")
     img = cv2.imread(image_path)
     if img is None:
         print(f"Error: Unable to load image at {image_path}")
-        return False
+        return False, direction, angle
+
+    img0 = img.copy()  # Copy for drawing
 
     # Prepare image for inference
     img = cv2.resize(img, (640, 640))
@@ -41,14 +47,39 @@ def detect_trash(image_path, model, classNames, device):
     # Process detections
     for det in pred:
         if len(det):
-            # Process each detected object
+            det[:, :4] = scale_coords(img.shape[2:], det[:, :4], img0.shape).round()
+
             for *xyxy, _, cls in det:
+                x1, y1, x2, y2 = map(int, xyxy)
+                w, h = x2 - x1, y2 - y1
+
                 # Determine if it's trash or not
                 if classNames[int(cls)] == "trash":
                     trash_detected = True
+
+                    # Draw bounding box
+                    cvzone.cornerRect(img0, (x1, y1, w, h))
+
+                    # Calculate the horizontal center of the bounding box
+                    center_x = (x1 + x2) / 2
+                    image_center_x = img0.shape[1] / 2
+
+                    # Calculate the angle based on the position
+                    angle = (center_x / img0.shape[1]) * 180
+
+                    # Determine the direction based on the angle
+                    if 0 <= angle <= 45:
+                        direction = "turn left"
+                    elif 135 <= angle <= 180:
+                        direction = "turn right"
+                    else:
+                        direction = "center"
+
+                    # Print direction and angle
+                    print(f"Direction: {direction}, Angle: {angle}")
                     break
 
-    return trash_detected
+    return trash_detected, direction, angle
 
 def main():
     # Load the YOLOv7 model with the specified weights file
@@ -91,11 +122,11 @@ def main():
             print(f"Received image path: {image_path}")
 
             # Run the detection
-            trash_detected = detect_trash(image_path, model, classNames, device)
+            trash_detected, direction, angle = detect_trash(image_path, model, classNames, device)
 
             # Send the result back to C++ process
-            result = "1" if trash_detected else "0"
-            print("the value of result is "+result)
+            result = f"{int(trash_detected)}|{direction}|{angle}"
+            print(f"Sending result: {result}")
             connection.sendall(result.encode('utf-8'))
 
     finally:
