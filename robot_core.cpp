@@ -230,18 +230,18 @@ int main() {
                     MotorControl::forward();
                     usleep(500000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
-                }else if (trashLocation == "left")
+                }else if (trashLocation == "turn left")
                 {
                     std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnLeft();
-                    usleep(1000000); // Move forward for half second to get closer to the trash
+                    usleep(500000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
-                }else if(trashLocation == "right")
+                }else if(trashLocation == "turn right")
                 {
                     std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnRight();
-                    usleep(1000000); // Move forward for half second to get closer to the trash
+                    usleep(500000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
                 }
