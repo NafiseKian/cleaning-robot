@@ -13,6 +13,7 @@
 #include <libserialport.h>
 #include <string>
 #include <sstream>
+#include <atomic>
 
 #include "gps_module.h"
 #include "camera_module.h"
@@ -25,10 +26,10 @@
 // Global variables for synchronization
 std::mutex mtx;
 std::condition_variable cv;
-bool stopMovement = false;
-bool photoTaken = false;
-bool trashDetected = false;
-bool stopProgram = false;
+std::atomic<bool> stopMovement(false);
+std::atomic<bool> photoTaken(false);
+std::atomic<bool> trashDetected(false);
+std::atomic<bool> stopProgram(false);
 std::string trashLocation = "center";
 
 const double X_MIN = 0.0;
@@ -44,7 +45,7 @@ void signalHandler(int signum) {
     // Stop the motors
     MotorControl::stop();
     // Signal the program to stop
-    stopProgram = true;
+    stopProgram.store(true);
     // Notify all threads to exit
     cv.notify_all();
 }
@@ -58,7 +59,7 @@ void gps_wifi_thread() {
     Localization wifi;
     std::vector<std::tuple<std::string, double, double, double>> fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
 
-    while (!stopProgram) {
+    while (!stopProgram.load()) {
         std::cout << "worker thread loop" << std::endl;
 
         std::string gpsData;
@@ -113,12 +114,12 @@ void camera_thread(int &photoCounter) {
         exit(EXIT_FAILURE);
     }
 
-    while (!stopProgram) {
+    while (!stopProgram.load()) {
 
         std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [] { return stopMovement || stopProgram; });
+        cv.wait(lock, [] { return stopMovement.load() || stopProgram.load(); });
 
-        if (stopProgram) break;
+        if (stopProgram.load()) break;
 
         std::string path = CameraModule::capturePhoto(photoCounter);
         std::cout << "Photo " << photoCounter << " taken." << std::endl;
@@ -148,10 +149,10 @@ void camera_thread(int &photoCounter) {
         std::getline(ss, placeOfTrash, '|');
         std::getline(ss, angle, '|');
 
-        bool trashDetected = trashDetectedFlag == "1";
+        trashDetected.store(trashDetectedFlag == "1");
 
         // Print the detection result
-        if (trashDetected) {
+        if (trashDetected.load()) {
             std::cout << "Trash detected in photo " << photoCounter << "!" << std::endl;
             trashLocation = placeOfTrash ; 
         } else {
@@ -161,8 +162,8 @@ void camera_thread(int &photoCounter) {
         photoCounter++;
 
         // Signal main thread to resume movement
-        photoTaken = true;
-        stopMovement = false;
+        photoTaken.store(true);
+        stopMovement.store(false);
         cv.notify_all();
     }
 
@@ -192,11 +193,11 @@ int main() {
     arm.setup();
     std::cout << "arm set up done" << std::endl;
 
-    while (!stopProgram) {
+    while (!stopProgram.load()) {
         std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [] { return !stopMovement || stopProgram; });
+        cv.wait(lock, [] { return !stopMovement.load() || stopProgram.load(); });
 
-        if (stopProgram) MotorControl::stop();
+        if (stopProgram.load()) MotorControl::stop();
 
         int distanceFrontL = frontSensorL.getDistanceCm();
         int distanceFrontR = frontSensorR.getDistanceCm();
@@ -218,14 +219,14 @@ int main() {
         if (validFrontL || validFrontR) {
             MotorControl::stop();
             std::cout << "Obstacle detected. Stopping and taking a photo..." << std::endl;
-            stopMovement = true;
-            photoTaken = false;
+            stopMovement.store(true);
+            photoTaken.store(false);
             cv.notify_all();
-            cv.wait(lock, [] { return photoTaken || stopProgram; });
+            cv.wait(lock, [] { return photoTaken.load() || stopProgram.load(); });
 
-             if (stopProgram) MotorControl::stop();
+            if (stopProgram.load()) MotorControl::stop();
 
-            if (trashDetected) {
+            if (trashDetected.load()) {
                 if(trashLocation=="center")
                 {
                     std::cout << "Trash detected in center. Moving closer to pick it up..." << std::endl;
