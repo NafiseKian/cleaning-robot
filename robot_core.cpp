@@ -211,8 +211,8 @@ int main() {
         std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
         std::cout << " ------------------------------------------------------------ " << std::endl;
 
-        bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
-        bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 20);
+        bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 30);
+        bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 30);
         bool validRight = (distanceRight != -1 && distanceRight < 20);
         bool validLeft = (distanceLeft != -1 && distanceLeft < 20);
 
@@ -231,21 +231,24 @@ int main() {
                 if(trashLocation=="center")
                 {
                     std::cout << "Trash detected in center. Moving closer to pick it up..." << std::endl;
-                    MotorControl::forward();
-                    usleep(500000); // Move forward for half second to get closer to the trash
+                    if((distanceFrontL || distanceFrontR)>=20)
+                    {
+                        MotorControl::forward();
+                        usleep(500000); // Move forward for half second to get closer to the trash
+                    }
                     MotorControl::stop();
                 }else if (trashLocation == "turn left")
                 {
                     std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnLeft();
-                    usleep(500000); // Move forward for half second to get closer to the trash
+                    usleep(300000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
                 }else if(trashLocation == "turn right")
                 {
                     std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnRight();
-                    usleep(500000); // Move forward for half second to get closer to the trash
+                    usleep(300000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
                 }
