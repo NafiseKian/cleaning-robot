@@ -269,7 +269,7 @@ int main() {
             MotorControl::forward();
         } else if (validLeft) {
             MotorControl::turnRight();
-            usleep5(500000);
+            usleep(500000);
             MotorControl::forward();
         } else if ((validFrontL || validFrontR) && validLeft && validRight) {
             MotorControl::backward();
