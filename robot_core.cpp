@@ -203,10 +203,12 @@ int main() {
         int distanceRight = rightSensor.getDistanceCm();
         int distanceLeft = leftSensor.getDistanceCm();
 
+        std::cout << " ------------------------------------------------------------ " << std::endl;
         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
         std::cout << "Front Distance sensor right: " << distanceFrontR << " cm" << std::endl;
         std::cout << "Right Distance : " << distanceRight << " cm" << std::endl;
         std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
+        std::cout << " ------------------------------------------------------------ " << std::endl;
 
         bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 20);
         bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 20);
@@ -282,7 +284,7 @@ int main() {
             std::cout << "Path is clear. Moving forward..." << std::endl;
         }
 
-        usleep(500000); // 0.5 second delay for general loop control
+        usleep(1000000); // 1 second delay for general loop control
     }
 
     std::cout << "Program terminated gracefully." << std::endl;
