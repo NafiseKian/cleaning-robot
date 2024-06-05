@@ -216,7 +216,8 @@ int main() {
         bool validRight = (distanceRight != -1 && distanceRight < 20);
         bool validLeft = (distanceLeft != -1 && distanceLeft < 20);
 
-        if (validFrontL || validFrontR) {
+        if (validFrontL || validFrontR) 
+        {
             MotorControl::stop();
             std::cout << "Obstacle detected. Stopping and taking a photo..." << std::endl;
             stopMovement.store(true);
@@ -285,7 +286,7 @@ int main() {
             std::cout << "Path is clear. Moving forward..." << std::endl;
         }
 
-        usleep(1000000); // 1 second delay for general loop control
+        usleep(500000); // 1 second delay for general loop control
     }
 
     std::cout << "Program terminated gracefully." << std::endl;
