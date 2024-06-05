@@ -76,14 +76,14 @@ int main(){
 
     int distanceFrontL = frontSensorL.getDistanceCm();
         int distanceFrontR = frontSensorR.getDistanceCm();
-        //int distanceRight = rightSensor.getDistanceCm();
-        //int distanceLeft = leftSensor.getDistanceCm();
+        int distanceRight = rightSensor.getDistanceCm();
+        int distanceLeft = leftSensor.getDistanceCm();
 
         std::cout << " ------------------------------------------------------------ " << std::endl;
         std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
         std::cout << "Front Distance sensor right: " << distanceFrontR << " cm" << std::endl;
-       // std::cout << "Right Distance : " << distanceRight << " cm" << std::endl;
-        //std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
+        std::cout << "Right Distance : " << distanceRight << " cm" << std::endl;
+        std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
         std::cout << " ------------------------------------------------------------ " << std::endl;
 
     return 0 ; 
