@@ -219,7 +219,6 @@ int main() {
 
         if (validFrontL || validFrontR) 
         {
-            //MotorControl::stop();
             std::cout << "Obstacle detected. Stopping and taking a photo..." << std::endl;
             stopMovement.store(true);
             photoTaken.store(false);
@@ -262,6 +261,10 @@ int main() {
                 sleep(1);
                 arm.up();
                 sleep(2);
+                MotorControl::backward();
+                usleep(1000000);
+                MotorControl::turnLeft();
+                usleep(2000000);
             }
             else
             {
