@@ -242,14 +242,14 @@ int main() {
                 {
                     std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnLeft();
-                    usleep(300000); // Move forward for half second to get closer to the trash
+                    usleep(1000000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
                 }else if(trashLocation == "turn right")
                 {
                     std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnRight();
-                    usleep(300000); // Move forward for half second to get closer to the trash
+                    usleep(1000000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
                 }
@@ -268,22 +268,22 @@ int main() {
                 MotorControl::backward();
                 usleep(1000000);
                 MotorControl::turnLeft();
-                usleep(500000);
+                usleep(2000000);
             }
             std::cout << "Resuming movement..." << std::endl;
         } else if (validRight) {
             MotorControl::turnLeft();
-            usleep(500000);
+            usleep(2000000);
             MotorControl::forward();
         } else if (validLeft) {
             MotorControl::turnRight();
-            usleep(500000);
+            usleep(2000000);
             MotorControl::forward();
         } else if ((validFrontL || validFrontR) && validLeft && validRight) {
             MotorControl::backward();
             usleep(1000000);
             MotorControl::turnRight();
-            usleep(500000);
+            usleep(2000000);
         } else {
             // If no valid obstacle is directly in front, move forward
             MotorControl::forward();

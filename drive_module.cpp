@@ -103,7 +103,7 @@ void turnLeft()
         return;
     }
 
-    printf("Motors should be turning to right now." );
+    printf("Motors should be turning to left now." );
 }
 
 void stop() {
@@ -116,12 +116,3 @@ void stop() {
 }
 
 
-int main()
-{
-    MotorControl::setup();
-    MotorControl::turnLeft();
-    sleep(3); // Move forward for half second to get closer to the trash
-    MotorControl::stop();
-
-    return 0 ; 
-}
