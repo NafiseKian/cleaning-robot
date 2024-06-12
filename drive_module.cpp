@@ -113,3 +113,14 @@ void stop() {
 }
 
 }
+
+
+int main()
+{
+    MotorControl::setup();
+    MotorControl::turnLeft();
+    sleep(3); // Move forward for half second to get closer to the trash
+    MotorControl::stop();
+
+    return 0 ; 
+}
