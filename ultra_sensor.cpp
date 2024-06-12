@@ -22,8 +22,8 @@ UltrasonicSensor::~UltrasonicSensor() {
 }
 
 int UltrasonicSensor::getDistanceCm() {
-    const int NUM_READINGS = 5; // Number of readings to take
-    const int TIMEOUT = 30000;  // Timeout in microseconds
+    const int NUM_READINGS = 2; // Number of readings to take
+    const int TIMEOUT = 500000;  // Timeout in microseconds
     int totalDistance = 0;
     int validReadings = 0;
 
