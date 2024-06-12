@@ -289,7 +289,7 @@ int main() {
             std::cout << "Path is clear. Moving forward..." << std::endl;
         }
 
-        usleep(500000); // 1 second delay for general loop control
+        usleep(500000); // half second delay for general loop control
     }
 
     std::cout << "Program terminated gracefully." << std::endl;
