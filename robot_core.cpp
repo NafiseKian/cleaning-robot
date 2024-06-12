@@ -198,7 +198,8 @@ int main() {
         cv.wait(lock, [] { return !stopMovement.load() || stopProgram.load(); });
 
         if (stopProgram.load()) MotorControl::stop();
-
+        
+        MotorControl::stop();
         int distanceFrontL = frontSensorL.getDistanceCm();
         int distanceFrontR = frontSensorR.getDistanceCm();
         int distanceRight = rightSensor.getDistanceCm();
@@ -218,7 +219,7 @@ int main() {
 
         if (validFrontL || validFrontR) 
         {
-            MotorControl::stop();
+            //MotorControl::stop();
             std::cout << "Obstacle detected. Stopping and taking a photo..." << std::endl;
             stopMovement.store(true);
             photoTaken.store(false);
@@ -289,7 +290,7 @@ int main() {
             std::cout << "Path is clear. Moving forward..." << std::endl;
         }
 
-        usleep(500000); // half second delay for general loop control
+        usleep(1000000); // half second delay for general loop control
     }
 
     std::cout << "Program terminated gracefully." << std::endl;
