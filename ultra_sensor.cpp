@@ -22,30 +22,47 @@ UltrasonicSensor::~UltrasonicSensor() {
 }
 
 int UltrasonicSensor::getDistanceCm() {
-    const int TIMEOUT = 30000; // Increased timeout in microseconds
-    echoReceived = false;
+    const int NUM_READINGS = 5; // Number of readings to take
+    const int TIMEOUT = 30000;  // Timeout in microseconds
+    int totalDistance = 0;
+    int validReadings = 0;
 
-    // Ensure trigger pin is low before sending pulse
-    gpioWrite(triggerPin, PI_LOW);
-    usleep(2); // Settle time
-    gpioWrite(triggerPin, PI_HIGH);
-    usleep(10); // Trigger pulse duration
-    gpioWrite(triggerPin, PI_LOW);
+    for (int i = 0; i < NUM_READINGS; ++i) {
+        echoReceived = false;
+        startTimeUs = 0;
+        echoTimeUs = 0;
 
-    // Wait for echo
-    int waitTime = 0;
-    while (!echoReceived && waitTime < TIMEOUT) {
-        usleep(100); // Check every 100 microseconds
-        waitTime += 100;
+        // Ensure trigger pin is low before sending pulse
+        gpioWrite(triggerPin, PI_LOW);
+        usleep(2); // Settle time
+        gpioWrite(triggerPin, PI_HIGH);
+        usleep(10); // Trigger pulse duration
+        gpioWrite(triggerPin, PI_LOW);
+
+        // Wait for echo
+        int waitTime = 0;
+        while (!echoReceived && waitTime < TIMEOUT) {
+            usleep(100); // Check every 100 microseconds
+            waitTime += 100;
+        }
+
+        if (echoReceived) {
+            float distanceCm = (echoTimeUs * 0.0343) / 2.0; // Correct for sound speed and round trip
+            totalDistance += static_cast<int>(distanceCm);
+            validReadings++;
+        } else {
+            std::cout << name << ": Echo not received within timeout for reading " << i + 1 << "." << std::endl;
+        }
+
+        usleep(200000); // Wait 200ms between readings
     }
 
-    if (!echoReceived) {
-        std::cout << name << ": Echo not received within timeout." << std::endl;
+    if (validReadings > 0) {
+        return totalDistance / validReadings;
+    } else {
+        std::cout << name << ": No valid readings obtained." << std::endl;
         return -1;
     }
-
-    float distanceCm = (echoTimeUs * 0.0343) / 2.0; // Correct for sound speed and round trip
-    return static_cast<int>(distanceCm);
 }
 
 void UltrasonicSensor::echoCallback(int gpio, int level, uint32_t tick, void* userdata) {
@@ -54,11 +71,14 @@ void UltrasonicSensor::echoCallback(int gpio, int level, uint32_t tick, void* us
         sensor->startTimeUs = tick;
     } else if (level == 0) { // Falling edge
         if(sensor->startTimeUs == 0) {
-            std::cout << sensor->name << ": Falling edge detected before rising edge" << std::endl;
             return; 
         }
-        sensor->echoTimeUs = tick - sensor->startTimeUs;
+        // Debounce logic: Ignore any echoes that happen too quickly
+        uint32_t duration = tick - sensor->startTimeUs;
+        if (duration < 2000) { // Ignore echoes less than 2ms apart
+            return;
+        }
+        sensor->echoTimeUs = duration;
         sensor->echoReceived = true;
-        std::cout << sensor->name << " Distance: " << (sensor->echoTimeUs * 0.0343 / 2.0) << " cm" << std::endl;
     }
 }
