@@ -275,13 +275,14 @@ int main() {
             }
             std::cout << "Resuming movement..." << std::endl;
         } else if (validRight) {
-            MotorControl::turnLeft();
-            usleep(2000000);
-            MotorControl::forward();
-        } else if (validLeft) {
             MotorControl::turnRight();
             usleep(2000000);
-            MotorControl::forward();
+            MotorControl::stop();
+            
+        } else if (validLeft) {
+            MotorControl::turnLeft();
+            usleep(2000000);
+            MotorControl::stop();
         } else if ((validFrontL || validFrontR) && validLeft && validRight) {
             MotorControl::backward();
             usleep(1000000);
