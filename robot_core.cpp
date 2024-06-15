@@ -314,14 +314,14 @@ int main() {
                 {
                     std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnLeft();
-                    usleep(1000000); // Move forward for half second to get closer to the trash
+                    usleep(500000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
                 }else if(trashLocation == "turn right")
                 {
                     std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnRight();
-                    usleep(1000000); // Move forward for half second to get closer to the trash
+                    usleep(500000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
                 }
@@ -337,30 +337,30 @@ int main() {
                 MotorControl::backward();
                 usleep(1000000);
                 MotorControl::turnLeft();
-                usleep(1000000);
+                usleep(500000);
             }
             else
             {
                 MotorControl::backward();
                 usleep(1000000);
                 MotorControl::turnLeft();
-                usleep(1000000);
+                usleep(500000);
             }
             std::cout << "Resuming movement..." << std::endl;
         } else if (validRight) {
             MotorControl::turnRight();
-            usleep(1000000);
+            usleep(500000);
             MotorControl::stop();
             
         } else if (validLeft) {
             MotorControl::turnLeft();
-            usleep(1000000);
+            usleep(500000);
             MotorControl::stop();
         } else if ((validFrontL || validFrontR) && validLeft && validRight) {
             MotorControl::backward();
             usleep(1000000);
             MotorControl::turnRight();
-            usleep(1000000);
+            usleep(500000);
         } else {
             // If no valid obstacle is directly in front, move forward
             MotorControl::forward();
