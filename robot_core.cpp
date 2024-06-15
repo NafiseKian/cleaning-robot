@@ -183,9 +183,19 @@ void user_input_thread() {
         } else if (input == "c") {
             userStopMovement.store(false);
             cv.notify_all();
-        } else if (input == "ch") {
+        } 
+        else if (input == "ch") 
+        {
             navigateToCharger.store(true);
             userStopMovement.store(false);
+            cv.notify_all();
+        }
+        else if (input =="t")
+        {
+            MotorControl::stop();
+            // Signal the program to stop
+            stopProgram.store(true);
+            // Notify all threads to exit
             cv.notify_all();
         }
     }

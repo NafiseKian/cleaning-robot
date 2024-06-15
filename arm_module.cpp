@@ -32,3 +32,12 @@ void ServoControl::up() {
 }
 
 
+int main()
+{
+    ServoControl arm;
+    arm.setup();
+    std::cout << "arm set up done" << std::endl;
+    arm.close();
+
+    return 0 ; 
+}
