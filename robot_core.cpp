@@ -30,12 +30,15 @@ std::atomic<bool> stopMovement(false);
 std::atomic<bool> photoTaken(false);
 std::atomic<bool> trashDetected(false);
 std::atomic<bool> stopProgram(false);
+std::atomic<bool> userStopMovement(false);
+std::atomic<bool> navigateToCharger(false);
+std::atomic<double> currentX(0.0);
+std::atomic<double> currentY(0.0);
 std::string trashLocation = "center";
 
-const double X_MIN = 0.0;
-const double X_MAX = 100.0;
-const double Y_MIN = 0.0;
-const double Y_MAX = 100.0;
+// Coordinates for the charging station
+const double CHARGER_X = 10.0;
+const double CHARGER_Y = 10.0;
 
 #define SOCKET_PATH "/tmp/unix_socket_example"
 
@@ -171,6 +174,66 @@ void camera_thread(int &photoCounter) {
     close(sockfd);
 }
 
+void user_input_thread() {
+    std::string input;
+    while (!stopProgram.load()) {
+        std::cin >> input;
+        if (input == "s") {
+            userStopMovement.store(true);
+        } else if (input == "c") {
+            userStopMovement.store(false);
+            cv.notify_all();
+        } else if (input == "ch") {
+            navigateToCharger.store(true);
+            userStopMovement.store(false);
+            cv.notify_all();
+        }
+    }
+}
+
+// Function to navigate the robot towards the charging station
+void navigate_to_charger() {
+    const double TOLERANCE = 1.0;  // Acceptable distance to the charging station
+
+    while (true) {
+        // Get the current estimated position
+        double currentPosX = currentX.load();
+        double currentPosY = currentY.load();
+
+        if (std::abs(currentPosX - CHARGER_X) <= TOLERANCE && std::abs(currentPosY - CHARGER_Y) <= TOLERANCE) {
+            std::cout << "Reached the charging station." << std::endl;
+            MotorControl::stop();
+            break;
+        }
+
+        if (currentPosX < CHARGER_X) {
+            MotorControl::turnRight();
+            usleep(500000);
+            MotorControl::stop();
+            MotorControl::forward();
+        } else if (currentPosX > CHARGER_X) {
+            MotorControl::turnLeft();
+            usleep(500000);
+            MotorControl::stop();
+            MotorControl::forward();
+        }
+
+        if (currentPosY < CHARGER_Y) {
+            MotorControl::forward();
+        } else if (currentPosY > CHARGER_Y) {
+            MotorControl::backward();
+        }
+
+        usleep(500000);
+        MotorControl::stop();
+
+        if (stopProgram.load() || userStopMovement.load() || !navigateToCharger.load()) {
+            MotorControl::stop();
+            break;
+        }
+    }
+}
+
 int main() {
     // Register signal handler
     signal(SIGINT, signalHandler);
@@ -183,6 +246,7 @@ int main() {
 
     int photoCounter = 0;
     std::thread camThread(camera_thread, std::ref(photoCounter));
+    std::thread userInputThread(user_input_thread);
 
     UltrasonicSensor frontSensorL("Front-left", 26, 24);
     UltrasonicSensor frontSensorR("Front-right", 20, 21);
@@ -194,10 +258,19 @@ int main() {
     std::cout << "arm set up done" << std::endl;
 
     while (!stopProgram.load()) {
-        std::unique_lock<std::mutex> lock(mtx);
-        cv.wait(lock, [] { return !stopMovement.load() || stopProgram.load(); });
+      std::unique_lock<std::mutex> lock(mtx);
+      cv.wait(lock, [] { return !stopMovement.load() || stopProgram.load(); });
 
-        if (stopProgram.load()) MotorControl::stop();
+      if (stopProgram.load()) MotorControl::stop();
+
+      if (navigateToCharger.load()) 
+      {
+        navigate_to_charger();
+        navigateToCharger.store(false);
+      } else if (userStopMovement.load()) 
+      {
+         MotorControl::stop();
+      } else {
         
         MotorControl::stop();
         int distanceFrontL = frontSensorL.getDistanceCm();
@@ -295,9 +368,12 @@ int main() {
         }
 
         usleep(1000000); // half second delay for general loop control
+      }
+
     }
 
     std::cout << "Program terminated gracefully." << std::endl;
+    
 
     return 0;
 }
