@@ -30,16 +30,16 @@ int main() {
 
     while (true) {
         for (int pos = 0; pos <= 180; pos++) {
-            setServoAngle(servo1_pin, pos);
-            setServoAngle(servo2_pin, pos);
-            setServoAngle(servo3_pin, pos);
-            usleep(15000); // 15 ms
+            setServoAngle(servo1_pin, pos);       // Move servo1 from 0 to 180 degrees
+            setServoAngle(servo2_pin, 180 - pos); // Move servo2 from 180 to 0 degrees
+            setServoAngle(servo3_pin, pos);       // Sweep servo3 from 0 to 180 degrees
+            usleep(15000); // 15 ms delay
         }
         for (int pos = 180; pos >= 0; pos--) {
-            setServoAngle(servo1_pin, pos);
-            setServoAngle(servo2_pin, pos);
-            setServoAngle(servo3_pin, pos);
-            usleep(15000); // 15 ms
+            setServoAngle(servo1_pin, pos);       // Move servo1 from 180 to 0 degrees
+            setServoAngle(servo2_pin, 180 - pos); // Move servo2 from 0 to 180 degrees
+            setServoAngle(servo3_pin, pos);       // Sweep servo3 from 180 to 0 degrees
+            usleep(15000); // 15 ms delay
         }
     }
 
