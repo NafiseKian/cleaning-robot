@@ -1,71 +1,30 @@
-#include <wiringPi.h>
-#include <iostream>
+#include <Servo.h>
 
-// Constants for the GPIO pin numbers used for each servo
-const int TURN_SERVO_PIN = 1;       // Replace 0 with the GPIO pin number for the turn servo
-const int SHOULDER_SERVO_PIN = 13;   // Replace 1 with the GPIO pin number for the shoulder servo
-const int GRAB_SERVO_PIN = 12;       // Replace 2 with the GPIO pin number for the grab servo
-const int UP_DOWN_SERVO_PIN = 16;    // Replace 3 with the GPIO pin number for the up/down servo
+Servo servo1;  // create servo object to control the right hand
+Servo servo2;  // create servo object to control the left hand
+Servo servo3;  // create servo object to control the third servo
 
-// Function to initialize GPIO and wiringPi
+int servo1_pin = 2; // right hand
+int servo2_pin = 3; // left hand
+int servo3_pin = 4; // third servo
+
 void setup() {
-    wiringPiSetup();  // Initialize wiringPi
-    pinMode(TURN_SERVO_PIN, OUTPUT);
-    pinMode(SHOULDER_SERVO_PIN, OUTPUT);
-    pinMode(GRAB_SERVO_PIN, OUTPUT);
-    pinMode(UP_DOWN_SERVO_PIN, OUTPUT);
+  servo1.attach(servo1_pin);  // attaches the servo on pin 2 to the servo object
+  servo2.attach(servo2_pin);  // attaches the servo on pin 3 to the servo object
+  servo3.attach(servo3_pin);  // attaches the servo on pin 4 to the servo object
 }
 
-// Function to control the turn action
-void turn(int angle) {
-    int pulse = map(angle, 0, 180, 50, 250);  // Map angle to pulse width range
-    digitalWrite(TURN_SERVO_PIN, HIGH);
-    delayMicroseconds(pulse);
-    digitalWrite(TURN_SERVO_PIN, LOW);
-    delay(20 - pulse / 1000);
-}
-
-// Function to control the shoulder movement
-void moveShoulder(int angle) {
-    int pulse = map(angle, 0, 180, 50, 250);
-    digitalWrite(SHOULDER_SERVO_PIN, HIGH);
-    delayMicroseconds(pulse);
-    digitalWrite(SHOULDER_SERVO_PIN, LOW);
-    delay(20 - pulse / 1000);
-}
-
-// Function to control the grabbing action
-void grab(int position) {
-    int pulse = map(position, 0, 180, 50, 250);
-    digitalWrite(GRAB_SERVO_PIN, HIGH);
-    delayMicroseconds(pulse);
-    digitalWrite(GRAB_SERVO_PIN, LOW);
-    delay(20 - pulse / 1000);
-}
-
-// Function to control the up and down movement
-void moveUpDown(int height) {
-    int pulse = map(height, 0, 180, 50, 250);
-    digitalWrite(UP_DOWN_SERVO_PIN, HIGH);
-    delayMicroseconds(pulse);
-    digitalWrite(UP_DOWN_SERVO_PIN, LOW);
-    delay(20 - pulse / 1000);
-}
-
-// Main function
-int main() {
-    setup();
-    
-    // Example usage
-    turn(90);
-    moveShoulder(45);
-    grab(135);
-    moveUpDown(70);
-
-    return 0;
-}
-
-// Helper function to map values (similar to the Arduino map function)
-int map(int x, int in_min, int in_max, int out_min, int out_max) {
-    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+void loop() {
+  for (int pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees in steps of 1 degree
+    servo1.write(pos);  // tell servo to go to position in variable 'pos'
+    servo2.write(pos);  // tell servo to go to position in variable 'pos'
+    servo3.write(pos);  // tell servo to go to position in variable 'pos'
+    delay(15);          // waits 15ms for the servo to reach the position
+  }
+  for (int pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+    servo1.write(pos);  // tell servo to go to position in variable 'pos'
+    servo2.write(pos);  // tell servo to go to position in variable 'pos'
+    servo3.write(pos);  // tell servo to go to position in variable 'pos'
+    delay(15);          // waits 15ms for the servo to reach the position
+  }
 }
