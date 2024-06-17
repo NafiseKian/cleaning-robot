@@ -1,6 +1,29 @@
 #include "arm_module.h"
 #include <iostream>
-#include <unistd.h> 
+#include <unistd.h>
+#include <pigpio.h>
+
+const int servo1_pin = 2; // GPIO 2
+const int servo2_pin = 3; // GPIO 3
+const int servo3_pin = 4; // GPIO 4
+
+const int MIN_PULSE_WIDTH = 500;
+const int MAX_PULSE_WIDTH = 2500;
+
+class ServoControl {
+public:
+    void setup();
+    void open();
+    void close();
+    void down();
+    void up();
+private:
+    int angleToPulseWidth(int angle);
+};
+
+int ServoControl::angleToPulseWidth(int angle) {
+    return (MIN_PULSE_WIDTH + (angle * (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH) / 180));
+}
 
 void ServoControl::setup() {
     if (gpioInitialise() < 0) {
@@ -14,30 +37,31 @@ void ServoControl::setup() {
 }
 
 void ServoControl::open() {
-    gpioServo(servo1_pin, 900); // Adjust these values as per your servo specifications
-    gpioServo(servo2_pin, 1200);
+    gpioServo(servo1_pin, angleToPulseWidth(90));  // Corresponds to 90 degrees
+    gpioServo(servo2_pin, angleToPulseWidth(0));   // Corresponds to 0 degrees
 }
 
 void ServoControl::close() {
-    gpioServo(servo1_pin, 1520);
-    gpioServo(servo2_pin, 500); // Min pulse width
+    gpioServo(servo1_pin, angleToPulseWidth(60));  // Adjust these values to match your needs
+    gpioServo(servo2_pin, angleToPulseWidth(72));  // Adjust these values to match your needs
 }
 
 void ServoControl::down() {
-    gpioServo(servo3_pin, 1700); // Adjust to appropriate pulse width
+    gpioServo(servo3_pin, angleToPulseWidth(144)); // Adjust to appropriate pulse width
 }
 
 void ServoControl::up() {
-    gpioServo(servo3_pin, 500); // Adjust to appropriate pulse width
+    gpioServo(servo3_pin, angleToPulseWidth(36));  // Adjust to appropriate pulse width
 }
 
-
-int main()
-{
+int main() {
     ServoControl arm;
     arm.setup();
     std::cout << "arm set up done" << std::endl;
+    arm.open();
+    sleep(2);
     arm.close();
+    sleep(2);
 
-    return 0 ; 
+    return 0;
 }
