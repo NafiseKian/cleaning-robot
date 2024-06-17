@@ -11,6 +11,7 @@ public:
     void down();
     void up();
 private:
+    int angleToPulseWidth(int angle);
     int servo1_pin = 2; //right hand
     int servo2_pin = 3; //left hand
     int servo3_pin = 4;

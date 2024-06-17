@@ -10,16 +10,6 @@ const int servo3_pin = 4; // GPIO 4
 const int MIN_PULSE_WIDTH = 500;
 const int MAX_PULSE_WIDTH = 2500;
 
-class ServoControl {
-public:
-    void setup();
-    void open();
-    void close();
-    void down();
-    void up();
-private:
-    int angleToPulseWidth(int angle);
-};
 
 int ServoControl::angleToPulseWidth(int angle) {
     return (MIN_PULSE_WIDTH + (angle * (MAX_PULSE_WIDTH - MIN_PULSE_WIDTH) / 180));
