@@ -3,10 +3,10 @@
 
 namespace MotorControl {
     void setup();
-    void forward();
-    void backward() ;
-    void turnRight();
-    void turnLeft();
+    void forward(int speed);
+    void backward(int speed ) ;
+    void turnRight(int speed );
+    void turnLeft(int speed );
     void stop();
 }
 
