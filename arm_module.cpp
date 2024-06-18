@@ -37,11 +37,11 @@ void ServoControl::close() {
 }
 
 void ServoControl::down() {
-    gpioServo(servo3_pin, angleToPulseWidth(144)); // Adjust to appropriate pulse width
+    gpioServo(servo3_pin, angleToPulseWidth(160)); // Adjust to appropriate pulse width
 }
 
 void ServoControl::up() {
-    gpioServo(servo3_pin, angleToPulseWidth(36));  // Adjust to appropriate pulse width
+    gpioServo(servo3_pin, angleToPulseWidth(70));  // Adjust to appropriate pulse width
 }
 
 int main() {
