@@ -32,9 +32,9 @@ void setup() {
    
 }
 
-void forward() 
+void forward(int speed) 
 {
-    if (gpioPWM(enA, 85) != 0 || gpioPWM(enB, 85) != 0) {
+    if (gpioPWM(enA, speed) != 0 || gpioPWM(enB, speed) != 0) {
         printf( "Failed to set PWM on Enable pins." );
         return;
     }
@@ -50,9 +50,9 @@ void forward()
     printf("Motors should be moving forward now." );
 }
 
-void backward() 
+void backward(int speed) 
 {
-    if (gpioPWM(enA, 85) != 0 || gpioPWM(enB, 85) != 0) {
+    if (gpioPWM(enA, speed) != 0 || gpioPWM(enB, speed) != 0) {
         printf( "Failed to set PWM on Enable pins." );
         return;
     }
@@ -68,9 +68,9 @@ void backward()
     printf("Motors should be moving forward now." );
 }
 
-void turnRight()
+void turnRight(int speed)
 {
-    if (gpioPWM(enA, 100) != 0 || gpioPWM(enB, 100) != 0) {
+    if (gpioPWM(enA, speed) != 0 || gpioPWM(enB, speed) != 0) {
         printf( "Failed to set PWM on Enable pins." );
         return;
     }
@@ -87,9 +87,9 @@ void turnRight()
 }
 
 
-void turnLeft()
+void turnLeft(int speed)
 {
-    if (gpioPWM(enA, 100) != 0 || gpioPWM(enB, 100) != 0) {
+    if (gpioPWM(enA, speed) != 0 || gpioPWM(enB, speed) != 0) {
         printf( "Failed to set PWM on Enable pins." );
         return;
     }

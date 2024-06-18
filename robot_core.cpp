@@ -40,6 +40,9 @@ std::string trashLocation = "center";
 const double CHARGER_X = 10.0;
 const double CHARGER_Y = 10.0;
 
+int FBSpeed = 80 ; 
+int TurnSpeed = 100 ; 
+
 #define SOCKET_PATH "/tmp/unix_socket_example"
 
 // Signal handler to stop the motors and exit the program
@@ -94,7 +97,8 @@ void gps_wifi_thread() {
     }
 }
 
-void camera_thread(int &photoCounter) {
+void camera_thread(int &photoCounter) 
+{
     int sockfd;
     struct sockaddr_un addr;
     
@@ -180,6 +184,7 @@ void user_input_thread() {
         std::cin >> input;
         if (input == "s") {
             userStopMovement.store(true);
+            cv.notify_all();
         } else if (input == "c") {
             userStopMovement.store(false);
             cv.notify_all();
@@ -197,6 +202,17 @@ void user_input_thread() {
             stopProgram.store(true);
             // Notify all threads to exit
             cv.notify_all();
+        }
+        else if(input =="b")
+        {
+            userStopMovement.store(true);
+            cv.notify_all();
+            FBSpeed = 100 ; 
+            TurnSpeed = 120 ; 
+            userStopMovement.store(false);
+            cv.notify_all();
+
+
         }
     }
 }
@@ -217,21 +233,21 @@ void navigate_to_charger() {
         }
 
         if (currentPosX < CHARGER_X) {
-            MotorControl::turnRight();
+            MotorControl::turnRight(TurnSpeed);
             usleep(500000);
             MotorControl::stop();
-            MotorControl::forward();
+            MotorControl::forward(FBSpeed);
         } else if (currentPosX > CHARGER_X) {
-            MotorControl::turnLeft();
+            MotorControl::turnLeft(TurnSpeed);
             usleep(500000);
             MotorControl::stop();
-            MotorControl::forward();
+            MotorControl::forward(FBSpeed);
         }
 
         if (currentPosY < CHARGER_Y) {
-            MotorControl::forward();
+            MotorControl::forward(FBSpeed);
         } else if (currentPosY > CHARGER_Y) {
-            MotorControl::backward();
+            MotorControl::backward(FBSpeed);
         }
 
         usleep(500000);
@@ -316,21 +332,21 @@ int main() {
                     std::cout << "Trash detected in center. Moving closer to pick it up..." << std::endl;
                     if((distanceFrontL || distanceFrontR)>=30)
                     {
-                        MotorControl::forward();
+                        MotorControl::forward(FBSpeed);
                         usleep(300000); // Move forward for half second to get closer to the trash
                     }
                     MotorControl::stop();
                 }else if (trashLocation == "turn left")
                 {
                     std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
-                    MotorControl::turnLeft();
+                    MotorControl::turnLeft(TurnSpeed);
                     usleep(200000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
                 }else if(trashLocation == "turn right")
                 {
                     std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
-                    MotorControl::turnRight();
+                    MotorControl::turnRight(TurnSpeed);
                     usleep(200000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
@@ -344,36 +360,79 @@ int main() {
                 sleep(2);
                 arm.up();
                 sleep(2);
-                MotorControl::backward();
-                usleep(1000000);
-                MotorControl::turnLeft();
-                usleep(500000);
+                photoTaken.store(false);
+                cv.notify_all();
+                cv.wait(lock, [] { return photoTaken.load() || stopProgram.load(); });
+                if(trashDetected.load())
+                {
+                    if(trashLocation=="center")
+                    {
+                        std::cout << "Trash detected in center. Moving closer to pick it up..." << std::endl;
+                        if((distanceFrontL || distanceFrontR)>=30)
+                        {
+                            MotorControl::forward(FBSpeed);
+                            usleep(300000); // Move forward for half second to get closer to the trash
+                        }
+                        MotorControl::stop();
+                    }
+                    else if (trashLocation == "turn left")
+                    {
+                        std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
+                        MotorControl::turnLeft(TurnSpeed);
+                        usleep(200000); // Move forward for half second to get closer to the trash
+                        MotorControl::stop();
+
+                    }
+                    else if(trashLocation == "turn right")
+                    {
+                        std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
+                        MotorControl::turnRight(TurnSpeed);
+                        usleep(200000); // Move forward for half second to get closer to the trash
+                        MotorControl::stop();
+
+                    }
+                    std::cout << "Picking up trash..." << std::endl;
+                    arm.open();
+                    sleep(1);
+                    arm.down();
+                    sleep(3);
+                    arm.close();
+                    sleep(2);
+                    arm.up();
+                    sleep(2);
+                    
+                }else{
+                    MotorControl::backward(FBSpeed);
+                    usleep(1000000);
+                    MotorControl::turnLeft(TurnSpeed);
+                    usleep(500000);
+                }
             }
             else
             {
-                MotorControl::backward();
+                MotorControl::backward(FBSpeed);
                 usleep(1000000);
-                MotorControl::turnLeft();
+                MotorControl::turnLeft(TurnSpeed);
                 usleep(500000);
             }
             std::cout << "Resuming movement..." << std::endl;
         } else if (validRight) {
-            MotorControl::turnRight();
+            MotorControl::turnRight(TurnSpeed);
             usleep(500000);
             MotorControl::stop();
             
         } else if (validLeft) {
-            MotorControl::turnLeft();
+            MotorControl::turnLeft(TurnSpeed);
             usleep(500000);
             MotorControl::stop();
         } else if ((validFrontL || validFrontR) && validLeft && validRight) {
-            MotorControl::backward();
+            MotorControl::backward(FBSpeed);
             usleep(1000000);
-            MotorControl::turnRight();
+            MotorControl::turnRight(TurnSpeed);
             usleep(500000);
         } else {
             // If no valid obstacle is directly in front, move forward
-            MotorControl::forward();
+            MotorControl::forward(FBSpeed);
             std::cout << "Path is clear. Moving forward..." << std::endl;
         }
 
