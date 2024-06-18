@@ -339,9 +339,9 @@ int main() {
                 arm.open();
                 sleep(1);
                 arm.down();
-                sleep(1);
+                sleep(3);
                 arm.close();
-                sleep(1);
+                sleep(2);
                 arm.up();
                 sleep(2);
                 MotorControl::backward();
