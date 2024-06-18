@@ -183,20 +183,28 @@ void user_input_thread() {
     while (!stopProgram.load()) {
         std::cin >> input;
         if (input == "s") {
+            std::cout<<"-----------------------        ATTENTION       --------------------"<<std::endl;
+            std::cout<<"user wish to stop the robot "<<std::endl ;
             userStopMovement.store(true);
             cv.notify_all();
         } else if (input == "c") {
+            std::cout<<"-----------------------        ATTENTION       --------------------"<<std::endl;
+            std::cout<<"user wish to continue the movement "<<std::endl ;
             userStopMovement.store(false);
             cv.notify_all();
         } 
         else if (input == "ch") 
         {
+            std::cout<<"-----------------------        ATTENTION       --------------------"<<std::endl;
+            std::cout<<"going back to charging station "<<std::endl ;
             navigateToCharger.store(true);
             userStopMovement.store(false);
             cv.notify_all();
         }
         else if (input =="t")
         {
+            std::cout<<"-----------------------        ATTENTION       --------------------"<<std::endl;
+            std::cout<<"terminating the program"<<std::endl ;
             MotorControl::stop();
             // Signal the program to stop
             stopProgram.store(true);
@@ -209,8 +217,11 @@ void user_input_thread() {
             cv.notify_all();
             FBSpeed = 100 ; 
             TurnSpeed = 120 ; 
+            std::cout<<"-----------------------        ATTENTION       --------------------"<<std::endl;
+            std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
             cv.notify_all();
+            std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
 
 
         }
