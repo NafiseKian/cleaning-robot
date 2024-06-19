@@ -215,8 +215,8 @@ void user_input_thread() {
         {
             userStopMovement.store(true);
             cv.notify_all();
-            FBSpeed = 85 ; 
-            TurnSpeed = 100 ; 
+            FBSpeed = 75 ; 
+            TurnSpeed = 90 ; 
             std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
@@ -228,8 +228,8 @@ void user_input_thread() {
         {
             userStopMovement.store(true);
             cv.notify_all();
-            FBSpeed = 100 ; 
-            TurnSpeed = 120 ; 
+            FBSpeed = 85 ; 
+            TurnSpeed = 100 ; 
             std::cout<<"-----------------------        SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
@@ -242,8 +242,8 @@ void user_input_thread() {
         {
             userStopMovement.store(true);
             cv.notify_all();
-            FBSpeed = 120 ; 
-            TurnSpeed = 140 ; 
+            FBSpeed = 95 ; 
+            TurnSpeed = 110 ; 
             std::cout<<"-----------------------        SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
@@ -470,6 +470,10 @@ int main() {
                 sleep(2);
                 arm.up();
                 sleep(3);
+                MotorControl::backward(FBSpeed);
+                usleep(1000000);
+                MotorControl::turnLeft(TurnSpeed);
+                usleep(500000);
                 /*
                 photoTaken.store(false);
                 cv.notify_all();
