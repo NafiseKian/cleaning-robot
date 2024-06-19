@@ -27,8 +27,8 @@ void ServoControl::setup() {
 }
 
 void ServoControl::open() {
-    gpioServo(servo1_pin, angleToPulseWidth(90));  // Corresponds to 90 degrees
-    gpioServo(servo2_pin, angleToPulseWidth(90));   // Corresponds to 0 degrees
+    gpioServo(servo1_pin, angleToPulseWidth(100));  // Corresponds to 90 degrees
+    gpioServo(servo2_pin, angleToPulseWidth(80));   // Corresponds to 0 degrees
 }
 
 void ServoControl::close() {
@@ -37,7 +37,7 @@ void ServoControl::close() {
 }
 
 void ServoControl::down() {
-    gpioServo(servo3_pin, angleToPulseWidth(160)); // Adjust to appropriate pulse width
+    gpioServo(servo3_pin, angleToPulseWidth(165)); // Adjust to appropriate pulse width
 }
 
 void ServoControl::up() {
