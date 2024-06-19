@@ -169,39 +169,66 @@ class MapAndPosition extends StatelessWidget {
           ),
         ),
 
-/*  wifi coordinates for ST building 
-**  main door (150,50)
-**  back door (0,0)
-**  coffe tria door(50,50)
-**  GE door(100,0)
-**  st parking door(100,50)
-**  lib door (50,0)
-**  class 118(125,25) 
-**  class 104(25,25)
-**  under stairs of back door middle of back door and middle  (25,0)
-**  middle of back middle and GE (75,0)
-**  between main and parking (100,50)
-**  between parling and coffee (75,50)
-**  intersection of coridor (75,25)
-*/
+
         Positioned(
-          left: 1, // down left
-          top: 240, 
+          left: 11, // back door cordinaters coming from server -(0,0)
+          top: 260, 
           child: Icon(Icons.location_on, color: Colors.red, size: 24),
         ),
             Positioned(
-          left: 200, //upp left  coffe 
+          left: 200, //coffetria door coming from server - (50,50)
           top: 15, 
           child: Icon(Icons.location_on, color: Colors.red, size: 24),
         ),
                  Positioned(
-          left: 565, //upp right
+          left: 280,//**  between parling and coffee (75,50)
+          top: 15, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+                  Positioned(
+          left: 80, // **  class 104( coming from server -(25,25)
+          top: 170, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+                 Positioned(
+          left: 565, /// main door cordinates from server - (150,50)
           top: 2, 
           child: Icon(Icons.location_on, color: Colors.red, size: 24),
         ),
+                        Positioned(
+          left: 470, /// between main and parking (100,50)
+          top: 2, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+        
            Positioned(
-          left: 410, // down right
+          left: 410, // GE door( coming from server (100,0)
           top: 230, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+             Positioned(
+          left: 300, // intersection of coridor (75,25)
+          top: 110, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+               Positioned(
+          left: 310, //   middle of back middle and GE (75,0)
+          top: 230, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+                  Positioned(
+          left: 370, //st parking door cordinates from server (100,50)
+          top: 5,
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+             Positioned(
+          left: 210, // ibrary door cordinates from server (50,0)
+          top: 240, 
+          child: Icon(Icons.location_on, color: Colors.red, size: 24),
+        ),
+                      Positioned(
+          left: 510, // **  class 118 cordaniters cominf from server( 125,25) 
+          top: 80, 
           child: Icon(Icons.location_on, color: Colors.red, size: 24),
         ),
       ],
