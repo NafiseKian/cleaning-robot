@@ -211,13 +211,82 @@ void user_input_thread() {
             // Notify all threads to exit
             cv.notify_all();
         }
-        else if(input =="b")
+        else if(input =="b1")
         {
             userStopMovement.store(true);
             cv.notify_all();
             FBSpeed = 100 ; 
-            TurnSpeed = 120 ; 
-            std::cout<<"-----------------------        ATTENTION       --------------------"<<std::endl;
+            TurnSpeed = 130 ; 
+            std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
+            std::cout<<"speed of motors are increased "<<std::endl ;
+            userStopMovement.store(false);
+            cv.notify_all();
+            std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
+
+
+        }else if(input =="b2")
+        {
+            userStopMovement.store(true);
+            cv.notify_all();
+            FBSpeed = 120 ; 
+            TurnSpeed = 150 ; 
+            std::cout<<"-----------------------        SPEED UP        --------------------"<<std::endl;
+            std::cout<<"speed of motors are increased "<<std::endl ;
+            userStopMovement.store(false);
+            cv.notify_all();
+            std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
+
+
+        }
+        else if(input =="b3")
+        {
+            userStopMovement.store(true);
+            cv.notify_all();
+            FBSpeed = 140 ; 
+            TurnSpeed = 170 ; 
+            std::cout<<"-----------------------        SPEED UP        --------------------"<<std::endl;
+            std::cout<<"speed of motors are increased "<<std::endl ;
+            userStopMovement.store(false);
+            cv.notify_all();
+            std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
+
+
+        }
+        else if(input =="b4")
+        {
+            userStopMovement.store(true);
+            cv.notify_all();
+            FBSpeed = 160 ; 
+            TurnSpeed = 190 ; 
+            std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
+            std::cout<<"speed of motors are increased "<<std::endl ;
+            userStopMovement.store(false);
+            cv.notify_all();
+            std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
+
+
+        }
+        else if(input =="b5")
+        {
+            userStopMovement.store(true);
+            cv.notify_all();
+            FBSpeed = 180 ; 
+            TurnSpeed = 210 ; 
+            std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
+            std::cout<<"speed of motors are increased "<<std::endl ;
+            userStopMovement.store(false);
+            cv.notify_all();
+            std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
+
+
+        }
+        else if(input =="b6")
+        {
+            userStopMovement.store(true);
+            cv.notify_all();
+            FBSpeed = 200 ; 
+            TurnSpeed = 230 ; 
+            std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
             cv.notify_all();
@@ -230,44 +299,74 @@ void user_input_thread() {
 
 // Function to navigate the robot towards the charging station
 void navigate_to_charger() {
-    const double TOLERANCE = 1.0;  // Acceptable distance to the charging station
+    std::string chargerMAC = "D0:C6:37:F3:BB:41"; 
+    Localization wifi;
+    int counter = 0 ;
 
-    while (true) {
-        // Get the current estimated position
-        double currentPosX = currentX.load();
-        double currentPosY = currentY.load();
+    while (!stopProgram.load()) {
+        if (!navigateToCharger.load()) continue;
 
-        if (std::abs(currentPosX - CHARGER_X) <= TOLERANCE && std::abs(currentPosY - CHARGER_Y) <= TOLERANCE) {
+        std::string wifiData = wifi.captureWifiSignal();
+        std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(wifiData);
+
+        // Find the signal strength of the charger
+        double chargerSignalStrength = -150.0;
+        double initStrength = -150.0 ; 
+        for (const auto& signal : observedRSSI) {
+            if (signal.first == chargerMAC) {
+                initStrength = signal.second;
+                chargerSignalStrength = initStrength ; 
+                break;
+            }
+        }
+
+        std::cout << "Charger Signal Strength: " << initStrength << std::endl;
+
+
+        if (chargerSignalStrength > -40) {  // Assuming signal strength closer to -30 is stronger
             std::cout << "Reached the charging station." << std::endl;
+            navigateToCharger.store(false);
             MotorControl::stop();
-            break;
+            return;
         }
-
-        if (currentPosX < CHARGER_X) {
-            MotorControl::turnRight(TurnSpeed);
-            usleep(500000);
-            MotorControl::stop();
+        else
+        {
+            counter ++ ; 
+            std::cout << "Navigating towards the charging station..." << std::endl;
             MotorControl::forward(FBSpeed);
-        } else if (currentPosX > CHARGER_X) {
-            MotorControl::turnLeft(TurnSpeed);
-            usleep(500000);
+            sleep(3);
             MotorControl::stop();
-            MotorControl::forward(FBSpeed);
+            std::string wifiData = wifi.captureWifiSignal();
+            std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(wifiData);
+
+            for (const auto& signal : observedRSSI) {
+                if (signal.first == chargerMAC) {
+                    chargerSignalStrength = signal.second;
+                    break;
+                }
+            }
+            if(chargerSignalStrength < initStrength){
+                MotorControl::backward(FBSpeed);
+                sleep(5);
+                if(counter %2 == 0 )
+                {
+                    MotorControl::turnRight(TurnSpeed);
+                    sleep(1);
+                }
+                else
+                {
+                    MotorControl::turnLeft(TurnSpeed);
+                    sleep(1);
+                }
+                MotorControl::forward(FBSpeed);
+                sleep(2);
+                MotorControl.stop();
+
+            }
+
         }
 
-        if (currentPosY < CHARGER_Y) {
-            MotorControl::forward(FBSpeed);
-        } else if (currentPosY > CHARGER_Y) {
-            MotorControl::backward(FBSpeed);
-        }
-
-        usleep(500000);
-        MotorControl::stop();
-
-        if (stopProgram.load() || userStopMovement.load() || !navigateToCharger.load()) {
-            MotorControl::stop();
-            break;
-        }
+        
     }
 }
 
