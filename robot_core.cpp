@@ -470,6 +470,7 @@ int main() {
                 sleep(2);
                 arm.up();
                 sleep(2);
+                /*
                 photoTaken.store(false);
                 cv.notify_all();
                 cv.wait(lock, [] { return photoTaken.load() || stopProgram.load(); });
@@ -517,6 +518,7 @@ int main() {
                     MotorControl::turnLeft(TurnSpeed);
                     usleep(500000);
                 }
+                */
             }
             else
             {
