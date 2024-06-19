@@ -360,7 +360,7 @@ void navigate_to_charger() {
                 }
                 MotorControl::forward(FBSpeed);
                 sleep(2);
-                MotorControl.stop();
+                MotorControl::stop();
 
             }
 
