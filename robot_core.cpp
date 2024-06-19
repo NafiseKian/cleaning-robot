@@ -40,8 +40,8 @@ std::string trashLocation = "center";
 const double CHARGER_X = 10.0;
 const double CHARGER_Y = 10.0;
 
-int FBSpeed = 65 ; 
-int TurnSpeed = 80 ; 
+int FBSpeed = 55 ; 
+int TurnSpeed = 70 ; 
 
 #define SOCKET_PATH "/tmp/unix_socket_example"
 
@@ -215,8 +215,8 @@ void user_input_thread() {
         {
             userStopMovement.store(true);
             cv.notify_all();
-            FBSpeed = 100 ; 
-            TurnSpeed = 130 ; 
+            FBSpeed = 70 ; 
+            TurnSpeed = 90 ; 
             std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
@@ -463,13 +463,13 @@ int main() {
                 }
                 std::cout << "Picking up trash..." << std::endl;
                 arm.open();
-                sleep(1);
+                sleep(2);
                 arm.down();
                 sleep(3);
                 arm.close();
                 sleep(2);
                 arm.up();
-                sleep(2);
+                sleep(3);
                 /*
                 photoTaken.store(false);
                 cv.notify_all();
