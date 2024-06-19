@@ -443,7 +443,7 @@ int main() {
                     if((distanceFrontL || distanceFrontR)>=30)
                     {
                         MotorControl::forward(FBSpeed);
-                        usleep(300000); // Move forward for half second to get closer to the trash
+                        usleep(500000); // Move forward for half second to get closer to the trash
                     }
                     MotorControl::stop();
                 }else if (trashLocation == "turn left")
