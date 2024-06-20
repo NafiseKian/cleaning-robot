@@ -440,7 +440,7 @@ int main() {
                 if(trashLocation=="center")
                 {
                     std::cout << "Trash detected in center. Moving closer to pick it up..." << std::endl;
-                    if((distanceFrontL || distanceFrontR)>=30)
+                    if((distanceFrontL || distanceFrontR)>=20)
                     {
                         MotorControl::forward(FBSpeed);
                         usleep(500000); // Move forward for half second to get closer to the trash
@@ -466,10 +466,10 @@ int main() {
                 sleep(3);
                 std::cout << "arm opens" << std::endl;
                 arm.down();
-                sleep(4);
+                sleep(5);
                 std::cout << "arm down" << std::endl;
                 arm.close();
-                sleep(3);
+                sleep(4);
                 std::cout << "arm closes" << std::endl;
                 arm.up();
                 sleep(3);
