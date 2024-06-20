@@ -463,13 +463,17 @@ int main() {
                 }
                 std::cout << "Picking up trash..." << std::endl;
                 arm.open();
-                sleep(2);
-                arm.down();
                 sleep(3);
+                std::cout << "arm opens" << std::endl;
+                arm.down();
+                sleep(4);
+                std::cout << "arm down" << std::endl;
                 arm.close();
-                sleep(2);
+                sleep(3);
+                std::cout << "arm closes" << std::endl;
                 arm.up();
                 sleep(3);
+                std::cout << "arm up" << std::endl;
                 MotorControl::backward(FBSpeed);
                 usleep(1000000);
                 MotorControl::turnLeft(TurnSpeed);
