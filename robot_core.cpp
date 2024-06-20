@@ -299,7 +299,7 @@ void user_input_thread() {
 
 // Function to navigate the robot towards the charging station
 void navigate_to_charger() {
-    std::string chargerMAC = "D0:C6:37:F3:BB:41"; 
+    std::string chargerMAC = "E2:E1:E1:2C:EA:73"; 
     Localization wifi;
     int counter = 0 ;
 
