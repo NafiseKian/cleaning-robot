@@ -30,6 +30,7 @@ std::atomic<bool> stopMovement(false);
 std::atomic<bool> photoTaken(false);
 std::atomic<bool> trashDetected(false);
 std::atomic<bool> stopProgram(false);
+std::atomic<bool> stopWifi(false);
 std::atomic<bool> userStopMovement(false);
 std::atomic<bool> navigateToCharger(false);
 std::atomic<double> currentX(0.0);
@@ -65,7 +66,7 @@ void gps_wifi_thread() {
     Localization wifi;
     std::vector<std::tuple<std::string, double, double, double>> fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
 
-    while (!stopProgram.load()) {
+    while (!stopProgram.load() || !stopWifi.load()) {
         std::cout << "worker thread loop" << std::endl;
 
         std::string gpsData;
@@ -199,6 +200,7 @@ void user_input_thread() {
             std::cout<<"going back to charging station "<<std::endl ;
             navigateToCharger.store(true);
             userStopMovement.store(false);
+            stopWifi.store(true);
             cv.notify_all();
         }
         else if (input =="t")
@@ -298,7 +300,8 @@ void user_input_thread() {
 }
 
 // Function to navigate the robot towards the charging station
-void navigate_to_charger() {
+void navigate_to_charger() 
+{
     std::string chargerMAC = "E2:E1:E1:2C:EA:73"; 
     Localization wifi;
     int counter = 0 ;
@@ -342,6 +345,7 @@ void navigate_to_charger() {
             for (const auto& signal : observedRSSI) {
                 if (signal.first == chargerMAC) {
                     chargerSignalStrength = signal.second;
+                    stopWifi.store(false);
                     break;
                 }
             }
@@ -463,17 +467,17 @@ int main() {
                 }
                 std::cout << "Picking up trash..." << std::endl;
                 arm.open();
-                sleep(3);
                 std::cout << "arm opens" << std::endl;
-                arm.down();
-                sleep(5);
-                std::cout << "arm down" << std::endl;
-                arm.close();
-                sleep(4);
-                std::cout << "arm closes" << std::endl;
-                arm.up();
                 sleep(3);
+                arm.down();
+                std::cout << "arm down" << std::endl;
+                sleep(5);
+                arm.close();
+                std::cout << "arm closes" << std::endl;
+                sleep(4);
+                arm.up();
                 std::cout << "arm up" << std::endl;
+                sleep(3);
                 MotorControl::backward(FBSpeed);
                 usleep(1000000);
                 MotorControl::turnLeft(TurnSpeed);
