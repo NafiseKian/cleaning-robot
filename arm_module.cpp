@@ -50,6 +50,7 @@ int main ()
     arm.setup();
     std::cout << "arm set up done" << std::endl;
     arm.close();
+    sleep(3);
     return 0 ;
 
 }
