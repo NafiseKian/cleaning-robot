@@ -30,7 +30,6 @@ std::atomic<bool> stopMovement(false);
 std::atomic<bool> photoTaken(false);
 std::atomic<bool> trashDetected(false);
 std::atomic<bool> stopProgram(false);
-std::atomic<bool> stopWifi(false);
 std::atomic<bool> userStopMovement(false);
 std::atomic<bool> navigateToCharger(false);
 std::atomic<double> currentX(0.0);
@@ -45,6 +44,8 @@ int FBSpeed = 65 ;
 int TurnSpeed = 80 ; 
 
 #define SOCKET_PATH "/tmp/unix_socket_example"
+
+Localization wifi;
 
 // Signal handler to stop the motors and exit the program
 void signalHandler(int signum) {
@@ -63,10 +64,9 @@ void gps_wifi_thread() {
     GPSModule gps;
     int k = 3;
 
-    Localization wifi;
     std::vector<std::tuple<std::string, double, double, double>> fingerprintData = wifi.readWiFiFingerprintFile("wifi_fingerprint.txt");
 
-    while (!stopProgram.load() || !stopWifi.load()) {
+    while (!stopProgram.load()) {
         std::cout << "worker thread loop" << std::endl;
 
         std::string gpsData;
@@ -200,7 +200,6 @@ void user_input_thread() {
             std::cout<<"going back to charging station "<<std::endl ;
             navigateToCharger.store(true);
             userStopMovement.store(false);
-            stopWifi.store(true);
             cv.notify_all();
         }
         else if (input =="t")
@@ -217,8 +216,8 @@ void user_input_thread() {
         {
             userStopMovement.store(true);
             cv.notify_all();
-            FBSpeed = 75 ; 
-            TurnSpeed = 90 ; 
+            FBSpeed +=15 ; 
+            TurnSpeed +=15 ; 
             std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
@@ -230,8 +229,8 @@ void user_input_thread() {
         {
             userStopMovement.store(true);
             cv.notify_all();
-            FBSpeed = 85 ; 
-            TurnSpeed = 100 ; 
+            FBSpeed +=15 ; 
+            TurnSpeed +=15 ; 
             std::cout<<"-----------------------        SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
@@ -244,8 +243,8 @@ void user_input_thread() {
         {
             userStopMovement.store(true);
             cv.notify_all();
-            FBSpeed = 95 ; 
-            TurnSpeed = 110 ; 
+            FBSpeed +=15 ; 
+            TurnSpeed +=15 ; 
             std::cout<<"-----------------------        SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
@@ -258,8 +257,8 @@ void user_input_thread() {
         {
             userStopMovement.store(true);
             cv.notify_all();
-            FBSpeed = 140 ; 
-            TurnSpeed = 160 ; 
+            FBSpeed +=15 ; 
+            TurnSpeed +=15 ; 
             std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
@@ -272,8 +271,8 @@ void user_input_thread() {
         {
             userStopMovement.store(true);
             cv.notify_all();
-            FBSpeed = 180 ; 
-            TurnSpeed = 210 ; 
+            FBSpeed +=15 ; 
+            TurnSpeed +=15 ; 
             std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
@@ -286,8 +285,8 @@ void user_input_thread() {
         {
             userStopMovement.store(true);
             cv.notify_all();
-            FBSpeed = 200 ; 
-            TurnSpeed = 230 ; 
+            FBSpeed +=15 ; 
+            TurnSpeed +=15 ; 
             std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
@@ -303,7 +302,7 @@ void user_input_thread() {
 void navigate_to_charger() 
 {
     std::string chargerMAC = "E2:E1:E1:2C:EA:73"; 
-    Localization wifi;
+    
     int counter = 0 ;
 
     while (!stopProgram.load()) {
@@ -345,7 +344,6 @@ void navigate_to_charger()
             for (const auto& signal : observedRSSI) {
                 if (signal.first == chargerMAC) {
                     chargerSignalStrength = signal.second;
-                    stopWifi.store(false);
                     break;
                 }
             }
