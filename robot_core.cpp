@@ -40,8 +40,8 @@ std::string trashLocation = "center";
 const double CHARGER_X = 10.0;
 const double CHARGER_Y = 10.0;
 
-int FBSpeed = 65 ; 
-int TurnSpeed = 80 ; 
+int FBSpeed = 80 ; 
+int TurnSpeed = 100 ; 
 
 #define SOCKET_PATH "/tmp/unix_socket_example"
 
