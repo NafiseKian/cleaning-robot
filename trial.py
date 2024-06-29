@@ -10,8 +10,7 @@ from utils.general import non_max_suppression, scale_coords
 
 SOCKET_PATH = "/tmp/unix_socket_example"
 
-
-def detect_trash(image_path, model, classNames, device, conf_thresh=0.5):
+def detect_trash(image_path, model, classNames, device):
     trash_detected = False
     direction = "center"
     angle = 0
@@ -42,8 +41,8 @@ def detect_trash(image_path, model, classNames, device, conf_thresh=0.5):
     with torch.no_grad():
         pred = model(img)[0]
 
-    # Apply NMS with confidence threshold
-    pred = non_max_suppression(pred, conf_thresh, 0.45, agnostic=False)
+    # Apply NMS
+    pred = non_max_suppression(pred, 0.25, 0.45, agnostic=False)
 
     # Process detections
     for det in pred:
@@ -85,7 +84,7 @@ def detect_trash(image_path, model, classNames, device, conf_thresh=0.5):
 def main():
     # Load the YOLOv7 model with the specified weights file
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    weights_path = r"/home/ciuteam/Documents/cleaning-robot/trained.pt"
+    weights_path = r"/home/ciuteam/cleaningrobot/cleaning-robot/trained.pt"
     model = attempt_load(weights_path, map_location=device)  # Load the model
     model.eval()
 
@@ -122,8 +121,8 @@ def main():
             image_path = data.decode('utf-8')
             print(f"Received image path: {image_path}")
 
-            # Run the detection with a confidence threshold of 0.5
-            trash_detected, direction, angle = detect_trash(image_path, model, classNames, device, conf_thresh=0.5)
+            # Run the detection
+            trash_detected, direction, angle = detect_trash(image_path, model, classNames, device)
 
             # Send the result back to C++ process
             result = f"{int(trash_detected)}|{direction}|{angle}"
@@ -136,5 +135,5 @@ def main():
         server_socket.close()
         os.unlink(SOCKET_PATH)
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     main()

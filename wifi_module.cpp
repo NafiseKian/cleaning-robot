@@ -10,7 +10,7 @@
 #include <tuple>
 
 #include <Eigen/Dense>
-#include "robot_core.cpp"
+
 
 
 
@@ -138,12 +138,7 @@ std::tuple<double, double> Localization::knnLocation(const std::vector<std::tupl
         for (const auto& fingerprint : fingerprintData) {
             if (std::get<0>(fingerprint) == observed.first) {
                 //std::cout<<std::get<0>(fingerprint)<<"    and the received mac is -->   "<<observed.first<<std::endl;
-                if(observed.first == "E2:E1:E1:2C:EA:73")
-                {
-                    std::cout<<"_________________________________we have a signal from station_______________________________"<<std::endl ;
-                    stationSignal = (int)observed.second ; 
-                    std::cout<<"signal value for station is ------>"<<stationSignal<<std::endl ;  
-                }
+                
                 //std::cout<<"found match"<<std::endl;
                 double distance = rssiDistance(std::get<1>(fingerprint), observed.second);
                 //std::cout << "Distance for MAC " << observed.first << ": " << distance << std::endl;
