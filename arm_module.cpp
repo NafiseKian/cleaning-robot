@@ -5,7 +5,7 @@
 
 const int servo1_pin = 2; // GPIO 2
 const int servo2_pin = 1; // GPIO 3
-const int servo3_pin = 13; // GPIO 4
+const int servo3_pin = 16; // GPIO 4
 
 const int MIN_PULSE_WIDTH = 500;
 const int MAX_PULSE_WIDTH = 2500;
