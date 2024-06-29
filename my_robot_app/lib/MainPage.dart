@@ -11,15 +11,15 @@ class RobotMainPage extends StatefulWidget {
 }
 
 class _RobotMainPageState extends State<RobotMainPage> {
-  bool isUniMap = true;  // State for  the map.
+  bool isUniMap = true;  // State for the map.
   bool _isConnected = false;  // State to display connection status.
   double batteryLevel = 0.0;  // State for battery level.
   double trashLevel = 0.0;  // State for trash level.
+  List<Map<String, double>> markerPositions = []; // State for marker positions.
 
   @override
   void initState() {
     super.initState();
- 
   }
 
   void _sendHelloToServer() async {
@@ -60,15 +60,53 @@ class _RobotMainPageState extends State<RobotMainPage> {
     }
   }
 
-void _updateIndicators(String responseData) {
- 
+  void _updateIndicators(String responseData) {
+    print('Raw response data: $responseData');
     var decoded = jsonDecode(responseData);
+    print('Decoded response data: $decoded');
+    
     setState(() {
       batteryLevel = double.parse(decoded['battery'].toString());
+      print('Updated battery level: $batteryLevel');
+      
       trashLevel = double.parse(decoded['trash'].toString());
+      print('Updated trash level: $trashLevel');
+      
+      var coordinates = decoded['coordinates'];
+      print('Coordinates received: $coordinates');
+      
+      _updateMarkers(coordinates);
     });
-}
+  }
 
+  void _updateMarkers(List<dynamic> coordinates) {
+    List<Map<String, double>> newMarkerPositions = [];
+    double maxX = 600; // Maximum width of the map image
+    double maxY = 300; // Maximum height of the map image
+    double scaleX = 4; // Scaling factor for X coordinate
+    double scaleY = 4; // Scaling factor for Y coordinate
+
+    for (var coord in coordinates) {
+      // Assuming the coordinates are in the form [x, y]
+      double x = double.parse(coord[0].toString());
+      double y = double.parse(coord[1].toString());
+
+      // Estimate the position on the map based on existing logic
+      double estimatedLeft = x * scaleX; // Example transformation
+      double estimatedTop = y * scaleY;  // Example transformation
+
+      // Clamp the coordinates to be within the map boundaries
+      estimatedLeft = estimatedLeft.clamp(0.0, maxX);
+      estimatedTop = estimatedTop.clamp(0.0, maxY);
+
+      newMarkerPositions.add({'left': estimatedLeft, 'top': estimatedTop});
+    }
+
+    setState(() {
+      markerPositions = newMarkerPositions;
+      print('Updated marker positions: $markerPositions');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +121,7 @@ void _updateIndicators(String responseData) {
             SwitchAndConnectionStatus(isUniMap: isUniMap, isConnected: _isConnected, toggleMap: _toggleMap),
             Expanded(
               flex: 3,
-              child: MapAndPosition(isUniMap: isUniMap, mapWidth: 600, mapHeight: 300),
+              child: MapAndPosition(isUniMap: isUniMap, mapWidth: 600, mapHeight: 300, markerPositions: markerPositions),
             ),
             SizedBox(height: 20),
             BatteryAndTrash(batteryLevel: batteryLevel, trashLevel: trashLevel),
@@ -141,11 +179,13 @@ class MapAndPosition extends StatelessWidget {
     required this.isUniMap,
     required this.mapWidth,
     required this.mapHeight,
+    required this.markerPositions,
   }) : super(key: key);
 
   final bool isUniMap;
   final double mapWidth;
   final double mapHeight;
+  final List<Map<String, double>> markerPositions;
 
   @override
   Widget build(BuildContext context) {
@@ -168,69 +208,13 @@ class MapAndPosition extends StatelessWidget {
             ),
           ),
         ),
-
-
-        Positioned(
-          left: 11, // back door cordinaters coming from server -(0,0)
-          top: 260, 
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
-            Positioned(
-          left: 200, //coffetria door coming from server - (50,50)
-          top: 15, 
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
-                 Positioned(
-          left: 280,//**  between parling and coffee (75,50)
-          top: 15, 
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
-                  Positioned(
-          left: 80, // **  class 104( coming from server -(25,25)
-          top: 170, 
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
-                 Positioned(
-          left: 565, /// main door cordinates from server - (150,50)
-          top: 2, 
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
-                        Positioned(
-          left: 470, /// between main and parking (100,50)
-          top: 2, 
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
-        
-           Positioned(
-          left: 410, // GE door( coming from server (100,0)
-          top: 230, 
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
-             Positioned(
-          left: 300, // intersection of coridor (75,25)
-          top: 110, 
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
-               Positioned(
-          left: 310, //   middle of back middle and GE (75,0)
-          top: 230, 
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
-                  Positioned(
-          left: 370, //st parking door cordinates from server (100,50)
-          top: 5,
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
-             Positioned(
-          left: 210, // ibrary door cordinates from server (50,0)
-          top: 240, 
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
-                      Positioned(
-          left: 510, // **  class 118 cordaniters cominf from server( 125,25) 
-          top: 80, 
-          child: Icon(Icons.location_on, color: Colors.red, size: 24),
-        ),
+        ...markerPositions.map((position) {
+          return Positioned(
+            left: position['left'],
+            top: position['top'],
+            child: Icon(Icons.location_on, color: Colors.red, size: 24),
+          );
+        }).toList(),
       ],
     );
   }
