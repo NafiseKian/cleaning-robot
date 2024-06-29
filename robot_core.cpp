@@ -82,6 +82,14 @@ void gps_wifi_thread() {
         std::cout << "------------------------wifi signal levels -----------------------" << std::endl;
         std::cout << ret << std::endl;
         std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(ret);
+        for (const auto& observed : observedRSSI) {
+                if(observed.first == "E2:E1:E1:2C:EA:73")
+                {
+                    std::cout<<"_________________________________we have a signal from station_______________________________"<<std::endl ;
+                    stationSignal = (int)observed.second ; 
+                    std::cout<<"signal value for station is ------>"<<stationSignal<<std::endl ;  
+                }
+        }
 
         std::tuple<double, double> estimatedLocation = wifi.knnLocation(fingerprintData, observedRSSI, k);
         double currentX = std::get<0>(estimatedLocation);
