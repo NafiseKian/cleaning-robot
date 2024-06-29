@@ -36,7 +36,7 @@ std::atomic<double> currentX(0.0);
 std::atomic<double> currentY(0.0);
 std::string trashLocation = "center";
 
-double stationSignal = -150.0 ; 
+int stationSignal = -150.0 ; 
 
 // Coordinates for the charging station
 const double CHARGER_X = 10.0;
@@ -303,10 +303,12 @@ void user_input_thread() {
 // Function to navigate the robot towards the charging station
 void navigate_to_charger() 
 {
+    int initStrength = 0 ;
     
     int counter = 0 ;
 
-    while (!stopProgram.load()) {
+    while (!stopProgram.load()) 
+    {
         if (!navigateToCharger.load()) continue;
 
         if (stationSignal > -40) {  // Assuming signal strength closer to -30 is stronger
