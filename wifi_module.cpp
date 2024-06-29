@@ -10,6 +10,7 @@
 #include <tuple>
 
 #include <Eigen/Dense>
+#include "robot_core.cpp"
 
 
 
