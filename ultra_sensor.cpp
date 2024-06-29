@@ -49,10 +49,12 @@ int UltrasonicSensor::getDistanceCm() {
 
 void UltrasonicSensor::echoCallback(int gpio, int level, uint32_t tick, void* userdata) {
     UltrasonicSensor* sensor = reinterpret_cast<UltrasonicSensor*>(userdata);
-    if (level == 1) { // Rising edge
+    if (level == 1) 
+    { // Rising edge
         sensor->startTimeUs = tick;
     } 
-    else if (level == 0) {
+    else if (level == 0) 
+    {
         if(sensor->startTimeUs == 0)
         {
             std::cout<< sensor->name << ": Falling edge detected before rising edge"<<std::endl;
@@ -61,6 +63,6 @@ void UltrasonicSensor::echoCallback(int gpio, int level, uint32_t tick, void* us
         // Falling edge
         sensor->echoTimeUs = tick - sensor->startTimeUs;
         sensor->echoReceived = true;
-        std::cout << sensor->name << " Distance: " << (sensor->echoTimeUs * 0.0343 / 2.0) << " cm" << std::endl;
+        //std::cout << sensor->name << " Distance: " << (sensor->echoTimeUs * 0.0343 / 2.0) << " cm" << std::endl;
     }
 }

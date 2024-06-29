@@ -36,12 +36,14 @@ std::atomic<double> currentX(0.0);
 std::atomic<double> currentY(0.0);
 std::string trashLocation = "center";
 
+double stationSignal = -150.0 ; 
+
 // Coordinates for the charging station
 const double CHARGER_X = 10.0;
 const double CHARGER_Y = 10.0;
 
-int FBSpeed = 80 ; 
-int TurnSpeed = 100 ; 
+int FBSpeed = 60 ; 
+int TurnSpeed = 80 ; 
 
 #define SOCKET_PATH "/tmp/unix_socket_example"
 
@@ -301,31 +303,13 @@ void user_input_thread() {
 // Function to navigate the robot towards the charging station
 void navigate_to_charger() 
 {
-    std::string chargerMAC = "E2:E1:E1:2C:EA:73"; 
     
     int counter = 0 ;
 
     while (!stopProgram.load()) {
         if (!navigateToCharger.load()) continue;
 
-        std::string wifiData = wifi.captureWifiSignal();
-        std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(wifiData);
-
-        // Find the signal strength of the charger
-        double chargerSignalStrength = -150.0;
-        double initStrength = -150.0 ; 
-        for (const auto& signal : observedRSSI) {
-            if (signal.first == chargerMAC) {
-                initStrength = signal.second;
-                chargerSignalStrength = initStrength ; 
-                break;
-            }
-        }
-
-        std::cout << "Charger Signal Strength: " << initStrength << std::endl;
-
-
-        if (chargerSignalStrength > -40) {  // Assuming signal strength closer to -30 is stronger
+        if (stationSignal > -40) {  // Assuming signal strength closer to -30 is stronger
             std::cout << "Reached the charging station." << std::endl;
             navigateToCharger.store(false);
             MotorControl::stop();
@@ -338,16 +322,9 @@ void navigate_to_charger()
             MotorControl::forward(FBSpeed);
             sleep(3);
             MotorControl::stop();
-            std::string wifiData = wifi.captureWifiSignal();
-            std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(wifiData);
-
-            for (const auto& signal : observedRSSI) {
-                if (signal.first == chargerMAC) {
-                    chargerSignalStrength = signal.second;
-                    break;
-                }
-            }
-            if(chargerSignalStrength < initStrength){
+            
+            if(stationSignal < initStrength)
+            {
                 MotorControl::backward(FBSpeed);
                 sleep(5);
                 if(counter %2 == 0 )

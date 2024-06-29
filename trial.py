@@ -10,7 +10,8 @@ from utils.general import non_max_suppression, scale_coords
 
 SOCKET_PATH = "/tmp/unix_socket_example"
 
-def detect_trash(image_path, model, classNames, device):
+
+def detect_trash(image_path, model, classNames, device, conf_thresh=0.5):
     trash_detected = False
     direction = "center"
     angle = 0
@@ -41,8 +42,8 @@ def detect_trash(image_path, model, classNames, device):
     with torch.no_grad():
         pred = model(img)[0]
 
-    # Apply NMS
-    pred = non_max_suppression(pred, 0.25, 0.45, agnostic=False)
+    # Apply NMS with confidence threshold
+    pred = non_max_suppression(pred, conf_thresh, 0.45, agnostic=False)
 
     # Process detections
     for det in pred:
@@ -121,8 +122,8 @@ def main():
             image_path = data.decode('utf-8')
             print(f"Received image path: {image_path}")
 
-            # Run the detection
-            trash_detected, direction, angle = detect_trash(image_path, model, classNames, device)
+            # Run the detection with a confidence threshold of 0.5
+            trash_detected, direction, angle = detect_trash(image_path, model, classNames, device, conf_thresh=0.5)
 
             # Send the result back to C++ process
             result = f"{int(trash_detected)}|{direction}|{angle}"
@@ -135,5 +136,5 @@ def main():
         server_socket.close()
         os.unlink(SOCKET_PATH)
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     main()
