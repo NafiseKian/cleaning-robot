@@ -140,7 +140,7 @@ std::tuple<double, double> Localization::knnLocation(const std::vector<std::tupl
                 if(observed.first == "E2:E1:E1:2C:EA:73")
                 {
                     std::cout<<"_________________________________we have a signal from station_______________________________"<<std::endl ;
-                    stationSignal = observed.second ; 
+                    stationSignal = (int)observed.second ; 
                     std::cout<<"signal value for station is ------>"<<stationSignal<<std::endl ;  
                 }
                 //std::cout<<"found match"<<std::endl;

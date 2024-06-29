@@ -85,7 +85,7 @@ def detect_trash(image_path, model, classNames, device, conf_thresh=0.5):
 def main():
     # Load the YOLOv7 model with the specified weights file
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    weights_path = r"/home/ciuteam/cleaningrobot/cleaning-robot/trained.pt"
+    weights_path = r"/home/ciuteam/Documents/cleaning-robot/trained.pt"
     model = attempt_load(weights_path, map_location=device)  # Load the model
     model.eval()
 
