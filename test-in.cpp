@@ -1,4 +1,6 @@
+
 #include <iostream>
+#include <wiringPi.h>
 #include <wiringSerial.h>
 #include <unistd.h> // for usleep
 
