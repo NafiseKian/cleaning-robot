@@ -14,6 +14,8 @@
 #include <string>
 #include <sstream>
 #include <atomic>
+#include <wiringPi.h>
+#include <wiringSerial.h>
 
 #include "gps_module.h"
 #include "camera_module.h"
@@ -395,6 +397,8 @@ void navigate_to_charger()
 
 int main() 
 {
+      int fd;
+    char command = 'a';
     // Register signal handler
     signal(SIGINT, signalHandler);
 
@@ -491,8 +495,10 @@ int main()
 
                 }
                 std::cout << "Picking up trash..." << std::endl;
-                sendCommandToArduino(port, "performAction");
-                sleep(5);
+             // Send command to Arduino
+           serialPutchar(fd, command);
+
+            usleep(100000); // Wait for data to be transmitted
                 MotorControl::backward(FBSpeed);
                 usleep(1000000);
                 MotorControl::turnLeft(TurnSpeed);
