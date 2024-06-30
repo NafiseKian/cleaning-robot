@@ -417,7 +417,7 @@ int main()
     //arm.setup();
     //std::cout << "arm set up done" << std::endl;
 
-    sp_port* port = initializeSerialPort("/dev/ttyUSB0"); // Adjust the port name as needed
+    sp_port* port = initializeSerialPort("/dev/ttyACM0"); // Adjust the port name as needed
     if (port == nullptr) {
         return 1;
     }
