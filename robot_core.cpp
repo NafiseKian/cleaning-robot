@@ -397,10 +397,7 @@ void navigate_to_charger()
 
 int main() 
 {
-      int fd;
-    char command = 'a';
-    // Register signal handler
-    signal(SIGINT, signalHandler);
+
 
     std::thread gpsWifiThread(gps_wifi_thread);
 
@@ -495,12 +492,21 @@ int main()
 
                 }
                 std::cout << "Picking up trash..." << std::endl;
-                   if ((fd = serialOpen("/dev/ttyACM0", 9600)) < 0) { // Open serial port
-        std::cerr << "Unable to open serial device." << std::endl;
+              // Initialize serial port for Arduino
+    sp_port* port = initializeSerialPort("/dev/ttyACM0");
+    if (port == nullptr) {
+        std::cerr << "Failed to initialize serial port." << std::endl;
         return 1;
     }
-             // Send command to Arduino
-           serialPutchar(fd, command);
+
+    // Example command to send to Arduino
+    char command = 'a';
+    if (!sendCommandToArduino(port, std::string(1, command))) {
+        std::cerr << "Failed to send command to Arduino." << std::endl;
+        sp_close(port);
+        sp_free_port(port);
+        return 1;
+    }
 
             usleep(100000); // Wait for data to be transmitted
                 MotorControl::backward(FBSpeed);
@@ -592,6 +598,9 @@ int main()
 
     std::cout << "Program terminated gracefully." << std::endl;
     
+    sp_close(port);
+    sp_free_port(port);
 
+    
     return 0;
 }
