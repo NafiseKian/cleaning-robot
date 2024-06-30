@@ -495,6 +495,10 @@ int main()
 
                 }
                 std::cout << "Picking up trash..." << std::endl;
+                   if ((fd = serialOpen("/dev/ttyACM0", 9600)) < 0) { // Open serial port
+        std::cerr << "Unable to open serial device." << std::endl;
+        return 1;
+    }
              // Send command to Arduino
            serialPutchar(fd, command);
 
