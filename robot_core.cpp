@@ -49,6 +49,40 @@ int TurnSpeed = 80 ;
 
 Localization wifi;
 
+
+
+sp_port* initializeSerialPort(const char* portName) {
+    sp_port *port;
+    sp_return result = sp_get_port_by_name(portName, &port);
+    if (result != SP_OK) {
+        std::cerr << "Cannot find port: " << portName << std::endl;
+        return nullptr;
+    }
+
+    result = sp_open(port, SP_MODE_READ_WRITE);
+    if (result != SP_OK) {
+        std::cerr << "Cannot open port: " << portName << std::endl;
+        sp_free_port(port);
+        return nullptr;
+    }
+
+    sp_set_baudrate(port, 9600);
+    sp_set_bits(port, 8);
+    sp_set_parity(port, SP_PARITY_NONE);
+    sp_set_stopbits(port, 1);
+    sp_set_flowcontrol(port, SP_FLOWCONTROL_NONE);
+
+    return port;
+}
+
+// Function to send a command to the Arduino
+bool sendCommandToArduino(sp_port* port, const std::string& command) {
+    std::string cmd = command + "\n";
+    sp_nonblocking_write(port, cmd.c_str(), cmd.length());
+    return true;
+}
+
+
 // Signal handler to stop the motors and exit the program
 void signalHandler(int signum) {
     std::cout << "Interrupt signal (" << signum << ") received.\n";
@@ -359,7 +393,8 @@ void navigate_to_charger()
     }
 }
 
-int main() {
+int main() 
+{
     // Register signal handler
     signal(SIGINT, signalHandler);
 
@@ -378,9 +413,14 @@ int main() {
     UltrasonicSensor rightSensor("Right", 22, 27);
     UltrasonicSensor leftSensor("Left", 18, 17);
 
-    ServoControl arm;
-    arm.setup();
-    std::cout << "arm set up done" << std::endl;
+    //ServoControl arm;
+    //arm.setup();
+    //std::cout << "arm set up done" << std::endl;
+
+    sp_port* port = initializeSerialPort("/dev/ttyUSB0"); // Adjust the port name as needed
+    if (port == nullptr) {
+        return 1;
+    }
 
     while (!stopProgram.load()) {
       std::unique_lock<std::mutex> lock(mtx);
@@ -451,18 +491,8 @@ int main() {
 
                 }
                 std::cout << "Picking up trash..." << std::endl;
-                arm.open();
-                std::cout << "arm opens" << std::endl;
-                sleep(3);
-                arm.down();
-                std::cout << "arm down" << std::endl;
+                sendCommandToArduino(port, "performAction");
                 sleep(5);
-                arm.close();
-                std::cout << "arm closes" << std::endl;
-                sleep(4);
-                arm.up();
-                std::cout << "arm up" << std::endl;
-                sleep(3);
                 MotorControl::backward(FBSpeed);
                 usleep(1000000);
                 MotorControl::turnLeft(TurnSpeed);
