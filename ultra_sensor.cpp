@@ -66,3 +66,28 @@ void UltrasonicSensor::echoCallback(int gpio, int level, uint32_t tick, void* us
         //std::cout << sensor->name << " Distance: " << (sensor->echoTimeUs * 0.0343 / 2.0) << " cm" << std::endl;
     }
 }
+
+
+int main ()
+{
+    UltrasonicSensor frontSensorL("Front-left", 26, 24);
+    UltrasonicSensor frontSensorR("Front-right", 20, 3);
+    UltrasonicSensor rightSensor("Right", 22, 27);
+    UltrasonicSensor leftSensor("Left", 18, 17);
+
+    int distanceFrontL = frontSensorL.getDistanceCm();
+        int distanceFrontR = frontSensorR.getDistanceCm();
+        int distanceRight = rightSensor.getDistanceCm();
+        int distanceLeft = leftSensor.getDistanceCm();
+
+        std::cout << " ------------------------------------------------------------ " << std::endl;
+        std::cout << "Front Distance sensor left: " << distanceFrontL << " cm" << std::endl;
+        std::cout << "Front Distance sensor right: " << distanceFrontR << " cm" << std::endl;
+        std::cout << "Right Distance : " << distanceRight << " cm" << std::endl;
+        std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
+        std::cout << " ------------------------------------------------------------ " << std::endl;
+
+    
+
+    return 0 ; 
+}
