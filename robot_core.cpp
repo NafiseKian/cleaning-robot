@@ -115,8 +115,6 @@ void gps_wifi_thread() {
         }
 
         std::string ret = wifi.captureWifiSignal();
-        std::cout << "------------------------wifi signal levels -----------------------" << std::endl;
-        std::cout << ret << std::endl;
         std::vector<std::pair<std::string, double>> observedRSSI = wifi.parseIwlistOutput(ret);
         for (const auto& observed : observedRSSI) {
                 if(observed.first == "E2:E1:E1:2C:EA:73")
@@ -162,7 +160,8 @@ void camera_thread(int &photoCounter)
     strncpy(addr.sun_path, SOCKET_PATH, sizeof(addr.sun_path) - 1);
 
     // Connect to the server
-    if (connect(sockfd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
+    if (connect(sockfd, (struct sockaddr*)&addr, sizeof(addr)) == -1) 
+    {
         perror("connect error");
         close(sockfd);
         exit(EXIT_FAILURE);
@@ -176,7 +175,7 @@ void camera_thread(int &photoCounter)
         if (stopProgram.load()) break;
 
         std::string path = CameraModule::capturePhoto(photoCounter);
-        std::cout << "Photo " << photoCounter << " taken." << std::endl;
+        std::cout << "Photo is taken." << std::endl;
 
         // Send the image path to Python process
         if (send(sockfd, path.c_str(), path.length(), 0) == -1) {
@@ -206,11 +205,14 @@ void camera_thread(int &photoCounter)
         trashDetected.store(trashDetectedFlag == "1");
 
         // Print the detection result
-        if (trashDetected.load()) {
-            std::cout << "Trash detected in photo " << photoCounter << "!" << std::endl;
+        if (trashDetected.load()) 
+        {
+            std::cout << "Trash detected in the photo !" << std::endl;
             trashLocation = placeOfTrash ; 
-        } else {
-            std::cout << "No trash detected in photo " << photoCounter << "." << std::endl;
+        } 
+        else 
+        {
+            std::cout << "No trash detected in the photo " << std::endl;
         }
 
         photoCounter++;
@@ -221,20 +223,24 @@ void camera_thread(int &photoCounter)
         cv.notify_all();
     }
 
-    // Close socket
     close(sockfd);
 }
 
-void user_input_thread() {
+void user_input_thread() 
+{
     std::string input;
-    while (!stopProgram.load()) {
+    while (!stopProgram.load()) 
+    {
         std::cin >> input;
-        if (input == "s") {
+        if (input == "s") 
+        {
             std::cout<<"-----------------------        ATTENTION       --------------------"<<std::endl;
             std::cout<<"user wish to stop the robot "<<std::endl ;
             userStopMovement.store(true);
             cv.notify_all();
-        } else if (input == "c") {
+        } 
+        else if (input == "c") 
+        {
             std::cout<<"-----------------------        ATTENTION       --------------------"<<std::endl;
             std::cout<<"user wish to continue the movement "<<std::endl ;
             userStopMovement.store(false);
@@ -272,77 +278,6 @@ void user_input_thread() {
 
 
         }
-        /*else if(input =="b2")
-        {
-            userStopMovement.store(true);
-            cv.notify_all();
-            FBSpeed +=15 ; 
-            TurnSpeed +=15 ; 
-            std::cout<<"-----------------------        SPEED UP        --------------------"<<std::endl;
-            std::cout<<"speed of motors are increased "<<std::endl ;
-            userStopMovement.store(false);
-            cv.notify_all();
-            std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
-
-
-        }
-        else if(input =="b3")
-        {
-            userStopMovement.store(true);
-            cv.notify_all();
-            FBSpeed +=15 ; 
-            TurnSpeed +=15 ; 
-            std::cout<<"-----------------------        SPEED UP        --------------------"<<std::endl;
-            std::cout<<"speed of motors are increased "<<std::endl ;
-            userStopMovement.store(false);
-            cv.notify_all();
-            std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
-
-
-        }
-        else if(input =="b4")
-        {
-            userStopMovement.store(true);
-            cv.notify_all();
-            FBSpeed +=15 ; 
-            TurnSpeed +=15 ; 
-            std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
-            std::cout<<"speed of motors are increased "<<std::endl ;
-            userStopMovement.store(false);
-            cv.notify_all();
-            std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
-
-
-        }
-        else if(input =="b5")
-        {
-            userStopMovement.store(true);
-            cv.notify_all();
-            FBSpeed +=15 ; 
-            TurnSpeed +=15 ; 
-            std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
-            std::cout<<"speed of motors are increased "<<std::endl ;
-            userStopMovement.store(false);
-            cv.notify_all();
-            std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
-
-
-        }
-        else if(input =="b6")
-        {
-            userStopMovement.store(true);
-            cv.notify_all();
-            FBSpeed +=15 ; 
-            TurnSpeed +=15 ; 
-            std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
-            std::cout<<"speed of motors are increased "<<std::endl ;
-            userStopMovement.store(false);
-            cv.notify_all();
-            std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
-
-
-        }
-        */
     }
 }
 
@@ -400,6 +335,13 @@ void navigate_to_charger()
 int main() 
 {
 
+    // Initialize serial port for Arduino
+    sp_port* port = initializeSerialPort("/dev/ttyACM0");
+    if (port == nullptr) 
+    {
+        std::cerr << "Failed to initialize serial port." << std::endl;
+        return 1;
+    }
 
     std::thread gpsWifiThread(gps_wifi_thread);
 
@@ -468,7 +410,8 @@ int main()
 
             if (stopProgram.load()) MotorControl::stop();
 
-            if (trashDetected.load()) {
+            if (trashDetected.load()) 
+            {
                 if(trashLocation=="center")
                 {
                     std::cout << "Trash detected in center. Moving closer to pick it up..." << std::endl;
@@ -482,24 +425,18 @@ int main()
                 {
                     std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnLeft(TurnSpeed);
-                    usleep(200000); // Move forward for half second to get closer to the trash
+                    usleep(400000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
                 }else if(trashLocation == "turn right")
                 {
                     std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnRight(TurnSpeed);
-                    usleep(200000); // Move forward for half second to get closer to the trash
+                    usleep(400000); // Move forward for half second to get closer to the trash
                     MotorControl::stop();
 
                 }
                 std::cout << "Picking up trash..." << std::endl;
-                // Initialize serial port for Arduino
-                sp_port* port = initializeSerialPort("/dev/ttyACM0");
-                if (port == nullptr) {
-                    std::cerr << "Failed to initialize serial port." << std::endl;
-                    return 1;
-                }
 
                 // Example command to send to Arduino
                 char command = 'a';
@@ -573,15 +510,7 @@ int main()
                 usleep(500000);
             }
             std::cout << "Resuming movement..." << std::endl;
-        } else if (validRight) {
-            MotorControl::turnRight(TurnSpeed);
-            usleep(500000);
-            MotorControl::stop();
-            
-        } else if (validLeft) {
-            MotorControl::turnLeft(TurnSpeed);
-            usleep(500000);
-            MotorControl::stop();
+
         } else if ((validFrontL || validFrontR) && validLeft && validRight) {
             MotorControl::backward(FBSpeed);
             usleep(1000000);
@@ -598,10 +527,10 @@ int main()
 
     }
 
-    std::cout << "Program terminated gracefully." << std::endl;
-    
     sp_close(port);
     sp_free_port(port);
+
+    std::cout << "Program terminated gracefully." << std::endl;
 
     
     return 0;
