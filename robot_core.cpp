@@ -354,7 +354,7 @@ int main()
     std::thread userInputThread(user_input_thread);
 
     UltrasonicSensor frontSensorL("Front-left", 26, 24);
-    UltrasonicSensor frontSensorR("Front-right", 20, 21);
+    UltrasonicSensor frontSensorR("Front-right", 20, 3);
     UltrasonicSensor rightSensor("Right", 22, 27);
     UltrasonicSensor leftSensor("Left", 18, 17);
 
