@@ -362,11 +362,6 @@ int main()
     //arm.setup();
     //std::cout << "arm set up done" << std::endl;
 
-    sp_port* port = initializeSerialPort("/dev/ttyACM0"); // Adjust the port name as needed
-    if (port == nullptr) {
-        return 1;
-    }
-
     while (!stopProgram.load()) {
       std::unique_lock<std::mutex> lock(mtx);
       cv.wait(lock, [] { return !stopMovement.load() || stopProgram.load(); });
