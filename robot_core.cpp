@@ -44,8 +44,8 @@ int stationSignal = -150.0 ;
 const double CHARGER_X = 10.0;
 const double CHARGER_Y = 10.0;
 
-int FBSpeed = 60 ; 
-int TurnSpeed = 80 ; 
+int FBSpeed = 70 ; 
+int TurnSpeed = 90 ; 
 
 #define SOCKET_PATH "/tmp/unix_socket_example"
 
@@ -258,7 +258,7 @@ void user_input_thread() {
             // Notify all threads to exit
             cv.notify_all();
         }
-        else if(input =="b1")
+        else if(input =="b")
         {
             userStopMovement.store(true);
             cv.notify_all();
@@ -271,7 +271,8 @@ void user_input_thread() {
             std::cout<<"-----------------------       ALL SET     --------------------"<<std::endl;
 
 
-        }else if(input =="b2")
+        }
+        /*else if(input =="b2")
         {
             userStopMovement.store(true);
             cv.notify_all();
@@ -341,6 +342,7 @@ void user_input_thread() {
 
 
         }
+        */
     }
 }
 
@@ -492,23 +494,23 @@ int main()
 
                 }
                 std::cout << "Picking up trash..." << std::endl;
-              // Initialize serial port for Arduino
-    sp_port* port = initializeSerialPort("/dev/ttyACM0");
-    if (port == nullptr) {
-        std::cerr << "Failed to initialize serial port." << std::endl;
-        return 1;
-    }
+                // Initialize serial port for Arduino
+                sp_port* port = initializeSerialPort("/dev/ttyACM0");
+                if (port == nullptr) {
+                    std::cerr << "Failed to initialize serial port." << std::endl;
+                    return 1;
+                }
 
-    // Example command to send to Arduino
-    char command = 'a';
-    if (!sendCommandToArduino(port, std::string(1, command))) {
-        std::cerr << "Failed to send command to Arduino." << std::endl;
-        sp_close(port);
-        sp_free_port(port);
-        return 1;
-    }
+                // Example command to send to Arduino
+                char command = 'a';
+                if (!sendCommandToArduino(port, std::string(1, command))) {
+                    std::cerr << "Failed to send command to Arduino." << std::endl;
+                    sp_close(port);
+                    sp_free_port(port);
+                    return 1;
+                }
 
-            usleep(100000); // Wait for data to be transmitted
+                sleep(8);
                 MotorControl::backward(FBSpeed);
                 usleep(1000000);
                 MotorControl::turnLeft(TurnSpeed);
