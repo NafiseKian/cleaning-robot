@@ -133,7 +133,7 @@ void gps_wifi_thread() {
 
         if (network.connectToServer()) {
             std::cout << "Connected to server successfully." << std::endl;
-            network.sendData("ROBOT," + std::to_string(50.66) + "," + std::to_string(11.00));
+            network.sendData("ROBOT," + std::to_string(currentX) + "," + std::to_string(currentY));
         } else {
             std::cout << "Failed to connect to server." << std::endl;
         }
@@ -390,8 +390,8 @@ int main()
         std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
         std::cout << " ------------------------------------------------------------ " << std::endl;
 
-        bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 40);
-        bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 40);
+        bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 30);
+        bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 30);
         bool validRight = (distanceRight != -1 && distanceRight < 20);
         bool validLeft = (distanceLeft != -1 && distanceLeft < 20);
 
