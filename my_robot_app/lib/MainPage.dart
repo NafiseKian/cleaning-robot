@@ -23,13 +23,14 @@ class _RobotMainPageState extends State<RobotMainPage> {
     super.initState();
     // Initialize predefined markers with names, x, y, left, and top
     predefinedMarkers = [
-      {'name': 'Marker 1', 'x': 10.0, 'y': 10.0, 'left': 20.0, 'top': 10.0},
+      {'name': 'Marker 1', 'x': 10.0, 'y': 10.0, 'left': 20.0, 'top': 1.0},
       {'name': 'Marker 2', 'x': 20.0, 'y': 20.0, 'left': 0.0, 'top': 0.0},
       {'name': 'Marker 3', 'x': 30.0, 'y': 30.0, 'left': 0.0, 'top': 0.0},
       {'name': 'Marker 4', 'x': 40.0, 'y': 40.0, 'left': 0.0, 'top': 0.0},
       // Add more predefined markers as needed
     ];
   }
+
 
   void _sendHelloToServer() async {
     var host = ServerConfig.host;
@@ -70,43 +71,57 @@ class _RobotMainPageState extends State<RobotMainPage> {
   }
 
   void _updateIndicators(String responseData) {
-    print('Raw response data: $responseData');
-    
-    try {
-      var decoded = jsonDecode(responseData);
-      print('Decoded response data: $decoded');
+  print('Raw response data: $responseData');
+  
+  try {
+    var decoded = jsonDecode(responseData);
+    print('Decoded response data: $decoded');
 
-      // Parse the coordinates from 'x' and 'y' directly
-      double x = decoded.containsKey('x') ? double.parse(decoded['x'].toString()) : 0.0;
-      double y = decoded.containsKey('y') ? double.parse(decoded['y'].toString()) : 0.0;
-      print('Parsed coordinates: x=$x, y=$y');
+    // Parse the coordinates from 'x' and 'y' directly
+    double x = decoded.containsKey('x') ? double.parse(decoded['x'].toString()) : 0.0;
+    double y = decoded.containsKey('y') ? double.parse(decoded['y'].toString()) : 0.0;
+    print('Parsed coordinates: x=$x, y=$y');
 
-      // Update the predefined markers with received x, y, left, and top values
-      for (var marker in predefinedMarkers) {
-        if (marker['x'] == x && marker['y'] == y) {
-          // Calculate left and top positions based on map dimensions
-          double mapWidth = 500; // Width of the map image
-          double mapHeight = 250; // Height of the map image
-          double coordMaxX = 90; // Maximum X value from the server
-          double coordMaxY = 90; // Maximum Y value from the server
+    // Determine which marker to display based on ranges
+    double left = 0.0;
+    double top = 0.0;
+    int mapWidth = 500 ; 
 
-          marker['left'] = (x / coordMaxX) * mapWidth;
-          marker['top'] = (y / coordMaxY) * mapHeight;
-          print('Updated marker ${marker['name']} positions: left=${marker['left']}, top=${marker['top']}');
-          break;
-        }
+    if (40 < x && x < 80) {
+      if (0 < y && y < 10) {
+        // Conditions for pin 1
+        top = 220.0;
+        left = mapWidth / 2; // Center of the map horizontally
+      } else if (10 < y && y < 20) {
+        // Conditions for pin 2
+        top = 200.0;
+        left = (mapWidth / 2) + 10 ;
+      } else if (20 < y && y < 30) {
+        // Conditions for pin 3
+        top = 150.0;
+        left = (mapWidth / 2) + 50;
+      } else if (30 < y && y < 40) {
+        // Conditions for pin 4
+        top = 110.0;
+        left = (mapWidth / 2)+30;
+      } else if (40 < y && y < 50) {
+        // Conditions for pin 5
+        top = 60.0;
+        left =( mapWidth / 2)+50;
       }
-
-      setState(() {
-        // Update markers
-        markerPositions = List<Map<String, double>>.from(predefinedMarkers.map((marker) =>
-            {'left': marker['left'], 'top': marker['top']}
-        ));
-      });
-    } catch (e) {
-      print('Error parsing response data: $e');
     }
+
+    // Update the marker positions
+    setState(() {
+      markerPositions = [
+        {'left': left, 'top': top},
+      ];
+    });
+  } catch (e) {
+    print('Error parsing response data: $e');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
