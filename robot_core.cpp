@@ -268,8 +268,8 @@ void user_input_thread()
         {
             userStopMovement.store(true);
             cv.notify_all();
-            FBSpeed +=15 ; 
-            TurnSpeed +=15 ; 
+            FBSpeed +=10 ; 
+            TurnSpeed +=10 ; 
             std::cout<<"-----------------------       SPEED UP        --------------------"<<std::endl;
             std::cout<<"speed of motors are increased "<<std::endl ;
             userStopMovement.store(false);
