@@ -67,7 +67,7 @@ void UltrasonicSensor::echoCallback(int gpio, int level, uint32_t tick, void* us
     }
 }
 
-
+/*
 int main ()
 {
     UltrasonicSensor frontSensorL("Front-left", 26, 24);
@@ -91,3 +91,4 @@ int main ()
 
     return 0 ; 
 }
+*/
