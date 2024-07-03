@@ -42,7 +42,7 @@ def detect_trash(image_path, model, classNames, device):
         pred = model(img)[0]
 
     # Apply NMS
-    pred = non_max_suppression(pred, 0.5, 0.45, agnostic=False)
+    pred = non_max_suppression(pred, 0.3, 0.3, agnostic=False)
 
     # Process detections
     for det in pred:
