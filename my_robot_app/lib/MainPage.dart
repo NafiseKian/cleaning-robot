@@ -15,11 +15,20 @@ class _RobotMainPageState extends State<RobotMainPage> {
   bool _isConnected = false;  // State to display connection status.
   double batteryLevel = 0.0;  // State for battery level.
   double trashLevel = 0.0;  // State for trash level.
+  List<Map<String, dynamic>> predefinedMarkers = []; // Predefined markers with names and coordinates
   List<Map<String, double>> markerPositions = []; // State for marker positions.
 
   @override
   void initState() {
     super.initState();
+    // Initialize predefined markers with names, x, y, left, and top
+    predefinedMarkers = [
+      {'name': 'Marker 1', 'x': 10.0, 'y': 10.0, 'left': 20.0, 'top': 10.0},
+      {'name': 'Marker 2', 'x': 20.0, 'y': 20.0, 'left': 0.0, 'top': 0.0},
+      {'name': 'Marker 3', 'x': 30.0, 'y': 30.0, 'left': 0.0, 'top': 0.0},
+      {'name': 'Marker 4', 'x': 40.0, 'y': 40.0, 'left': 0.0, 'top': 0.0},
+      // Add more predefined markers as needed
+    ];
   }
 
   void _sendHelloToServer() async {
@@ -62,50 +71,41 @@ class _RobotMainPageState extends State<RobotMainPage> {
 
   void _updateIndicators(String responseData) {
     print('Raw response data: $responseData');
-    var decoded = jsonDecode(responseData);
-    print('Decoded response data: $decoded');
     
-    setState(() {
-      batteryLevel = double.parse(decoded['battery'].toString());
-      print('Updated battery level: $batteryLevel');
-      
-      trashLevel = double.parse(decoded['trash'].toString());
-      print('Updated trash level: $trashLevel');
-      
-      var coordinates = decoded['coordinates'];
-      print('Coordinates received: $coordinates');
-      
-      _updateMarkers(coordinates);
-    });
-  }
+    try {
+      var decoded = jsonDecode(responseData);
+      print('Decoded response data: $decoded');
 
-  void _updateMarkers(List<dynamic> coordinates) {
-    List<Map<String, double>> newMarkerPositions = [];
-    double maxX = 600; // Maximum width of the map image
-    double maxY = 300; // Maximum height of the map image
-    double scaleX = 4; // Scaling factor for X coordinate
-    double scaleY = 4; // Scaling factor for Y coordinate
+      // Parse the coordinates from 'x' and 'y' directly
+      double x = decoded.containsKey('x') ? double.parse(decoded['x'].toString()) : 0.0;
+      double y = decoded.containsKey('y') ? double.parse(decoded['y'].toString()) : 0.0;
+      print('Parsed coordinates: x=$x, y=$y');
 
-    for (var coord in coordinates) {
-      // Assuming the coordinates are in the form [x, y]
-      double x = double.parse(coord[0].toString());
-      double y = double.parse(coord[1].toString());
+      // Update the predefined markers with received x, y, left, and top values
+      for (var marker in predefinedMarkers) {
+        if (marker['x'] == x && marker['y'] == y) {
+          // Calculate left and top positions based on map dimensions
+          double mapWidth = 500; // Width of the map image
+          double mapHeight = 250; // Height of the map image
+          double coordMaxX = 90; // Maximum X value from the server
+          double coordMaxY = 90; // Maximum Y value from the server
 
-      // Estimate the position on the map based on existing logic
-      double estimatedLeft = x * scaleX; // Example transformation
-      double estimatedTop = y * scaleY;  // Example transformation
+          marker['left'] = (x / coordMaxX) * mapWidth;
+          marker['top'] = (y / coordMaxY) * mapHeight;
+          print('Updated marker ${marker['name']} positions: left=${marker['left']}, top=${marker['top']}');
+          break;
+        }
+      }
 
-      // Clamp the coordinates to be within the map boundaries
-      estimatedLeft = estimatedLeft.clamp(0.0, maxX);
-      estimatedTop = estimatedTop.clamp(0.0, maxY);
-
-      newMarkerPositions.add({'left': estimatedLeft, 'top': estimatedTop});
+      setState(() {
+        // Update markers
+        markerPositions = List<Map<String, double>>.from(predefinedMarkers.map((marker) =>
+            {'left': marker['left'], 'top': marker['top']}
+        ));
+      });
+    } catch (e) {
+      print('Error parsing response data: $e');
     }
-
-    setState(() {
-      markerPositions = newMarkerPositions;
-      print('Updated marker positions: $markerPositions');
-    });
   }
 
   @override

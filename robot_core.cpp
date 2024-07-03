@@ -390,8 +390,8 @@ int main()
         std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
         std::cout << " ------------------------------------------------------------ " << std::endl;
 
-        bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 40);
-        bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 40);
+        bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 30);
+        bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 30);
         bool validRight = (distanceRight != -1 && distanceRight < 20);
         bool validLeft = (distanceLeft != -1 && distanceLeft < 20);
 
