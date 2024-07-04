@@ -82,20 +82,20 @@ class _RobotMainPageState extends State<RobotMainPage> {
     if (40 < x && x < 80) {
       if (0 < y && y < 10) {
         // Conditions for pin 1
-        top = 220.0;
+        top = 200.0;
         left = mapWidth / 2; // Center of the map horizontally
       } else if (10 < y && y < 20) {
         // Conditions for pin 2
-        top = 200.0;
+        top = 100.0;
         left = (mapWidth / 2) + 10 ;
       } else if (20 < y && y < 30) {
         // Conditions for pin 3
-        top = 150.0;
+        top = 120.0;
         left = (mapWidth / 2) + 50;
       } else if (30 < y && y < 40) {
         // Conditions for pin 4
-        top = 110.0;
-        left = (mapWidth / 2)+30;
+        top = 100.0;
+        left = (mapWidth / 2)+20;
       } else if (40 < y && y < 50) {
         // Conditions for pin 5
         top = 70.0;
