@@ -134,7 +134,7 @@ void gps_wifi_thread() {
 
         if (network.connectToServer()) {
             std::cout << "Connected to server successfully." << std::endl;
-            network.sendData("ROBOT," + std::to_string(currentX) + "," + std::to_string(currentY)+ ","+std::to_string(lastDetected);
+            network.sendData("ROBOT," + std::to_string(currentX) + "," + std::to_string(currentY)+ ","+std::to_string(lastDetected));
         } else {
             std::cout << "Failed to connect to server." << std::endl;
         }
