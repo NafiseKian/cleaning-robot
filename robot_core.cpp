@@ -39,7 +39,7 @@ std::atomic<double> currentY(0.0);
 std::string trashLocation = "center";
 
 int stationSignal = -150.0 ; 
-int lastDetected = 0 ; 
+double lastDetected = 0.0 ; 
 
 // Coordinates for the charging station
 const double CHARGER_X = 10.0;
@@ -408,7 +408,7 @@ int main()
 
             if (trashDetected.load()) 
             {
-                lastDetected = 1 ;
+                lastDetected = 1.0 ;
                 if(trashLocation=="center")
                 {
                     std::cout << "Trash detected in center" << std::endl;
@@ -462,7 +462,7 @@ int main()
             }
             else
             {
-                lastDetected = 0 ;
+                lastDetected = 0.0 ;
                 MotorControl::backward(FBSpeed);
                 usleep(1000000);
                 MotorControl::turnLeft(TurnSpeed);
