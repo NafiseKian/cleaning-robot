@@ -15,20 +15,11 @@ class _RobotMainPageState extends State<RobotMainPage> {
   bool _isConnected = false;  // State to display connection status.
   double batteryLevel = 0.0;  // State for battery level.
   double trashLevel = 0.0;  // State for trash level.
-  List<Map<String, dynamic>> predefinedMarkers = []; // Predefined markers with names and coordinates
   List<Map<String, double>> markerPositions = []; // State for marker positions.
 
   @override
   void initState() {
     super.initState();
-    // Initialize predefined markers with names, x, y, left, and top
-    predefinedMarkers = [
-      {'name': 'Marker 1', 'x': 10.0, 'y': 10.0, 'left': 20.0, 'top': 1.0},
-      {'name': 'Marker 2', 'x': 20.0, 'y': 20.0, 'left': 0.0, 'top': 0.0},
-      {'name': 'Marker 3', 'x': 30.0, 'y': 30.0, 'left': 0.0, 'top': 0.0},
-      {'name': 'Marker 4', 'x': 40.0, 'y': 40.0, 'left': 0.0, 'top': 0.0},
-      // Add more predefined markers as needed
-    ];
   }
 
 
@@ -80,7 +71,8 @@ class _RobotMainPageState extends State<RobotMainPage> {
     // Parse the coordinates from 'x' and 'y' directly
     double x = decoded.containsKey('x') ? double.parse(decoded['x'].toString()) : 0.0;
     double y = decoded.containsKey('y') ? double.parse(decoded['y'].toString()) : 0.0;
-    print('Parsed coordinates: x=$x, y=$y');
+    double z = decoded.containsKey('z') ? double.parse(decoded['z'].toString()) : 0.0;
+    print('Parsed coordinates: x=$x, y=$y and trash detected value is $z');
 
     // Determine which marker to display based on ranges
     double left = 0.0;
@@ -106,7 +98,7 @@ class _RobotMainPageState extends State<RobotMainPage> {
         left = (mapWidth / 2)+30;
       } else if (40 < y && y < 50) {
         // Conditions for pin 5
-        top = 60.0;
+        top = 70.0;
         left =( mapWidth / 2)+50;
       }
     }
