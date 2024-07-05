@@ -219,13 +219,25 @@ class MapAndPosition extends StatelessWidget {
           return Positioned(
             left: position['left'],
             top: position['top'],
-            child: Icon(Icons.location_on, color: Colors.red, size: 24),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.red, width: 2),
+                image: DecorationImage(
+                  image: AssetImage('assets/logo.png'), 
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
           );
         }).toList(),
       ],
     );
   }
 }
+
 
 class BatteryAndTrash extends StatelessWidget {
   const BatteryAndTrash({
