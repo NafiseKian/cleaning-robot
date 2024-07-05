@@ -1,3 +1,4 @@
+import 'dart:async'; // Import the Timer class
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -16,12 +17,23 @@ class _RobotMainPageState extends State<RobotMainPage> {
   double batteryLevel = 0.0;  // State for battery level.
   double trashLevel = 0.0;  // State for trash level.
   List<Map<String, double>> markerPositions = []; // State for marker positions.
+  Timer? _timer;  // Timer to periodically update data
 
   @override
   void initState() {
     super.initState();
+    // Start a timer to call _sendHelloToServer every 5 seconds
+    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      _sendHelloToServer();
+    });
   }
 
+  @override
+  void dispose() {
+    // Cancel the timer when the widget is disposed
+    _timer?.cancel();
+    super.dispose();
+  }
 
   void _sendHelloToServer() async {
     var host = ServerConfig.host;
@@ -62,58 +74,82 @@ class _RobotMainPageState extends State<RobotMainPage> {
   }
 
   void _updateIndicators(String responseData) {
-  print('Raw response data: $responseData');
+    print('Raw response data: $responseData');
   
-  try {
-    var decoded = jsonDecode(responseData);
-    print('Decoded response data: $decoded');
+    try {
+      var decoded = jsonDecode(responseData);
+      print('Decoded response data: $decoded');
 
-    // Parse the coordinates from 'x' and 'y' directly
-    double x = decoded.containsKey('x') ? double.parse(decoded['x'].toString()) : 0.0;
-    double y = decoded.containsKey('y') ? double.parse(decoded['y'].toString()) : 0.0;
-    double z = decoded.containsKey('z') ? double.parse(decoded['z'].toString()) : 0.0;
-    print('Parsed coordinates: x=$x, y=$y and trash detected value is $z');
+      // Parse the coordinates from 'x' and 'y' directly
+      double x = decoded.containsKey('x') ? double.parse(decoded['x'].toString()) : 0.0;
+      double y = decoded.containsKey('y') ? double.parse(decoded['y'].toString()) : 0.0;
+      double z = decoded.containsKey('z') ? double.parse(decoded['z'].toString()) : 0.0;
+      print('Parsed coordinates: x=$x, y=$y and trash detected value is $z');
 
-    // Determine which marker to display based on ranges
-    double left = 0.0;
-    double top = 0.0;
-    int mapWidth = 500 ; 
+      // Determine which marker to display based on ranges
+      double left = 0.0;
+      double top = 0.0;
+      int mapWidth = 500 ; 
 
-    if (40 < x && x < 80) {
-      if (0 < y && y < 10) {
-        // Conditions for pin 1
-        top = 200.0;
-        left = mapWidth / 2; // Center of the map horizontally
-      } else if (10 < y && y < 20) {
-        // Conditions for pin 2
-        top = 100.0;
-        left = (mapWidth / 2) + 10 ;
-      } else if (20 < y && y < 30) {
-        // Conditions for pin 3
-        top = 120.0;
-        left = (mapWidth / 2) + 50;
-      } else if (30 < y && y < 40) {
-        // Conditions for pin 4
-        top = 100.0;
-        left = (mapWidth / 2)+20;
-      } else if (40 < y && y < 50) {
-        // Conditions for pin 5
-        top = 70.0;
-        left =( mapWidth / 2)+50;
+      if (40 < x && x < 80) {
+        if (0 < y && y < 10) {
+          // Conditions for pin 1
+          top = 200.0;
+          left = mapWidth / 2; // Center of the map horizontally
+        } else if (10 < y && y < 20) {
+          // Conditions for pin 2
+          top = 100.0;
+          left = (mapWidth / 2) + 10 ;
+        } else if (20 < y && y < 30) {
+          // Conditions for pin 3
+          top = 120.0;
+          left = (mapWidth / 2) + 50;
+        } else if (30 < y && y < 40) {
+          // Conditions for pin 4
+          top = 100.0;
+          left = (mapWidth / 2)+20;
+        } else if (40 < y && y < 50) {
+          // Conditions for pin 5
+          top = 70.0;
+          left =( mapWidth / 2)+50;
+        }
       }
+
+      // Update the marker positions
+      setState(() {
+        markerPositions = [
+          {'left': left, 'top': top},
+        ];
+      });
+
+      // Show a popup if trash is detected
+      if (z == 1.0) {
+        _showTrashDetectedPopup();
+      }
+    } catch (e) {
+      print('Error parsing response data: $e');
     }
-
-    // Update the marker positions
-    setState(() {
-      markerPositions = [
-        {'left': left, 'top': top},
-      ];
-    });
-  } catch (e) {
-    print('Error parsing response data: $e');
   }
-}
 
+  void _showTrashDetectedPopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Trash Detected'),
+          content: Text('Robot is picking trash.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
