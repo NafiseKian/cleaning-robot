@@ -412,18 +412,19 @@ int main()
                 if(trashLocation=="center")
                 {
                     std::cout << "Trash detected in center" << std::endl;
-                    int distanceFrontL = frontSensorL.getDistanceCm();
-                    int distanceFrontR = frontSensorR.getDistanceCm();
+                    int FrontL = frontSensorL.getDistanceCm();
+                    int FrontR = frontSensorR.getDistanceCm();
+                    std::cout<<"Distance is now ----> "<<FrontL<<" and "<<FrontR<<std::endl ; 
 
                     if((distanceFrontL || distanceFrontR)>=20)
                     {
                         MotorControl::forward(FBSpeed);
-                        usleep(500000); // Move forward for half second to get closer to the trash
+                        usleep(400000); // Move forward for half second to get closer to the trash
                     }
-                    if((distanceFrontL || distanceFrontR)<=20)
+                    if((distanceFrontL || distanceFrontR)<=10)
                     {
                         MotorControl::backward(FBSpeed);
-                        usleep(500000); // Move backward for half second to get closer to the trash
+                        usleep(400000); // Move backward for half second to get closer to the trash
                     }
                     MotorControl::stop();
                 }else if (trashLocation == "turn left")
