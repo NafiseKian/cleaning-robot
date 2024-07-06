@@ -425,6 +425,7 @@ int main()
                     {
                         MotorControl::backward(FBSpeed);
                         usleep(100000); // Move backward for half second to get closer to the trash
+                        MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
                         std::cout<<"Distance is now ----> "<<FL<<" and "<<FR<<std::endl ; 
@@ -440,6 +441,7 @@ int main()
                     std::cout << "Trash detected in left side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnLeft(TurnSpeed);
                     usleep(100000); // Move forward for half second to get closer to the trash
+                    MotorControl::stop();
                     int FrontL = frontSensorL.getDistanceCm();
                     int FrontR = frontSensorR.getDistanceCm();
                     std::cout<<"Distance is now ----> "<<FrontL<<" and "<<FrontR<<std::endl ; 
@@ -453,6 +455,7 @@ int main()
                     {
                         MotorControl::backward(FBSpeed);
                         usleep(100000); // Move backward for half second to get closer to the trash
+                        MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
                         std::cout<<"Distance is now ----> "<<FL<<" and "<<FR<<std::endl ; 
@@ -470,6 +473,7 @@ int main()
                     std::cout << "Trash detected in right side. Moving closer to pick it up..." << std::endl;
                     MotorControl::turnRight(TurnSpeed);
                     usleep(100000); // Move forward for half second to get closer to the trash
+                    MotorControl::stop();
                     int FrontL = frontSensorL.getDistanceCm();
                     int FrontR = frontSensorR.getDistanceCm();
                     std::cout<<"Distance is now ----> "<<FrontL<<" and "<<FrontR<<std::endl ; 
@@ -482,7 +486,8 @@ int main()
                    else if((FrontL <=10)||(FrontR <=10))
                     {
                         MotorControl::backward(FBSpeed);
-                        usleep(100000); // Move backward for half second to get closer to the trash
+                        usleep(100000); 
+                        MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
                         std::cout<<"Distance is now ----> "<<FL<<" and "<<FR<<std::endl ; 
