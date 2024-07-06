@@ -45,7 +45,7 @@ double lastDetected = 0.0 ;
 const double CHARGER_X = 10.0;
 const double CHARGER_Y = 10.0;
 
-int FBSpeed = 60 ; 
+int FBSpeed = 65 ; 
 int TurnSpeed = 75 ; 
 
 #define SOCKET_PATH "/tmp/unix_socket_example"
