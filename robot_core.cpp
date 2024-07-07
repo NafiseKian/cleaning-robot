@@ -391,11 +391,11 @@ int main()
         std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
         std::cout << " ------------------------------------------------------------ " << std::endl;
 
-        if (distanceFrontL == 3) 
+        if (distanceFrontL == 4) 
         {
             distanceFrontL = distanceFrontR;
         }
-        else if (distanceFrontR == 3) 
+        else if (distanceFrontR == 4) 
         {
             distanceFrontR = distanceFrontL;
         }
@@ -425,11 +425,11 @@ int main()
                     std::cout << "Trash detected in center" << std::endl;
                     int FrontL = frontSensorL.getDistanceCm();
                     int FrontR = frontSensorR.getDistanceCm();
-                    if (FrontL == 3) 
+                    if (FrontL == 4) 
                     {
                         FrontL = FrontR;
                     }
-                        else if (FrontR == 3) 
+                        else if (FrontR == 4) 
                     {
                         FrontR = FrontL;
                     }
@@ -454,11 +454,11 @@ int main()
                         MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
-                        if (FL == 3) 
+                        if (FL == 4) 
                         {
                             FL = FR;
                         }
-                            else if (FR == 3) 
+                            else if (FR == 4) 
                         {
                             FR = FL;
                         }
@@ -488,11 +488,11 @@ int main()
                     MotorControl::stop();
                     int FrontL = frontSensorL.getDistanceCm();
                     int FrontR = frontSensorR.getDistanceCm();
-                    if (FrontL == 3) 
+                    if (FrontL == 4) 
                     {
                         FrontL = FrontR;
                     }
-                        else if (FrontR == 3) 
+                        else if (FrontR == 4) 
                     {
                         FrontR = FrontL;
                     }
@@ -517,11 +517,11 @@ int main()
                         MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
-                        if (FL == 3) 
+                        if (FL == 4) 
                         {
                             FL = FR;
                         }
-                            else if (FR == 3) 
+                            else if (FR == 4) 
                         {
                             FR = FL;
                         }
