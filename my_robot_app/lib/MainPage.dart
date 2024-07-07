@@ -15,7 +15,7 @@ class _RobotMainPageState extends State<RobotMainPage> {
   bool isUniMap = true;  // State for the map.
   bool _isConnected = false;  // State to display connection status.
   double batteryLevel = 0.0;  // State for battery level.
-  double trashLevel = 0.0;  // State for trash level.
+  double trashLevel = 0.0;  // State for trash level.git pull
   List<Map<String, double>> markerPositions = []; // State for marker positions.
   Timer? _timer;  // Timer to periodically update data
 
@@ -23,7 +23,7 @@ class _RobotMainPageState extends State<RobotMainPage> {
   void initState() {
     super.initState();
     // Start a timer to call _sendHelloToServer every 5 seconds
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 4), (timer) {
       _sendHelloToServer();
     });
   }
@@ -130,26 +130,30 @@ class _RobotMainPageState extends State<RobotMainPage> {
       print('Error parsing response data: $e');
     }
   }
+void _showTrashDetectedPopup() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      // Set a timer to dismiss the dialog after 15 seconds
+      Timer(Duration(seconds: 15), () {
+        Navigator.of(context).pop(true);
+      });
 
-  void _showTrashDetectedPopup() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Trash Detected'),
-          content: Text('Robot is picking trash.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
+      return AlertDialog(
+        title: Text('Trash Detected'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Robot is picking trash.'),
+            SizedBox(height: 20),
+            Image.asset('assets/robit-robot.gif'),
           ],
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
