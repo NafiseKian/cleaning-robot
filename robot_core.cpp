@@ -419,12 +419,12 @@ int main()
                     if((FrontL >=25)||(FrontR >=25))
                     {
                         MotorControl::forward(FBSpeed);
-                        usleep(150000); // Move forward for half second to get closer to the trash
+                        usleep(200000); // Move forward for half second to get closer to the trash
                     }
                     else if((FrontL <=10)||(FrontR <=10))
                     {
                         MotorControl::backward(FBSpeed);
-                        usleep(150000); // Move backward for half second to get closer to the trash
+                        usleep(200000); // Move backward for half second to get closer to the trash
                         MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
@@ -432,7 +432,7 @@ int main()
                         if((FL>=25)||(FR>=25))
                         {
                             MotorControl::forward(FBSpeed);
-                            usleep(150000);
+                            usleep(200000);
                         }
                     }
                     MotorControl::stop();
@@ -449,12 +449,12 @@ int main()
                     if((FrontL >=25)||(FrontR >=25))
                     {
                         MotorControl::forward(FBSpeed);
-                        usleep(150000); // Move forward for half second to get closer to the trash
+                        usleep(200000); // Move forward for half second to get closer to the trash
                     }
                     else if((FrontL <=10)||(FrontR <=10))
                     {
                         MotorControl::backward(FBSpeed);
-                        usleep(150000); // Move backward for half second to get closer to the trash
+                        usleep(200000); // Move backward for half second to get closer to the trash
                         MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
@@ -462,7 +462,7 @@ int main()
                         if((FL>=25)||(FR>=25))
                         {
                             MotorControl::forward(FBSpeed);
-                            usleep(150000);
+                            usleep(200000);
 
                         }
                     }
@@ -481,12 +481,12 @@ int main()
                     if((FrontL >=25)||(FrontR >=25))
                     {
                         MotorControl::forward(FBSpeed);
-                        usleep(150000); // Move forward for half second to get closer to the trash
+                        usleep(200000); // Move forward for half second to get closer to the trash
                     }
                    else if((FrontL <=10)||(FrontR <=10))
                     {
                         MotorControl::backward(FBSpeed);
-                        usleep(150000); 
+                        usleep(200000); 
                         MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
@@ -494,7 +494,7 @@ int main()
                         if((FL>=25)||(FR>=25))
                         {
                             MotorControl::forward(FBSpeed);
-                            usleep(150000);
+                            usleep(200000);
 
                         }
                     }
