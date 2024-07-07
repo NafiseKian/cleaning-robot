@@ -435,13 +435,13 @@ int main()
                     }
                     std::cout<<"Distance is now ----> "<<FrontL<<" and "<<FrontR<<std::endl ; 
 
-                    if((FrontL >=25)||(FrontR >=25))
+                    if((FrontL >=20)||(FrontR >=20))
                     {
                         MotorControl::forward(FBSpeed);
                         usleep(300000); // Move forward for half second to get closer to the trash
                         MotorControl::stop();
                     }
-                    else if((FrontL <=10)||(FrontR <=10))
+                    else if((FrontL <=15)||(FrontR <=15))
                     {
                         MotorControl::backward(FBSpeed);
                         usleep(300000); // Move backward for half second to get closer to the trash
@@ -483,13 +483,13 @@ int main()
                     }
                     std::cout<<"Distance is now ----> "<<FrontL<<" and "<<FrontR<<std::endl ; 
 
-                    if((FrontL >=25)||(FrontR >=25))
+                    if((FrontL >=20)||(FrontR >=20))
                     {
                         MotorControl::forward(FBSpeed);
                         usleep(300000); // Move forward for half second to get closer to the trash
                         MotorControl::stop();
                     }
-                    else if((FrontL <=10)||(FrontR <=10))
+                    else if((FrontL <=15)||(FrontR <=15))
                     {
                         MotorControl::backward(FBSpeed);
                         usleep(300000); // Move backward for half second to get closer to the trash
@@ -533,13 +533,13 @@ int main()
                     }
                     std::cout<<"Distance is now ----> "<<FrontL<<" and "<<FrontR<<std::endl ; 
 
-                    if((FrontL >=25)||(FrontR >=25))
+                    if((FrontL >=20)||(FrontR >=20))
                     {
                         MotorControl::forward(FBSpeed);
                         usleep(300000); // Move forward for half second to get closer to the trash
                         MotorControl::stop();
                     }
-                   else if((FrontL <=10)||(FrontR <=10))
+                   else if((FrontL <=15)||(FrontR <=15))
                     {
                         MotorControl::backward(FBSpeed);
                         usleep(300000); 
