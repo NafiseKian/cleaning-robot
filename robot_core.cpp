@@ -440,6 +440,32 @@ int main()
                         MotorControl::forward(FBSpeed);
                         usleep(600000); // Move forward for half second to get closer to the trash
                         MotorControl::stop();
+                        int FL = frontSensorL.getDistanceCm();
+                        int FR = frontSensorR.getDistanceCm();
+                        if (FL == 4) 
+                        {
+                            FL = FR;
+                        }
+                            else if (FR == 4) 
+                        {
+                            FR = FL;
+                        }
+                        std::cout<<"Checking distance again . Distance is now ----> "<<FL<<" and "<<FR<<std::endl ; 
+                        if((FL<=10)||(FR<=10))
+                        {
+                            
+                            MotorControl::backward(FBSpeed);
+                            usleep(400000);
+                            MotorControl::stop();
+
+                        }else if((FL>=20)||(FR>=20))
+                        {
+                            
+                            MotorControl::forward(FBSpeed);
+                            usleep(400000);
+                            MotorControl::stop();
+
+                        }
                     }
                     else if((FrontL >=20)||(FrontR >=20))
                     {
@@ -503,6 +529,32 @@ int main()
                         MotorControl::forward(FBSpeed);
                         usleep(600000); // Move forward for half second to get closer to the trash
                         MotorControl::stop();
+                        int FL = frontSensorL.getDistanceCm();
+                        int FR = frontSensorR.getDistanceCm();
+                        if (FL == 4) 
+                        {
+                            FL = FR;
+                        }
+                            else if (FR == 4) 
+                        {
+                            FR = FL;
+                        }
+                        std::cout<<"Checking distance again . Distance is now ----> "<<FL<<" and "<<FR<<std::endl ; 
+                        if((FL<=10)||(FR<=10))
+                        {
+                            
+                            MotorControl::backward(FBSpeed);
+                            usleep(400000);
+                            MotorControl::stop();
+
+                        }else if((FL>=20)||(FR>=20))
+                        {
+                            
+                            MotorControl::forward(FBSpeed);
+                            usleep(400000);
+                            MotorControl::stop();
+
+                        }
                     }
                     else if((FrontL >=20)||(FrontR >=20))
                     {
@@ -552,11 +604,11 @@ int main()
                     MotorControl::stop();
                     int FrontL = frontSensorL.getDistanceCm();
                     int FrontR = frontSensorR.getDistanceCm();
-                    if (FrontL == 3) 
+                    if (FrontL == 4) 
                     {
                         FrontL = FrontR;
                     }
-                        else if (FrontR == 3) 
+                        else if (FrontR == 4) 
                     {
                         FrontR = FrontL;
                     }
@@ -567,6 +619,32 @@ int main()
                         MotorControl::forward(FBSpeed);
                         usleep(600000); // Move forward for half second to get closer to the trash
                         MotorControl::stop();
+                        int FL = frontSensorL.getDistanceCm();
+                        int FR = frontSensorR.getDistanceCm();
+                        if (FL == 4) 
+                        {
+                            FL = FR;
+                        }
+                            else if (FR == 4) 
+                        {
+                            FR = FL;
+                        }
+                        std::cout<<"Checking distance again . Distance is now ----> "<<FL<<" and "<<FR<<std::endl ; 
+                        if((FL<=10)||(FR<=10))
+                        {
+                            
+                            MotorControl::backward(FBSpeed);
+                            usleep(400000);
+                            MotorControl::stop();
+
+                        }else if((FL>=20)||(FR>=20))
+                        {
+                            
+                            MotorControl::forward(FBSpeed);
+                            usleep(400000);
+                            MotorControl::stop();
+
+                        }
                     }
                     else if((FrontL >=20)||(FrontR >=20))
                     {
