@@ -391,10 +391,21 @@ int main()
         std::cout << "Left Distance : " << distanceLeft << " cm" << std::endl;
         std::cout << " ------------------------------------------------------------ " << std::endl;
 
+        if (distanceFrontL == 3) 
+        {
+            distanceFrontL = distanceFrontR;
+        }
+        else if (distanceFrontR == 3) 
+        {
+            distanceFrontR = distanceFrontL;
+        }
+
         bool validFrontL = (distanceFrontL != -1 && distanceFrontL < 30);
         bool validFrontR = (distanceFrontR != -1 && distanceFrontR < 30);
         bool validRight = (distanceRight != -1 && distanceRight < 20);
         bool validLeft = (distanceLeft != -1 && distanceLeft < 20);
+
+        
 
         if (validFrontL || validFrontR) 
         {
@@ -414,6 +425,14 @@ int main()
                     std::cout << "Trash detected in center" << std::endl;
                     int FrontL = frontSensorL.getDistanceCm();
                     int FrontR = frontSensorR.getDistanceCm();
+                    if (FrontL == 3) 
+                    {
+                        FrontL = FrontR;
+                    }
+                        else if (FrontR == 3) 
+                    {
+                        FrontR = FrontL;
+                    }
                     std::cout<<"Distance is now ----> "<<FrontL<<" and "<<FrontR<<std::endl ; 
 
                     if((FrontL >=25)||(FrontR >=25))
@@ -429,6 +448,14 @@ int main()
                         MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
+                        if (FL == 3) 
+                        {
+                            FL = FR;
+                        }
+                            else if (FR == 3) 
+                        {
+                            FR = FL;
+                        }
                         std::cout<<"Distance is now ----> "<<FL<<" and "<<FR<<std::endl ; 
                         if((FL>=25)||(FR>=25))
                         {
@@ -446,6 +473,14 @@ int main()
                     MotorControl::stop();
                     int FrontL = frontSensorL.getDistanceCm();
                     int FrontR = frontSensorR.getDistanceCm();
+                    if (FrontL == 3) 
+                    {
+                        FrontL = FrontR;
+                    }
+                        else if (FrontR == 3) 
+                    {
+                        FrontR = FrontL;
+                    }
                     std::cout<<"Distance is now ----> "<<FrontL<<" and "<<FrontR<<std::endl ; 
 
                     if((FrontL >=25)||(FrontR >=25))
@@ -461,6 +496,14 @@ int main()
                         MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
+                        if (FL == 3) 
+                        {
+                            FL = FR;
+                        }
+                            else if (FR == 3) 
+                        {
+                            FR = FL;
+                        }
                         std::cout<<"Checking distance again . Distance is now ----> "<<FL<<" and "<<FR<<std::endl ; 
                         if((FL>=25)||(FR>=25))
                         {
@@ -480,6 +523,14 @@ int main()
                     MotorControl::stop();
                     int FrontL = frontSensorL.getDistanceCm();
                     int FrontR = frontSensorR.getDistanceCm();
+                    if (FrontL == 3) 
+                    {
+                        FrontL = FrontR;
+                    }
+                        else if (FrontR == 3) 
+                    {
+                        FrontR = FrontL;
+                    }
                     std::cout<<"Distance is now ----> "<<FrontL<<" and "<<FrontR<<std::endl ; 
 
                     if((FrontL >=25)||(FrontR >=25))
@@ -495,6 +546,14 @@ int main()
                         MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
+                        if (FL == 3) 
+                        {
+                            FL = FR;
+                        }
+                            else if (FR == 3) 
+                        {
+                            FR = FL;
+                        }
                         std::cout<<"Checking distance again . Distance is now ----> "<<FL<<" and "<<FR<<std::endl ; 
                         if((FL>=25)||(FR>=25))
                         {
