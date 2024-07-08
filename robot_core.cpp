@@ -604,11 +604,11 @@ int main()
                     MotorControl::stop();
                     int FrontL = frontSensorL.getDistanceCm();
                     int FrontR = frontSensorR.getDistanceCm();
-                    if (FrontL == 4) 
+                    if ((FL == 4) || (FL ==3)) 
                     {
                         FrontL = FrontR;
                     }
-                        else if (FrontR == 4) 
+                    else if ((FR == 4) ||(FR ==3))
                     {
                         FrontR = FrontL;
                     }
@@ -621,11 +621,11 @@ int main()
                         MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
-                        if (FL == 4) 
+                        if ((FL == 4) || (FL ==3)) 
                         {
                             FL = FR;
                         }
-                            else if (FR == 4) 
+                        else if ((FR == 4) ||(FR ==3))
                         {
                             FR = FL;
                         }
@@ -659,11 +659,11 @@ int main()
                         MotorControl::stop();
                         int FL = frontSensorL.getDistanceCm();
                         int FR = frontSensorR.getDistanceCm();
-                        if (FL == 3) 
+                        if ((FL == 4) || (FL ==3))  
                         {
                             FL = FR;
                         }
-                            else if (FR == 3) 
+                        else if ((FR == 4) ||(FR ==3)) 
                         {
                             FR = FL;
                         }
