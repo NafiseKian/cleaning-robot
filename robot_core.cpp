@@ -604,11 +604,11 @@ int main()
                     MotorControl::stop();
                     int FrontL = frontSensorL.getDistanceCm();
                     int FrontR = frontSensorR.getDistanceCm();
-                    if ((FL == 4) || (FL ==3)) 
+                    if ((FrontL == 4) || (FrontL == 3 ))
                     {
                         FrontL = FrontR;
                     }
-                    else if ((FR == 4) ||(FR ==3))
+                    else if ((FrontR == 4) || (FrontR == 3 ))
                     {
                         FrontR = FrontL;
                     }
